@@ -1,9 +1,9 @@
 {
   // note: @jsxImportSource pragma seems to be needed for compile to work
-  // "compilerOptions": {
-  //   "jsx": "react-jsx",
-  //   "jsxImportSource": "npm/preact"
-  // },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "npm/preact"
+  },
   "fmt": {
     "useTabs": false,
     "singleQuote": true,
