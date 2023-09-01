@@ -1,23 +1,12 @@
-/** @jsxImportSource https://esm.sh/preact@10.17.1 */
+/** @jsxImportSource npm/preact */
 import { bundle } from "deno/x/emit/mod.ts";
 import { parse as parseDenoArgs } from "deno/std/flags/mod.ts";
 import { transform as transformEsModuleToIifeModule } from "npm/es-iife";
 import { parse as acornParse } from "npm/acorn";
 import { CuratorStewConfig, CuratorStewConfigSchema } from "./StewConfig.ts";
-import { renderToString } from "https://esm.sh/preact-render-to-string@6.2.1?deps=preact@10.17.1";
-import * as Preact from "https://esm.sh/preact@10.17.1";
+import { renderToString } from "npm/preact-render-to-string";
+import { h as h_preact } from "npm/preact";
 
-declare global {
-  let h: typeof Preact.h;
-
-  interface Window {
-    h: typeof Preact.h;
-  }
-}
-
-window.h = Preact.h;
-
-//
 const parsedDenoArgs = parseDenoArgs(Deno.args, {});
 const stewCommand = parsedDenoArgs._[0];
 
@@ -54,7 +43,9 @@ async function buildStewApp(api: BuildStewAppApi) {
         ecmaVersion: 2020,
       }),
   });
-  console.log(stewConfigIifeModule.code);
+  // mount preact jsx factory onto window so iife evaluation works
+  // deno-lint-ignore no-explicit-any
+  (window as unknown as any).h = h_preact;
   const maybeStewConfig: unknown = new Function(
     `${stewConfigIifeModule.code}; return stewConfigIifeResult;`
   )();
