@@ -5,21 +5,30 @@ import { transform as transformEsModuleToIifeModule } from "npm/es-iife";
 import { parse as acornParse } from "npm/acorn";
 import { CuratorStewConfig, CuratorStewConfigSchema } from "./StewConfig.ts";
 import { renderToString } from "npm/preact-render-to-string";
-import { h as h_preact } from "npm/preact";
+import { h } from "npm/preact";
 
-const parsedDenoArgs = parseDenoArgs(Deno.args, {});
-const stewCommand = parsedDenoArgs._[0];
+runStewCommand({
+  parsedDenoArgs: parseDenoArgs(Deno.args, {}),
+});
 
-if (stewCommand === "build") {
-  const maybeStewConfigUrl =
-    typeof parsedDenoArgs._[1] === "string"
-      ? parsedDenoArgs._[1]
-      : throwInvalidErrorPath("parsedDenoArgs._[1]");
-  await buildStewApp({
-    stewConfigUrl: maybeStewConfigUrl,
-  });
-} else {
-  throw new Error(`unrecognized command: ${stewCommand}`);
+interface RunStewComandApi {
+  parsedDenoArgs: ReturnType<typeof parseDenoArgs>;
+}
+
+async function runStewCommand(api: RunStewComandApi) {
+  const { parsedDenoArgs } = api;
+  const userStewCommand = parsedDenoArgs._[0];
+  if (userStewCommand === "build") {
+    const maybeStewConfigUrl =
+      typeof parsedDenoArgs._[1] === "string"
+        ? parsedDenoArgs._[1]
+        : throwInvalidErrorPath("parsedDenoArgs._[1]");
+    await buildStewApp({
+      stewConfigUrl: maybeStewConfigUrl,
+    });
+  } else {
+    throw new Error(`unrecognized command: ${userStewCommand}`);
+  }
 }
 
 interface BuildStewAppApi {
@@ -45,7 +54,7 @@ async function buildStewApp(api: BuildStewAppApi) {
   });
   // mount preact jsx factory onto window so iife evaluation works
   // deno-lint-ignore no-explicit-any
-  (window as unknown as any).h = h_preact;
+  (window as unknown as any).h = h;
   const maybeStewConfig: unknown = new Function(
     `${stewConfigIifeModule.code}; return stewConfigIifeResult;`
   )();
