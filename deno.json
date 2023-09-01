@@ -1,0 +1,18 @@
+{
+  "fmt": {
+    "useTabs": false,
+    "singleQuote": true,
+    "semiColons": true,
+    "indentWidth": 2
+  },
+  "imports": {
+    "deno/x/emit/": "https://deno.land/x/emit@0.27.0/",
+    "deno/std/": "https://deno.land/std@0.200.0/",
+    "npm/es-iife": "https://esm.sh/es-iife@0.2.0",
+    "npm/acorn": "https://esm.sh/acorn@8.10.0"
+  },
+  "tasks": {
+    "runCommand": "deno run --allow-env --allow-read --allow-net --deny-write ./source/main.ts",
+    "compileCli": "deno compile --allow-env --allow-read --allow-net --deny-write ./source/main.ts --output ./stews"
+  }
+}
