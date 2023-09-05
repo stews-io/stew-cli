@@ -1,16 +1,13 @@
 // note: @jsxImportSource pragma seems to be needed for compile to work
 /** @jsxImportSource npm/preact */
+
 import { bundle } from "deno/x/emit/mod.ts";
 import { parse as parseDenoArgs } from "deno/std/flags/mod.ts";
 import { transform as transformEsModuleToIifeModule } from "npm/es-iife";
 import { parse as acornParse } from "npm/acorn";
-import {
-  CurationItem,
-  CuratorStewConfig,
-  CuratorStewConfigSchema,
-} from "./StewConfig.ts";
 import { renderToString } from "npm/preact-render-to-string";
 import { h } from "npm/preact";
+import { StewConfig, StewConfigSchema } from "./library/data/StewConfig.ts";
 
 runStewCommand({
   parsedDenoArgs: parseDenoArgs(Deno.args),
@@ -63,18 +60,23 @@ async function buildStewApp(api: BuildStewAppApi) {
   const maybeStewConfig: unknown = new Function(
     `${stewConfigIifeModule.code}; return stewConfigIifeResult;`
   )();
-  const curatorStewConfig: CuratorStewConfig<CurationItem> =
-    CuratorStewConfigSchema.parse(maybeStewConfig);
-  console.log(
-    renderToString(
-      <curatorStewConfig.ItemDisplay
-        someItem={{
-          itemId: 0,
-          itemFoo: Math.random(),
-        }}
-      />
-    )
-  );
+  const stewConfig: StewConfig = StewConfigSchema.parse(maybeStewConfig);
+  console.log(stewConfig);
+  // console.log(
+  //   renderToString(
+  //     <html>
+  //       <head></head>
+  //       <body>
+  //         <curatorStewConfig.ItemDisplay
+  //           someItem={{
+  //             itemId: 0,
+  //             itemFoo: Math.random(),
+  //           }}
+  //         />
+  //       </body>
+  //     </html>
+  //   )
+  // );
 }
 
 function throwInvalidErrorPath(errorMessage: string): never {
