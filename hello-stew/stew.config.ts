@@ -1,4 +1,4 @@
-import { StewConfig } from "../source/library/data/StewConfig.ts";
+import { SourceStewConfig } from "../source/shared/data/StewConfig.ts";
 
 export default {
   stewInfo: {
@@ -21,4 +21,4 @@ export default {
       segmentViews: [],
     },
   ],
-} satisfies StewConfig;
+} satisfies SourceStewConfig;

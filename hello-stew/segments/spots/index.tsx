@@ -1,7 +1,7 @@
 import {
-  StewItem,
-  StewSegmentModule,
-} from "../../../source/library/data/StewSegmentModule.ts";
+  SegmentItem,
+  SegmentModule,
+} from "../../../source/shared/data/StewSegmentModule.ts";
 
 export default {
   segmentItems: [
@@ -24,11 +24,11 @@ export default {
   ],
   getSegmentItemSearchString: (someStewItem) => someStewItem.spotName,
   SegmentItemDisplay: (props) => {
-    const { someStewItem } = props;
-    return <div>{someStewItem.spotName}</div>;
+    const { someSegmentItem } = props;
+    return <div>{someSegmentItem.spotName}</div>;
   },
-} satisfies StewSegmentModule<SpotItem>;
+} satisfies SegmentModule<SpotItem>;
 
-interface SpotItem extends StewItem {
+interface SpotItem extends SegmentItem {
   spotName: string;
 }
