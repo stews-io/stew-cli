@@ -4,7 +4,6 @@ import { parse as parseDenoArgs } from "deno/std/flags/mod.ts";
 import {
   dirname as getDirectoryPath,
   join as joinPaths,
-  resolve as resolvePath,
 } from "deno/std/path/mod.ts";
 import { cryptoRandomString as getRandomCryptoString } from "deno/x/crypto-random-string/mod.ts";
 import { BundleOptions, bundle } from "deno/x/emit/mod.ts";
@@ -49,13 +48,24 @@ interface BuildStewAppApi {
 
 async function buildStewApp(api: BuildStewAppApi) {
   const { stewSourceConfigPath } = api;
+  const stewBuildId = getRandomCryptoString({
+    length: 6,
+    type: "alphanumeric",
+  });
+  const buildDirectoryPath = `./build_${stewBuildId}`;
+  const publicDirectoryPath = `${buildDirectoryPath}/public`;
+  const modulesDirectoryPath = `${publicDirectoryPath}/modules`;
+  const datasetsDirectoryPath = `${publicDirectoryPath}/datasets`;
+  Deno.mkdirSync(publicDirectoryPath, { recursive: true });
+  Deno.mkdirSync(modulesDirectoryPath);
+  Deno.mkdirSync(datasetsDirectoryPath);
   const { stewSourceConfig } = await fetchStewSourceConfig({
     stewSourceConfigPath,
   });
   const sourceSegmentModules: Record<string, SegmentModule<SegmentItem>> = {};
   for (const someSourceSegmentConfig of stewSourceConfig.stewSegments) {
     const segmentModuleIifeResultName = "segmentModuleIifeResult";
-    const segmentModuleIifeScript = await bundleEsModuleToIifeScript({
+    const segmentModuleIifeScript = await bundleEsModuleInIifeScript({
       iifeResultName: segmentModuleIifeResultName,
       someEsModulePath: joinPaths(
         getDirectoryPath(stewSourceConfigPath),
@@ -75,14 +85,14 @@ async function buildStewApp(api: BuildStewAppApi) {
     // todo: validate shape
     const segmentModule = maybeSegmentModule as any;
     sourceSegmentModules[someSourceSegmentConfig.segmentKey] = segmentModule;
-    // write segment module script
+    Deno.writeTextFileSync(
+      `${modulesDirectoryPath}/${someSourceSegmentConfig.segmentKey}.js`,
+      segmentModuleIifeScript
+    );
     // write segment dataset json
   }
   const stewBuildConfig: BuildStewConfig = {
-    stewBuildId: getRandomCryptoString({
-      length: 6,
-      type: "alphanumeric",
-    }),
+    stewBuildId,
     stewInfo: stewSourceConfig.stewInfo,
     stewSegments: stewSourceConfig.stewSegments.map(
       (someSourceSegmentConfig) => ({
@@ -98,8 +108,6 @@ async function buildStewApp(api: BuildStewAppApi) {
       })
     ),
   };
-  const buildDirectoryPath = `./build_${stewBuildConfig.stewBuildId}`;
-  Deno.mkdirSync(buildDirectoryPath);
   Deno.writeTextFileSync(
     `${buildDirectoryPath}/index.html`,
     `<!DOCTYPE html>${renderToString(
@@ -114,7 +122,7 @@ interface FetchStewSourceConfigApi
 async function fetchStewSourceConfig(api: FetchStewSourceConfigApi) {
   const { stewSourceConfigPath } = api;
   const stewSourceConfigResultName = "stewConfigIifeResult";
-  const stewSourceConfigIifeScript = await bundleEsModuleToIifeScript({
+  const stewSourceConfigIifeScript = await bundleEsModuleInIifeScript({
     someEsModulePath: stewSourceConfigPath,
     iifeResultName: stewSourceConfigResultName,
     moduleCompilerOptions: {},
@@ -130,13 +138,13 @@ async function fetchStewSourceConfig(api: FetchStewSourceConfigApi) {
   };
 }
 
-interface BundleEsModuleToIifeScriptApi {
+interface BundleEsModuleInIifeScriptApi {
   someEsModulePath: string;
   iifeResultName: string;
   moduleCompilerOptions: NonNullable<BundleOptions["compilerOptions"]>;
 }
 
-async function bundleEsModuleToIifeScript(api: BundleEsModuleToIifeScriptApi) {
+async function bundleEsModuleInIifeScript(api: BundleEsModuleInIifeScriptApi) {
   const { someEsModulePath, moduleCompilerOptions, iifeResultName } = api;
   const esModuleBundle = await bundle(someEsModulePath, {
     compilerOptions: moduleCompilerOptions,
