@@ -1,7 +1,6 @@
 import { JSX } from "npm/preact";
 
 export interface SegmentModule<SomeSegmentItem extends SegmentItem> {
-  // segmentItems: Array<SomeSegmentItem>;
   segmentSortOptions: Array<SegmentSortOption<SomeSegmentItem>>;
   getSegmentItemSearchString: (someSegmentItem: SomeSegmentItem) => string;
   SegmentItemDisplay: (
