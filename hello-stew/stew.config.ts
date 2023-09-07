@@ -9,13 +9,15 @@ export default {
   },
   stewSegments: [
     {
-      segmentModuleUrl: "./segments/music/index.tsx",
+      segmentModulePath: "./segments/music/music.module.tsx",
+      segmentDatasetPath: "./segments/music/music.dataset.ts",
       segmentKey: "music",
       segmentSearchLabel: "music",
       segmentViews: [],
     },
     {
-      segmentModuleUrl: "./segments/spots/index.tsx",
+      segmentModulePath: "./segments/spots/spots.module.tsx",
+      segmentDatasetPath: "./segments/spots/spots.dataset.ts",
       segmentKey: "spots",
       segmentSearchLabel: "spots",
       segmentViews: [],

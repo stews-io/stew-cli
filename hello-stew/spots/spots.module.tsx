@@ -1,13 +1,7 @@
-import {
-  SegmentItem,
-  SegmentModule,
-} from "../../../source/shared/data/StewSegmentModule.ts";
+import { SegmentModule } from "../../source/shared/data/SegmentModule.ts";
+import { SpotItem } from "./SpotItem.ts";
 
 export default {
-  segmentItems: [
-    { itemId: 0, spotName: "ice cream #1" },
-    { itemId: 1, spotName: "bagels r' us" },
-  ],
   segmentSortOptions: [
     {
       sortOptionKey: "spotNameAsc",
@@ -28,7 +22,3 @@ export default {
     return <div>{someSegmentItem.spotName}</div>;
   },
 } satisfies SegmentModule<SpotItem>;
-
-interface SpotItem extends SegmentItem {
-  spotName: string;
-}

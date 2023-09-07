@@ -1,5 +1,5 @@
 import * as Zod from "deno/x/zod/mod.ts";
-import { SegmentItem, SegmentSortOption } from "./StewSegmentModule.ts";
+import { SegmentItem, SegmentSortOption } from "./SegmentModule.ts";
 
 export interface SourceStewConfig
   extends StewConfigBase<SourceStewSegmentConfig> {}
@@ -7,13 +7,15 @@ export interface SourceStewConfig
 export function SourceStewConfigSchema(): Zod.ZodType<SourceStewConfig> {
   return StewConfigBaseSchema(
     StewSegmentConfigBaseSchema().extend({
-      segmentModuleUrl: Zod.string(),
+      segmentModulePath: Zod.string(),
+      segmentDatasetPath: Zod.string(),
     })
   );
 }
 
 interface SourceStewSegmentConfig extends StewSegmentConfigBase {
-  segmentModuleUrl: string;
+  segmentModulePath: string;
+  segmentDatasetPath: string;
 }
 
 export interface BuildStewConfig

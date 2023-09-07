@@ -18,7 +18,7 @@ import {
 } from "./shared/data/StewConfig.ts";
 import { renderToString } from "npm/preact-render-to-string";
 import { InitialStewHtml } from "./client/auxiliary/InitialStewHtml.tsx";
-import { SegmentItem, SegmentModule } from "./shared/data/StewSegmentModule.ts";
+import { SegmentItem, SegmentModule } from "./shared/data/SegmentModule.ts";
 
 runStewCommand({
   parsedDenoArgs: parseDenoArgs(Deno.args),
@@ -71,7 +71,7 @@ async function buildStewApp(api: BuildStewAppApi) {
   for (const someSourceSegmentConfig of sourceStewConfig.stewSegments) {
     const absoluteSegmentModulePath = joinPaths(
       getDirectoryPath(absoluteSourceStewConfigPath),
-      someSourceSegmentConfig.segmentModuleUrl
+      someSourceSegmentConfig.segmentModulePath
     );
     const segmentModuleBundle = await bundle(absoluteSegmentModulePath, {
       compilerOptions: {
@@ -95,8 +95,11 @@ async function buildStewApp(api: BuildStewAppApi) {
     const maybeSegmentModule: unknown = new Function(
       `${segmentModuleIifeModule.code}; return ${segmentModuleIifeResultName};`
     )();
+    // todo: validate shape
     sourceSegmentModules[someSourceSegmentConfig.segmentKey] =
       maybeSegmentModule as any;
+    // write segment items json
+    //
   }
   const buildStewConfig: BuildStewConfig = {
     stewBuildId: getRandomCryptoString({
