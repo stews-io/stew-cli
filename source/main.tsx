@@ -4,10 +4,15 @@ import { parse as parseDenoArgs } from "deno/std/flags/mod.ts";
 import {
   dirname as getDirectoryPath,
   join as joinPaths,
+  resolve,
 } from "deno/std/path/mod.ts";
 import { cryptoRandomString as getRandomCryptoString } from "deno/x/crypto-random-string/mod.ts";
 import { TsconfigRaw } from "deno/x/esbuild/mod.d.ts";
-import { build } from "deno/x/esbuild/mod.js";
+import {
+  build as buildBundle,
+  stop as closeEsbuild,
+} from "deno/x/esbuild/mod.js";
+import { denoPlugins } from "deno/x/esbuild_deno_loader/mod.ts";
 import * as Zod from "deno/x/zod/mod.ts";
 import { renderToString } from "npm/preact-render-to-string";
 import { InitialStewHtml } from "./client/auxiliary/InitialStewHtml.tsx";
@@ -42,8 +47,8 @@ async function runStewCommand(api: RunStewComandApi) {
     await buildStewApp({
       stewSourceConfigPath: maybeStewSourceConfigPath,
     });
-    // ??? esbuild seems to prevent process from terminating
-    Deno.exit();
+    // esbuild needs to be closed for process to terminate
+    closeEsbuild();
   } else {
     throw new Error(`unrecognized command: ${userStewCommand}`);
   }
@@ -88,16 +93,16 @@ async function buildStewApp(api: BuildStewAppApi) {
       segmentModuleIifeScript
     );
     // segmentDataset
-    const [segmentDataset] = await loadTypescriptModule<
-      SegmentDataset<SegmentItem>
-    >({
-      iifeResultName: "segmentDatasetResult",
-      ModuleResultSchema: Zod.array(SegmentItemSchema()),
-      modulePath: joinPaths(
-        getDirectoryPath(stewSourceConfigPath),
-        someSourceSegmentConfig.segmentDatasetPath
-      ),
-    });
+    const [segmentDataset] = await loadBasicModule<SegmentDataset<SegmentItem>>(
+      {
+        iifeResultName: "segmentDatasetResult",
+        ModuleResultSchema: Zod.array(SegmentItemSchema()),
+        modulePath: joinPaths(
+          getDirectoryPath(stewSourceConfigPath),
+          someSourceSegmentConfig.segmentDatasetPath
+        ),
+      }
+    );
     Deno.writeTextFileSync(
       `${datasetsDirectoryPath}/${someSourceSegmentConfig.segmentKey}.json`,
       JSON.stringify(segmentDataset)
@@ -133,7 +138,7 @@ interface LoadStewSourceConfigApi
 
 async function loadStewSourceConfig(api: LoadStewSourceConfigApi) {
   const { stewSourceConfigPath } = api;
-  const [stewSourceConfig] = await loadTypescriptModule({
+  const [stewSourceConfig] = await loadBasicModule({
     modulePath: stewSourceConfigPath,
     iifeResultName: "stewConfigIifeResult",
     ModuleResultSchema: SourceStewConfigSchema(),
@@ -164,15 +169,13 @@ function loadPreactModule<ModuleResult>(
   });
 }
 
-interface LoadTypescriptModuleApi<ModuleResult>
+interface LoadBasicModuleApi<ModuleResult>
   extends Pick<
     LoadModuleApi<ModuleResult>,
     "modulePath" | "iifeResultName" | "ModuleResultSchema"
   > {}
 
-function loadTypescriptModule<ModuleResult>(
-  api: LoadTypescriptModuleApi<ModuleResult>
-) {
+function loadBasicModule<ModuleResult>(api: LoadBasicModuleApi<ModuleResult>) {
   const { modulePath, iifeResultName, ModuleResultSchema } = api;
   return loadModule({
     modulePath,
@@ -194,7 +197,7 @@ async function loadModule<ModuleResult>(
 ): Promise<[ModuleResult, string]> {
   const { modulePath, iifeResultName, tsCompilerOptions, ModuleResultSchema } =
     api;
-  const buildBundleResult = await build({
+  const buildBundleResult = await buildBundle({
     bundle: true,
     write: false,
     minify: true,
@@ -202,6 +205,12 @@ async function loadModule<ModuleResult>(
     format: "iife",
     globalName: iifeResultName,
     entryPoints: [modulePath],
+    plugins: [
+      ...(denoPlugins({
+        loader: "portable",
+        configPath: resolve(`${Deno.cwd()}/deno.json`),
+      }) as unknown as any),
+    ],
     tsconfigRaw: {
       compilerOptions: tsCompilerOptions,
     },
