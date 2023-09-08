@@ -29,6 +29,6 @@
   },
   "tasks": {
     "runCommand": "deno run --allow-env=DENO_DIR,HOME,DENO_AUTH_TOKENS --allow-net=deno.land --allow-read=. --allow-write=. ./source/main.tsx",
-    "compileCli": "deno compile --allow-env --allow-read --allow-net --deny-write ./source/main.tsx --output ./stews"
+    "compileCli": "deno compile --allow-env=DENO_DIR,HOME,DENO_AUTH_TOKENS --allow-net=deno.land --allow-read=. --allow-write=. ./source/main.tsx --output ./stews"
   }
 }

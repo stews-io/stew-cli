@@ -1,4 +1,6 @@
-import { BuildStewConfig } from "../../shared/data/StewConfig.ts";
+// note: @jsxImportSource pragma seems to be needed for compile to work
+/** @jsxImportSource npm/preact */
+import { BuildStewConfig } from "../../shared/types/StewConfig.ts";
 
 export interface InitialStewHtmlProps {
   stewBuildConfig: BuildStewConfig;

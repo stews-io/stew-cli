@@ -1,4 +1,5 @@
 import { JSX } from "npm/preact";
+import { SegmentItem } from "./SegmentDataset.ts";
 
 export interface SegmentModule<SomeSegmentItem extends SegmentItem> {
   segmentSortOptions: Array<SegmentSortOption<SomeSegmentItem>>;
@@ -6,10 +7,6 @@ export interface SegmentModule<SomeSegmentItem extends SegmentItem> {
   SegmentItemDisplay: (
     props: SegmentItemDisplayProps<SomeSegmentItem>
   ) => JSX.Element;
-}
-
-export interface SegmentItem {
-  itemId: number;
 }
 
 export interface SegmentSortOption<SomeSegmentItem extends SegmentItem> {

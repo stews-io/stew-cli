@@ -7,16 +7,21 @@ import {
 } from "deno/std/path/mod.ts";
 import { cryptoRandomString as getRandomCryptoString } from "deno/x/crypto-random-string/mod.ts";
 import { BundleOptions, bundle } from "deno/x/emit/mod.ts";
+import * as Zod from "deno/x/zod/mod.ts";
 import { parse as acornParse } from "npm/acorn";
 import { transform as transformEsModuleToIifeModule } from "npm/es-iife";
-import { h } from "npm/preact";
-import { SegmentItem, SegmentModule } from "./shared/data/SegmentModule.ts";
+import { renderToString } from "npm/preact-render-to-string";
+import { InitialStewHtml } from "./client/auxiliary/InitialStewHtml.tsx";
+import {
+  SegmentDataset,
+  SegmentItem,
+  SegmentItemSchema,
+} from "./shared/types/SegmentDataset.ts";
+import { SegmentModule } from "./shared/types/SegmentModule.ts";
 import {
   BuildStewConfig,
   SourceStewConfigSchema,
-} from "./shared/data/StewConfig.ts";
-import { renderToString } from "npm/preact-render-to-string";
-import { InitialStewHtml } from "./client/auxiliary/InitialStewHtml.tsx";
+} from "./shared/types/StewConfig.ts";
 
 runStewCommand({
   parsedDenoArgs: parseDenoArgs(Deno.args),
@@ -64,9 +69,11 @@ async function buildStewApp(api: BuildStewAppApi) {
   });
   const sourceSegmentModules: Record<string, SegmentModule<SegmentItem>> = {};
   for (const someSourceSegmentConfig of stewSourceConfig.stewSegments) {
-    const segmentModuleIifeResultName = "segmentModuleIifeResult";
-    const segmentModuleIifeScript = await bundleEsModuleInIifeScript({
-      iifeResultName: segmentModuleIifeResultName,
+    // segmentModule
+    const [segmentModule, segmentModuleIifeScript] = await loadEsModule<
+      SegmentModule<SegmentItem>
+    >({
+      iifeResultName: "segmentModuleResult",
       someEsModulePath: joinPaths(
         getDirectoryPath(stewSourceConfigPath),
         someSourceSegmentConfig.segmentModulePath
@@ -75,21 +82,27 @@ async function buildStewApp(api: BuildStewAppApi) {
         jsxFactory: "h",
         jsxFragmentFactory: "Fragment",
       },
+      ModuleResultSchema: Zod.any(),
     });
-    // mount preact jsx factory onto window so iife evaluation works
-    // deno-lint-ignore no-explicit-any
-    (window as unknown as any).h = h;
-    const maybeSegmentModule: unknown = new Function(
-      `${segmentModuleIifeScript}; return ${segmentModuleIifeResultName};`
-    )();
-    // todo: validate shape
-    const segmentModule = maybeSegmentModule as any;
     sourceSegmentModules[someSourceSegmentConfig.segmentKey] = segmentModule;
     Deno.writeTextFileSync(
       `${modulesDirectoryPath}/${someSourceSegmentConfig.segmentKey}.js`,
       segmentModuleIifeScript
     );
-    // write segment dataset json
+    // segmentDataset
+    const [segmentDataset] = await loadEsModule<SegmentDataset<SegmentItem>>({
+      iifeResultName: "segmentDatasetResult",
+      someEsModulePath: joinPaths(
+        getDirectoryPath(stewSourceConfigPath),
+        someSourceSegmentConfig.segmentDatasetPath
+      ),
+      moduleCompilerOptions: {},
+      ModuleResultSchema: Zod.array(SegmentItemSchema()),
+    });
+    Deno.writeTextFileSync(
+      `${datasetsDirectoryPath}/${someSourceSegmentConfig.segmentKey}.json`,
+      JSON.stringify(segmentDataset)
+    );
   }
   const stewBuildConfig: BuildStewConfig = {
     stewBuildId,
@@ -121,31 +134,33 @@ interface FetchStewSourceConfigApi
 
 async function fetchStewSourceConfig(api: FetchStewSourceConfigApi) {
   const { stewSourceConfigPath } = api;
-  const stewSourceConfigResultName = "stewConfigIifeResult";
-  const stewSourceConfigIifeScript = await bundleEsModuleInIifeScript({
+  const [stewSourceConfig] = await loadEsModule({
     someEsModulePath: stewSourceConfigPath,
-    iifeResultName: stewSourceConfigResultName,
+    iifeResultName: "stewConfigIifeResult",
     moduleCompilerOptions: {},
+    ModuleResultSchema: SourceStewConfigSchema(),
   });
-  const maybeStewSourceConfig: unknown = new Function(
-    `${stewSourceConfigIifeScript}; return ${stewSourceConfigResultName};`
-  )();
-  const stewSourceConfig = SourceStewConfigSchema().parse(
-    maybeStewSourceConfig
-  );
   return {
     stewSourceConfig,
   };
 }
 
-interface BundleEsModuleInIifeScriptApi {
+interface LoadEsModuleApi<ModuleResult> {
   someEsModulePath: string;
   iifeResultName: string;
   moduleCompilerOptions: NonNullable<BundleOptions["compilerOptions"]>;
+  ModuleResultSchema: Zod.ZodType<ModuleResult, Zod.ZodTypeDef, unknown>;
 }
 
-async function bundleEsModuleInIifeScript(api: BundleEsModuleInIifeScriptApi) {
-  const { someEsModulePath, moduleCompilerOptions, iifeResultName } = api;
+async function loadEsModule<ModuleResult>(
+  api: LoadEsModuleApi<ModuleResult>
+): Promise<[ModuleResult, string]> {
+  const {
+    someEsModulePath,
+    iifeResultName,
+    moduleCompilerOptions,
+    ModuleResultSchema,
+  } = api;
   const esModuleBundle = await bundle(someEsModulePath, {
     compilerOptions: moduleCompilerOptions,
   });
@@ -158,7 +173,10 @@ async function bundleEsModuleInIifeScript(api: BundleEsModuleInIifeScriptApi) {
         ecmaVersion: 2020,
       }),
   }).code;
-  return bundleIifeScript;
+  const iifeResult: unknown = new Function(
+    `${bundleIifeScript}; return ${iifeResultName};`
+  )();
+  return [ModuleResultSchema.parse(iifeResult), bundleIifeScript];
 }
 
 function throwInvalidErrorPath(errorMessage: string): never {

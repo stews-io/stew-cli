@@ -1,4 +1,4 @@
-import { SegmentModule } from "../../source/shared/data/SegmentModule.ts";
+import { SegmentModule } from "../../source/shared/types/SegmentModule.ts";
 import { MusicItem } from "./MusicItem.ts";
 
 export default {

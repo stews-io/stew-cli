@@ -1,4 +1,4 @@
-import { SourceStewConfig } from "../source/shared/data/StewConfig.ts";
+import { SourceStewConfig } from "../source/shared/types/StewConfig.ts";
 
 export default {
   stewInfo: {
