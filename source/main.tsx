@@ -6,12 +6,12 @@ import {
   join as joinPaths,
 } from "deno/std/path/mod.ts";
 import { cryptoRandomString as getRandomCryptoString } from "deno/x/crypto-random-string/mod.ts";
-import { BundleOptions, bundle } from "deno/x/emit/mod.ts";
+import { TsconfigRaw } from "deno/x/esbuild/mod.d.ts";
+import { build } from "deno/x/esbuild/mod.js";
 import * as Zod from "deno/x/zod/mod.ts";
-import { parse as acornParse } from "npm/acorn";
-import { transform as transformEsModuleToIifeModule } from "npm/es-iife";
 import { renderToString } from "npm/preact-render-to-string";
 import { InitialStewHtml } from "./client/auxiliary/InitialStewHtml.tsx";
+import { throwInvalidErrorPath } from "./shared/general/throwInvalidPathError.ts";
 import {
   SegmentDataset,
   SegmentItem,
@@ -42,6 +42,8 @@ async function runStewCommand(api: RunStewComandApi) {
     await buildStewApp({
       stewSourceConfigPath: maybeStewSourceConfigPath,
     });
+    // ??? esbuild seems to prevent process from terminating
+    Deno.exit();
   } else {
     throw new Error(`unrecognized command: ${userStewCommand}`);
   }
@@ -64,25 +66,21 @@ async function buildStewApp(api: BuildStewAppApi) {
   Deno.mkdirSync(publicDirectoryPath, { recursive: true });
   Deno.mkdirSync(modulesDirectoryPath);
   Deno.mkdirSync(datasetsDirectoryPath);
-  const { stewSourceConfig } = await fetchStewSourceConfig({
+  const { stewSourceConfig } = await loadStewSourceConfig({
     stewSourceConfigPath,
   });
   const sourceSegmentModules: Record<string, SegmentModule<SegmentItem>> = {};
   for (const someSourceSegmentConfig of stewSourceConfig.stewSegments) {
     // segmentModule
-    const [segmentModule, segmentModuleIifeScript] = await loadEsModule<
+    const [segmentModule, segmentModuleIifeScript] = await loadPreactModule<
       SegmentModule<SegmentItem>
     >({
       iifeResultName: "segmentModuleResult",
-      someEsModulePath: joinPaths(
+      ModuleResultSchema: Zod.any(),
+      modulePath: joinPaths(
         getDirectoryPath(stewSourceConfigPath),
         someSourceSegmentConfig.segmentModulePath
       ),
-      moduleCompilerOptions: {
-        jsxFactory: "h",
-        jsxFragmentFactory: "Fragment",
-      },
-      ModuleResultSchema: Zod.any(),
     });
     sourceSegmentModules[someSourceSegmentConfig.segmentKey] = segmentModule;
     Deno.writeTextFileSync(
@@ -90,14 +88,15 @@ async function buildStewApp(api: BuildStewAppApi) {
       segmentModuleIifeScript
     );
     // segmentDataset
-    const [segmentDataset] = await loadEsModule<SegmentDataset<SegmentItem>>({
+    const [segmentDataset] = await loadTypescriptModule<
+      SegmentDataset<SegmentItem>
+    >({
       iifeResultName: "segmentDatasetResult",
-      someEsModulePath: joinPaths(
+      ModuleResultSchema: Zod.array(SegmentItemSchema()),
+      modulePath: joinPaths(
         getDirectoryPath(stewSourceConfigPath),
         someSourceSegmentConfig.segmentDatasetPath
       ),
-      moduleCompilerOptions: {},
-      ModuleResultSchema: Zod.array(SegmentItemSchema()),
     });
     Deno.writeTextFileSync(
       `${datasetsDirectoryPath}/${someSourceSegmentConfig.segmentKey}.json`,
@@ -129,15 +128,14 @@ async function buildStewApp(api: BuildStewAppApi) {
   );
 }
 
-interface FetchStewSourceConfigApi
+interface LoadStewSourceConfigApi
   extends Pick<BuildStewAppApi, "stewSourceConfigPath"> {}
 
-async function fetchStewSourceConfig(api: FetchStewSourceConfigApi) {
+async function loadStewSourceConfig(api: LoadStewSourceConfigApi) {
   const { stewSourceConfigPath } = api;
-  const [stewSourceConfig] = await loadEsModule({
-    someEsModulePath: stewSourceConfigPath,
+  const [stewSourceConfig] = await loadTypescriptModule({
+    modulePath: stewSourceConfigPath,
     iifeResultName: "stewConfigIifeResult",
-    moduleCompilerOptions: {},
     ModuleResultSchema: SourceStewConfigSchema(),
   });
   return {
@@ -145,40 +143,72 @@ async function fetchStewSourceConfig(api: FetchStewSourceConfigApi) {
   };
 }
 
-interface LoadEsModuleApi<ModuleResult> {
-  someEsModulePath: string;
+interface LoadPreactModuleApi<ModuleResult>
+  extends Pick<
+    LoadModuleApi<ModuleResult>,
+    "modulePath" | "iifeResultName" | "ModuleResultSchema"
+  > {}
+
+function loadPreactModule<ModuleResult>(
+  api: LoadPreactModuleApi<ModuleResult>
+) {
+  const { modulePath, iifeResultName, ModuleResultSchema } = api;
+  return loadModule({
+    modulePath,
+    iifeResultName,
+    ModuleResultSchema,
+    tsCompilerOptions: {
+      jsxFactory: "h",
+      jsxFragmentFactory: "Fragment",
+    },
+  });
+}
+
+interface LoadTypescriptModuleApi<ModuleResult>
+  extends Pick<
+    LoadModuleApi<ModuleResult>,
+    "modulePath" | "iifeResultName" | "ModuleResultSchema"
+  > {}
+
+function loadTypescriptModule<ModuleResult>(
+  api: LoadTypescriptModuleApi<ModuleResult>
+) {
+  const { modulePath, iifeResultName, ModuleResultSchema } = api;
+  return loadModule({
+    modulePath,
+    iifeResultName,
+    ModuleResultSchema,
+    tsCompilerOptions: {},
+  });
+}
+
+interface LoadModuleApi<ModuleResult> {
+  modulePath: string;
   iifeResultName: string;
-  moduleCompilerOptions: NonNullable<BundleOptions["compilerOptions"]>;
+  tsCompilerOptions: NonNullable<TsconfigRaw["compilerOptions"]>;
   ModuleResultSchema: Zod.ZodType<ModuleResult, Zod.ZodTypeDef, unknown>;
 }
 
-async function loadEsModule<ModuleResult>(
-  api: LoadEsModuleApi<ModuleResult>
+async function loadModule<ModuleResult>(
+  api: LoadModuleApi<ModuleResult>
 ): Promise<[ModuleResult, string]> {
-  const {
-    someEsModulePath,
-    iifeResultName,
-    moduleCompilerOptions,
-    ModuleResultSchema,
-  } = api;
-  const esModuleBundle = await bundle(someEsModulePath, {
-    compilerOptions: moduleCompilerOptions,
+  const { modulePath, iifeResultName, tsCompilerOptions, ModuleResultSchema } =
+    api;
+  const buildBundleResult = await build({
+    bundle: true,
+    write: false,
+    minify: true,
+    outdir: "out",
+    format: "iife",
+    globalName: iifeResultName,
+    entryPoints: [modulePath],
+    tsconfigRaw: {
+      compilerOptions: tsCompilerOptions,
+    },
   });
-  const bundleIifeScript: string = transformEsModuleToIifeModule({
-    code: esModuleBundle.code,
-    name: iifeResultName,
-    parse: (code: string) =>
-      acornParse(code, {
-        sourceType: "module",
-        ecmaVersion: 2020,
-      }),
-  }).code;
+  const bundleIifeScript = buildBundleResult.outputFiles[0].text;
   const iifeResult: unknown = new Function(
-    `${bundleIifeScript}; return ${iifeResultName};`
+    `${bundleIifeScript}; return ${iifeResultName}.default;`
   )();
   return [ModuleResultSchema.parse(iifeResult), bundleIifeScript];
-}
-
-function throwInvalidErrorPath(errorMessage: string): never {
-  throw new Error(`invalid path: ${errorMessage}`);
 }

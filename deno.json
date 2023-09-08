@@ -19,16 +19,14 @@
   "imports": {
     "deno/std/": "https://deno.land/std@0.200.0/",
     "deno/x/crypto-random-string/": "https://deno.land/x/crypto_random_string@1.0.0/",
-    "deno/x/emit/": "https://deno.land/x/emit@0.27.0/",
+    "deno/x/esbuild/": "https://deno.land/x/esbuild@v0.19.2/",
     "deno/x/zod/": "https://deno.land/x/zod@v3.22.2/",
-    "npm/es-iife": "https://esm.sh/es-iife@0.2.0",
-    "npm/acorn": "https://esm.sh/acorn@8.10.0",
     "npm/preact": "https://esm.sh/preact@10.17.1",
     "npm/preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime",
     "npm/preact-render-to-string": "https://esm.sh/preact-render-to-string@6.2.1?deps=preact@10.17.1"
   },
   "tasks": {
-    "runCommand": "deno run --allow-env=DENO_DIR,HOME,DENO_AUTH_TOKENS --allow-net=deno.land --allow-read=. --allow-write=. ./source/main.tsx",
-    "compileCli": "deno compile --allow-env=DENO_DIR,HOME,DENO_AUTH_TOKENS --allow-net=deno.land --allow-read=. --allow-write=. ./source/main.tsx --output ./stews"
+    "runCommand": "deno run -A ./source/main.tsx",
+    "compileCli": "deno compile -A ./source/main.tsx --output ./stews"
   }
 }
