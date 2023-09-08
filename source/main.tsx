@@ -25,6 +25,7 @@ import {
 import { SegmentModule } from "./shared/types/SegmentModule.ts";
 import {
   BuildStewConfig,
+  SourceSegmentConfig,
   SourceStewConfigSchema,
 } from "./shared/types/StewConfig.ts";
 
@@ -60,53 +61,34 @@ interface BuildStewAppApi {
 
 async function buildStewApp(api: BuildStewAppApi) {
   const { stewSourceConfigPath } = api;
-  const stewBuildId = getRandomCryptoString({
-    length: 6,
-    type: "alphanumeric",
-  });
-  const buildDirectoryPath = `./build_${stewBuildId}`;
-  const publicDirectoryPath = `${buildDirectoryPath}/public`;
-  const modulesDirectoryPath = `${publicDirectoryPath}/modules`;
-  const datasetsDirectoryPath = `${publicDirectoryPath}/datasets`;
-  Deno.mkdirSync(publicDirectoryPath, { recursive: true });
-  Deno.mkdirSync(modulesDirectoryPath);
-  Deno.mkdirSync(datasetsDirectoryPath);
+  const {
+    modulesBuildDirectoryPath,
+    datasetsBuildDirectoryPath,
+    stewBuildId,
+    buildDirectoryPath,
+  } = setupBuild();
   const { stewSourceConfig } = await loadStewSourceConfig({
     stewSourceConfigPath,
   });
-  const sourceSegmentModules: Record<string, SegmentModule<SegmentItem>> = {};
-  for (const someSourceSegmentConfig of stewSourceConfig.stewSegments) {
-    // segmentModule
-    const [segmentModule, segmentModuleIifeScript] = await loadPreactModule<
-      SegmentModule<SegmentItem>
-    >({
-      iifeResultName: "segmentModuleResult",
-      ModuleResultSchema: Zod.any(),
-      modulePath: joinPaths(
+  const loadedSegmentModules: Record<string, SegmentModule<SegmentItem>> = {};
+  for (const someSegmentSourceConfig of stewSourceConfig.stewSegments) {
+    await loadAndWriteSegmentModule({
+      modulesBuildDirectoryPath,
+      loadedSegmentModules,
+      someSegmentSourceConfig,
+      segmentModulePath: joinPaths(
         getDirectoryPath(stewSourceConfigPath),
-        someSourceSegmentConfig.segmentModulePath
+        someSegmentSourceConfig.segmentModulePath
       ),
     });
-    sourceSegmentModules[someSourceSegmentConfig.segmentKey] = segmentModule;
-    Deno.writeTextFileSync(
-      `${modulesDirectoryPath}/${someSourceSegmentConfig.segmentKey}.js`,
-      segmentModuleIifeScript
-    );
-    // segmentDataset
-    const [segmentDataset] = await loadBasicModule<SegmentDataset<SegmentItem>>(
-      {
-        iifeResultName: "segmentDatasetResult",
-        ModuleResultSchema: Zod.array(SegmentItemSchema()),
-        modulePath: joinPaths(
-          getDirectoryPath(stewSourceConfigPath),
-          someSourceSegmentConfig.segmentDatasetPath
-        ),
-      }
-    );
-    Deno.writeTextFileSync(
-      `${datasetsDirectoryPath}/${someSourceSegmentConfig.segmentKey}.json`,
-      JSON.stringify(segmentDataset)
-    );
+    await loadAndWriteDatasetModule({
+      datasetsBuildDirectoryPath,
+      someSegmentSourceConfig,
+      segmentDatasetPath: joinPaths(
+        getDirectoryPath(stewSourceConfigPath),
+        someSegmentSourceConfig.segmentDatasetPath
+      ),
+    });
   }
   const stewBuildConfig: BuildStewConfig = {
     stewBuildId,
@@ -116,7 +98,7 @@ async function buildStewApp(api: BuildStewAppApi) {
         segmentKey: someSourceSegmentConfig.segmentKey,
         segmentSearchLabel: someSourceSegmentConfig.segmentSearchLabel,
         segmentViews: someSourceSegmentConfig.segmentViews,
-        segmentSortOptions: sourceSegmentModules[
+        segmentSortOptions: loadedSegmentModules[
           someSourceSegmentConfig.segmentKey
         ].segmentSortOptions.map((someSegmentSortOption) => ({
           sortOptionKey: someSegmentSortOption.sortOptionKey,
@@ -133,6 +115,26 @@ async function buildStewApp(api: BuildStewAppApi) {
   );
 }
 
+function setupBuild() {
+  const stewBuildId = getRandomCryptoString({
+    length: 6,
+    type: "alphanumeric",
+  });
+  const buildDirectoryPath = `./build_${stewBuildId}`;
+  const publicBuildDirectoryPath = `${buildDirectoryPath}/public`;
+  const modulesBuildDirectoryPath = `${publicBuildDirectoryPath}/modules`;
+  const datasetsBuildDirectoryPath = `${publicBuildDirectoryPath}/datasets`;
+  Deno.mkdirSync(publicBuildDirectoryPath, { recursive: true });
+  Deno.mkdirSync(modulesBuildDirectoryPath);
+  Deno.mkdirSync(datasetsBuildDirectoryPath);
+  return {
+    stewBuildId,
+    buildDirectoryPath,
+    modulesBuildDirectoryPath,
+    datasetsBuildDirectoryPath,
+  };
+}
+
 interface LoadStewSourceConfigApi
   extends Pick<BuildStewAppApi, "stewSourceConfigPath"> {}
 
@@ -146,6 +148,57 @@ async function loadStewSourceConfig(api: LoadStewSourceConfigApi) {
   return {
     stewSourceConfig,
   };
+}
+
+interface LoadAndWriteSegmentModuleApi {
+  segmentModulePath: string;
+  modulesBuildDirectoryPath: string;
+  someSegmentSourceConfig: SourceSegmentConfig;
+  loadedSegmentModules: Record<string, SegmentModule<SegmentItem>>;
+}
+
+async function loadAndWriteSegmentModule(api: LoadAndWriteSegmentModuleApi) {
+  const {
+    segmentModulePath,
+    loadedSegmentModules,
+    someSegmentSourceConfig,
+    modulesBuildDirectoryPath,
+  } = api;
+  const [segmentModule, segmentModuleIifeScript] = await loadPreactModule<
+    SegmentModule<SegmentItem>
+  >({
+    iifeResultName: "segmentModuleResult",
+    ModuleResultSchema: Zod.any(),
+    modulePath: segmentModulePath,
+  });
+  await Deno.writeTextFile(
+    `${modulesBuildDirectoryPath}/${someSegmentSourceConfig.segmentKey}.js`,
+    segmentModuleIifeScript
+  );
+  loadedSegmentModules[someSegmentSourceConfig.segmentKey] = segmentModule;
+}
+
+interface LoadAndWriteDatasetModuleApi {
+  segmentDatasetPath: string;
+  datasetsBuildDirectoryPath: string;
+  someSegmentSourceConfig: SourceSegmentConfig;
+}
+
+async function loadAndWriteDatasetModule(api: LoadAndWriteDatasetModuleApi) {
+  const {
+    segmentDatasetPath,
+    someSegmentSourceConfig,
+    datasetsBuildDirectoryPath,
+  } = api;
+  const [segmentDataset] = await loadPreactModule<SegmentDataset<SegmentItem>>({
+    iifeResultName: "segmentDatasetResult",
+    ModuleResultSchema: Zod.array(SegmentItemSchema()),
+    modulePath: segmentDatasetPath,
+  });
+  await Deno.writeTextFile(
+    `${datasetsBuildDirectoryPath}/${someSegmentSourceConfig.segmentKey}.json`,
+    JSON.stringify(segmentDataset)
+  );
 }
 
 interface LoadPreactModuleApi<ModuleResult>

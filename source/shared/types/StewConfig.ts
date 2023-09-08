@@ -2,31 +2,29 @@ import * as Zod from "deno/x/zod/mod.ts";
 import { SegmentSortOption } from "./SegmentModule.ts";
 import { SegmentItem } from "./SegmentDataset.ts";
 
-export interface SourceStewConfig
-  extends StewConfigBase<SourceStewSegmentConfig> {}
+export interface SourceStewConfig extends StewConfigBase<SourceSegmentConfig> {}
 
 export function SourceStewConfigSchema(): Zod.ZodType<SourceStewConfig> {
   return StewConfigBaseSchema(
-    StewSegmentConfigBaseSchema().extend({
+    SegmentConfigBaseSchema().extend({
       segmentModulePath: Zod.string(),
       segmentDatasetPath: Zod.string(),
     })
   );
 }
 
-interface SourceStewSegmentConfig extends StewSegmentConfigBase {
+export interface SourceSegmentConfig extends SegmentConfigBase {
   segmentModulePath: string;
   segmentDatasetPath: string;
 }
 
-export interface BuildStewConfig
-  extends StewConfigBase<BuildStewSegmentConfig> {
+export interface BuildStewConfig extends StewConfigBase<BuildSegmentConfig> {
   stewBuildId: string;
 }
 
 export function BuildStewConfigSchema(): Zod.ZodType<BuildStewConfig> {
   return StewConfigBaseSchema(
-    StewSegmentConfigBaseSchema().extend({
+    SegmentConfigBaseSchema().extend({
       segmentSortOptions: Zod.array(
         Zod.object({
           sortOptionKey: Zod.string(),
@@ -39,17 +37,17 @@ export function BuildStewConfigSchema(): Zod.ZodType<BuildStewConfig> {
   });
 }
 
-interface BuildStewSegmentConfig extends StewSegmentConfigBase {
-  segmentSortOptions: Array<BuildStewSegmentSortOptionConfig>;
+interface BuildSegmentConfig extends SegmentConfigBase {
+  segmentSortOptions: Array<BuildSortOptionConfig>;
 }
 
-interface BuildStewSegmentSortOptionConfig
+interface BuildSortOptionConfig
   extends Pick<
     SegmentSortOption<SegmentItem>,
     "sortOptionKey" | "sortOptionLabel"
   > {}
 
-interface StewConfigBase<StegSegment extends StewSegmentConfigBase> {
+interface StewConfigBase<StegSegment extends SegmentConfigBase> {
   stewInfo: StewInfo;
   stewSegments: Array<StegSegment>;
 }
@@ -91,27 +89,27 @@ function StewExternalLinkSchema() {
   });
 }
 
-interface StewSegmentConfigBase {
+interface SegmentConfigBase {
   segmentKey: string;
   segmentSearchLabel: string;
-  segmentViews: Array<StewSegmentViewConfig>;
+  segmentViews: Array<SegmentViewConfig>;
 }
 
-function StewSegmentConfigBaseSchema() {
+function SegmentConfigBaseSchema() {
   return Zod.object({
     segmentKey: Zod.string(),
     segmentSearchLabel: Zod.string(),
-    segmentViews: Zod.array(StewSegmentViewConfigSchema()),
+    segmentViews: Zod.array(SegmentViewConfigSchema()),
   });
 }
 
-interface StewSegmentViewConfig {
+interface SegmentViewConfig {
   viewKey: string;
   viewLabel: string;
   viewItemIds: Array<number>;
 }
 
-function StewSegmentViewConfigSchema() {
+function SegmentViewConfigSchema() {
   return Zod.object({
     viewKey: Zod.string(),
     viewLabel: Zod.string(),
