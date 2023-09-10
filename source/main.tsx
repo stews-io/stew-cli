@@ -28,6 +28,7 @@ import {
   SourceSegmentConfig,
   SourceStewConfigSchema,
 } from "./shared/types/StewConfig.ts";
+import { APP_BUNDLE_JS } from "./client/app/APP_BUNDLE_JS.ts";
 
 runStewCommand({
   parsedDenoArgs: parseDenoArgs(Deno.args),
@@ -66,7 +67,7 @@ async function buildStewApp(api: BuildStewAppApi) {
     datasetsBuildDirectoryPath,
     stewBuildId,
     buildDirectoryPath,
-  } = setupBuild();
+  } = setupBuildDirectory();
   const { stewSourceConfig } = await loadStewSourceConfig({
     stewSourceConfigPath,
   });
@@ -81,7 +82,7 @@ async function buildStewApp(api: BuildStewAppApi) {
         someSegmentSourceConfig.segmentModulePath
       ),
     });
-    await loadAndWriteDatasetModule({
+    await loadAndWriteSegmentDataset({
       datasetsBuildDirectoryPath,
       someSegmentSourceConfig,
       segmentDatasetPath: joinPaths(
@@ -113,9 +114,13 @@ async function buildStewApp(api: BuildStewAppApi) {
       <InitialStewHtml stewBuildConfig={stewBuildConfig} />
     )}`
   );
+  Deno.writeTextFileSync(
+    `${buildDirectoryPath}/app.${stewBuildConfig.stewBuildId}.js`,
+    APP_BUNDLE_JS
+  );
 }
 
-function setupBuild() {
+function setupBuildDirectory() {
   const stewBuildId = getRandomCryptoString({
     length: 6,
     type: "alphanumeric",
@@ -178,13 +183,13 @@ async function loadAndWriteSegmentModule(api: LoadAndWriteSegmentModuleApi) {
   loadedSegmentModules[someSegmentSourceConfig.segmentKey] = segmentModule;
 }
 
-interface LoadAndWriteDatasetModuleApi {
+interface LoadAndWriteSegmentDatasetApi {
   segmentDatasetPath: string;
   datasetsBuildDirectoryPath: string;
   someSegmentSourceConfig: SourceSegmentConfig;
 }
 
-async function loadAndWriteDatasetModule(api: LoadAndWriteDatasetModuleApi) {
+async function loadAndWriteSegmentDataset(api: LoadAndWriteSegmentDatasetApi) {
   const {
     segmentDatasetPath,
     someSegmentSourceConfig,
