@@ -5,7 +5,16 @@ import {
 import { denoPlugins } from "deno/x/esbuild_deno_loader/mod.ts";
 import { resolve } from "deno/std/path/mod.ts";
 
-await bundleClientApp();
+compileCli();
+
+async function compileCli() {
+  await bundleClientApp();
+  await new Deno.Command(Deno.execPath(), {
+    args: ["compile", "--allow-all", "--output=./stew", "./source/main.tsx"],
+    stdout: "piped",
+    stderr: "piped",
+  }).output();
+}
 
 async function bundleClientApp() {
   const bundleClientResult = await buildBundle({
@@ -15,18 +24,18 @@ async function bundleClientApp() {
     platform: "browser",
     format: "iife",
     entryPoints: ["./source/client/app/main.tsx"],
-    tsconfigRaw: {
-      compilerOptions: {
-        jsxFactory: "h",
-        jsxFragmentFactory: "Fragment",
-      },
-    },
     plugins: [
       ...(denoPlugins({
         loader: "native",
         configPath: resolve(`${Deno.cwd()}/deno.json`),
       }) as unknown as any),
     ],
+    tsconfigRaw: {
+      compilerOptions: {
+        jsxFactory: "h",
+        jsxFragmentFactory: "Fragment",
+      },
+    },
   });
   closeEsbuild();
   Deno.writeTextFileSync(

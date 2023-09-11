@@ -1,6 +1,10 @@
-export interface StewAppProps {}
+import { BuildStewConfig } from "../../shared/types/StewConfig.ts";
+
+export interface StewAppProps {
+  stewConfig: BuildStewConfig;
+}
 
 export function StewApp(props: StewAppProps) {
-  const {} = props;
+  const { stewConfig } = props;
   return <div>loaded</div>;
 }

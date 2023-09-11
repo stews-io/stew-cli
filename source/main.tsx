@@ -66,6 +66,7 @@ async function buildStewApp(api: BuildStewAppApi) {
     modulesBuildDirectoryPath,
     datasetsBuildDirectoryPath,
     stewBuildId,
+    publicBuildDirectoryPath,
     buildDirectoryPath,
   } = setupBuildDirectory();
   const { stewSourceConfig } = await loadStewSourceConfig({
@@ -109,6 +110,10 @@ async function buildStewApp(api: BuildStewAppApi) {
     ),
   };
   Deno.writeTextFileSync(
+    `${publicBuildDirectoryPath}/stew.config.json`,
+    JSON.stringify(stewBuildConfig)
+  );
+  Deno.writeTextFileSync(
     `${buildDirectoryPath}/index.html`,
     `<!DOCTYPE html>${renderToString(
       <InitialStewHtml stewBuildConfig={stewBuildConfig} />
@@ -135,6 +140,7 @@ function setupBuildDirectory() {
   return {
     stewBuildId,
     buildDirectoryPath,
+    publicBuildDirectoryPath,
     modulesBuildDirectoryPath,
     datasetsBuildDirectoryPath,
   };

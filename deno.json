@@ -23,11 +23,12 @@
     "deno/x/esbuild_deno_loader/": "https://deno.land/x/esbuild_deno_loader@0.8.1/",
     "deno/x/zod/": "https://deno.land/x/zod@v3.22.2/",
     "npm/preact": "https://esm.sh/preact@10.17.1",
+    "npm/preact/hooks": "https://esm.sh/preact@10.17.1/hooks",
     "npm/preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime",
     "npm/preact-render-to-string": "https://esm.sh/preact-render-to-string@6.2.1?deps=preact@10.17.1"
   },
   "tasks": {
     "runCommand": "deno run -A ./source/main.tsx",
-    "compileCli": "deno compile -A ./source/main.tsx --output ./stews"
+    "compileCli": "deno run -A ./scripts/compileCli.ts"
   }
 }
