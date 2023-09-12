@@ -1,4 +1,10 @@
-import { useEffect, useState } from "npm/preact/hooks";
+import { StateUpdater, useEffect, useState } from "npm/preact/hooks";
+import { Fragment } from "npm/preact/jsx-runtime";
+import {
+  SegmentDataset,
+  SegmentItem,
+} from "../../shared/types/SegmentDataset.ts";
+import { SegmentModule } from "../../shared/types/SegmentModule.ts";
 import { BuildStewConfig } from "../../shared/types/StewConfig.ts";
 
 export interface StewAppProps {
@@ -7,37 +13,16 @@ export interface StewAppProps {
 
 export function StewApp(props: StewAppProps) {
   const { stewConfig } = props;
-  const [segmentKeyState, setSegmentKeyState] = useState(
-    stewConfig.stewSegments[0].segmentKey
-  );
-  const [segmentModuleState, setSegmentModuleState] = useState<any>({
-    fetchStatus: "loading",
+  const [segmentState, setSegmentState] = useState<SegmentState>({
+    loadingStatus: "loading",
+    segmentKey: stewConfig.stewSegments[0].segmentKey,
   });
   useEffect(() => {
-    fetch(`/public/modules/${segmentKeyState}.js`)
-      .then((getModuleIifeScript) => getModuleIifeScript.text())
-      .then((someModuleIifeScript) => {
-        setSegmentModuleState({
-          fetchStatus: "success",
-          segmentModule: new Function(
-            `${someModuleIifeScript}return segmentModuleResult.default`
-          )(),
-        });
-      });
-  }, [segmentKeyState]);
-  const [segmentDatasetState, setSegmentDatasetState] = useState<any>({
-    fetchStatus: "loading",
-  });
-  useEffect(() => {
-    fetch(`/public/datasets/${segmentKeyState}.json`)
-      .then((getDatasetJson) => getDatasetJson.json())
-      .then((someDatasetJson) => {
-        setSegmentDatasetState({
-          fetchStatus: "success",
-          segmentDataset: someDatasetJson,
-        });
-      });
-  }, [segmentKeyState]);
+    loadSegment({
+      segmentState,
+      setSegmentState,
+    });
+  }, [segmentState.segmentKey]);
   return (
     <div>
       <div style={{ display: "flex", flexDirection: "row" }}>
@@ -50,23 +35,79 @@ export function StewApp(props: StewAppProps) {
               fontWeight: 700,
             }}
             onClick={() => {
-              setSegmentKeyState(someSegmentConfig.segmentKey);
+              setSegmentState({
+                loadingStatus: "loading",
+                segmentKey: someSegmentConfig.segmentKey,
+              });
             }}
           >
             {someSegmentConfig.segmentKey}
           </div>
         ))}
       </div>
-      <div style={{ padding: 8, fontWeight: 300 }}>{segmentKeyState}</div>
-      <div>
-        {segmentDatasetState.fetchStatus === "success" &&
-        segmentModuleState.fetchStatus === "success" ? (
-          <segmentModuleState.segmentModule.SegmentItemDisplay
-            someSegmentItem={segmentDatasetState.segmentDataset[0]}
-          />
-        ) : null}
+      <div style={{ padding: 8, fontWeight: 300 }}>
+        {segmentState.segmentKey}
       </div>
-      <link rel={"stylesheet"} href={`/public/css/${segmentKeyState}.css`} />
+      {segmentState.loadingStatus === "success" ? (
+        <Fragment>
+          <segmentState.segmentModule.SegmentItemDisplay
+            someSegmentItem={segmentState.segmentDataset[0]}
+          />
+          <style>{segmentState.segmentCss}</style>
+        </Fragment>
+      ) : null}
     </div>
   );
+}
+
+type SegmentState =
+  | SuccessSegmentState
+  | LoadingSegmentState
+  | ErrorSegmentState;
+
+interface SuccessSegmentState extends SegmentStateBase<"success"> {
+  segmentDataset: SegmentDataset<SegmentItem>;
+  segmentModule: SegmentModule<SegmentItem>;
+  segmentCss: string;
+}
+
+interface LoadingSegmentState extends SegmentStateBase<"loading"> {}
+
+interface ErrorSegmentState extends SegmentStateBase<"error"> {}
+
+interface SegmentStateBase<LoadingStatus extends string> {
+  loadingStatus: LoadingStatus;
+  segmentKey: string;
+}
+
+interface LoadSegmentApi {
+  segmentState: SegmentState;
+  setSegmentState: StateUpdater<SegmentState>;
+}
+
+async function loadSegment(api: LoadSegmentApi) {
+  const { segmentState, setSegmentState } = api;
+  const [nextSegmentDataset, nextSegmentModule, nextSegmentCss] =
+    await Promise.all([
+      fetch(`/public/datasets/${segmentState.segmentKey}.json`).then(
+        (getSegmentDataset) => getSegmentDataset.json()
+      ),
+      fetch(`/public/modules/${segmentState.segmentKey}.js`)
+        .then((getSegmentModuleScript) => getSegmentModuleScript.text())
+        .then((nextSegmentModuleScript) =>
+          new Function(
+            `${nextSegmentModuleScript}return segmentModuleResult.default`
+          )()
+        ),
+      fetch(`/public/css/${segmentState.segmentKey}.css`).then(
+        (getSegmentCss) => getSegmentCss.text()
+      ),
+    ]);
+  setSegmentState({
+    loadingStatus: "success",
+    segmentKey: segmentState.segmentKey,
+    segmentDataset: nextSegmentDataset as SegmentDataset<SegmentItem>,
+    segmentModule: nextSegmentModule as SegmentModule<SegmentItem>,
+    segmentCss: nextSegmentCss,
+  });
 }

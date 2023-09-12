@@ -8,7 +8,6 @@ export interface MusicItemDisplayProps
 
 export function MusicItemDisplay(props: MusicItemDisplayProps) {
   const { someSegmentItem } = props;
-  console.log(cssModule);
   return (
     <div className={cssModule.fooClass}>
       <div className={cssModule.bazClass}>{someSegmentItem.musicTitle}</div>

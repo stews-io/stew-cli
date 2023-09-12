@@ -29,10 +29,10 @@ import {
   SourceStewConfigSchema,
 } from "./shared/types/StewConfig.ts";
 // import { HTML_BUNDLE_JS } from "./client/html/HTML_BUNDLE_JS.ts";
-import { InitialStewHtml } from "./client/html/InitialStewHtml.tsx";
 import postcssProcessor, { AcceptedPlugin } from "npm/postcss";
 import postcssModulesPlugin from "npm/postcss-modules";
 import postcssNestingPlugin from "npm/postcss-nesting";
+import { InitialStewHtml } from "./client/html/InitialStewHtml.tsx";
 
 runStewCommand({
   parsedDenoArgs: parseDenoArgs(Deno.args),
