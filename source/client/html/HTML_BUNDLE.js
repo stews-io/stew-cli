@@ -1,0 +1,1 @@
+export const HTML_BUNDLE_JS = "(()=>{function t(){return h(\"div\",null,\"loading...\")}function l(i){let{stewBuildConfig:e}=i;return h(\"html\",{lang:\"en\"},h(\"head\",null),h(\"body\",null,h(\"div\",{id:\"appContainer\"},h(t,null)),h(\"script\",{src:`/app.${e.stewBuildId}.js`})))}})();"

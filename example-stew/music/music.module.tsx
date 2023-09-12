@@ -1,5 +1,6 @@
 import { SegmentModule } from "../../source/shared/types/SegmentModule.ts";
 import { MusicItem } from "./MusicItem.ts";
+import { MusicItemDisplay } from "./MusicItemDisplay.tsx";
 
 export default {
   segmentSortOptions: [
@@ -17,8 +18,5 @@ export default {
     },
   ],
   getSegmentItemSearchString: (someSegmentItem) => someSegmentItem.musicTitle,
-  SegmentItemDisplay: (props) => {
-    const { someSegmentItem } = props;
-    return <div>{someSegmentItem.musicTitle}</div>;
-  },
+  SegmentItemDisplay: MusicItemDisplay,
 } satisfies SegmentModule<MusicItem>;

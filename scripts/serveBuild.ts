@@ -19,6 +19,7 @@ async function handleRequest(someRequest: Request) {
     console.log(responseContentLength);
     console.log(responseContentType);
     console.log(responseBody);
+    console.log("\n");
     return new Response(responseBody, {
       headers: {
         "content-length": `${responseContentLength}`,

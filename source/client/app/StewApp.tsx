@@ -66,6 +66,7 @@ export function StewApp(props: StewAppProps) {
           />
         ) : null}
       </div>
+      <link rel={"stylesheet"} href={`/public/css/${segmentKeyState}.css`} />
     </div>
   );
 }
