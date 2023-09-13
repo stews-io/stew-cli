@@ -63,7 +63,7 @@ function StewConfigBaseSchema<SegmentConfigSchema extends Zod.ZodTypeAny>(
 
 interface StewInfo {
   stewName: string;
-  stewStatus: string;
+  stewTagline: string;
   stewDescription: string;
   stewExternalLinks: Array<StewExternalLink>;
 }
@@ -71,7 +71,7 @@ interface StewInfo {
 function StewInfoSchema() {
   return Zod.object({
     stewName: Zod.string(),
-    stewStatus: Zod.string(),
+    stewTagline: Zod.string(),
     stewDescription: Zod.string(),
     stewExternalLinks: Zod.array(StewExternalLinkSchema()),
   });

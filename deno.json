@@ -3,7 +3,7 @@
   // note: @jsxImportSource pragma seems to be needed for compile to work
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "npm/preact"
+    "jsxImportSource": "_preact"
   },
   "fmt": {
     "useTabs": false,
@@ -18,8 +18,8 @@
   },
   "imports": {
     "CssModule": "./declaration.d.ts",
-    "npm/preact": "./source/deps/preact/mod.ts",
-    "npm/preact/jsx-runtime": "./source/deps/preact/jsx-runtime.ts"
+    "_preact": "./source/deps/preact/mod.ts",
+    "_preact/jsx-runtime": "./source/deps/preact/jsx-runtime.ts"
   },
   "tasks": {
     "runStewCommand": "deno run -A ./source/main.tsx",
