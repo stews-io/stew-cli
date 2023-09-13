@@ -1,5 +1,7 @@
+@import "theme.css";
+
 .fooClass {
-  background-color: red;
+  composes: shared-thing;
 }
 
 .bazClass {

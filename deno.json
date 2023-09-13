@@ -28,7 +28,9 @@
     "npm/preact-render-to-string": "https://esm.sh/preact-render-to-string@6.2.1?deps=preact@10.17.1",
     "npm/postcss": "https://esm.sh/postcss@8.4.29",
     "npm/postcss-modules": "https://esm.sh/postcss-modules@6.0.0",
-    "npm/postcss-nesting": "https://esm.sh/postcss-nesting@12.0.1"
+    "npm/postcss-nesting": "https://esm.sh/postcss-nesting@12.0.1",
+    "npm/postcss-import": "https://esm.sh/postcss-import@15.1.0",
+    "npm/postcss-minify": "https://esm.sh/postcss-minify@1.1.0"
   },
   "tasks": {
     "runCommand": "deno run -A ./source/main.tsx",

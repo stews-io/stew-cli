@@ -30,6 +30,8 @@ import {
 } from "./shared/types/StewConfig.ts";
 // import { HTML_BUNDLE_JS } from "./client/html/HTML_BUNDLE_JS.ts";
 import postcssProcessor, { AcceptedPlugin } from "npm/postcss";
+import postcssImportPlugin from "npm/postcss-import";
+import postcssMinifyPlugin from "npm/postcss-minify";
 import postcssModulesPlugin from "npm/postcss-modules";
 import postcssNestingPlugin from "npm/postcss-nesting";
 import { InitialStewHtml } from "./client/html/InitialStewHtml.tsx";
@@ -66,6 +68,7 @@ interface BuildStewAppApi {
 
 async function buildStewApp(api: BuildStewAppApi) {
   const { stewSourceConfigPath } = api;
+  const stewSourceDirectoryPath = getDirectoryPath(stewSourceConfigPath);
   const {
     modulesBuildDirectoryPath,
     cssBuildDirectoryPath,
@@ -80,12 +83,13 @@ async function buildStewApp(api: BuildStewAppApi) {
   const loadedSegmentModules: Record<string, SegmentModule<SegmentItem>> = {};
   for (const someSegmentSourceConfig of stewSourceConfig.stewSegments) {
     await loadAndWriteSegmentModule({
+      stewSourceDirectoryPath,
       modulesBuildDirectoryPath,
       cssBuildDirectoryPath,
       loadedSegmentModules,
       someSegmentSourceConfig,
       segmentModulePath: joinPaths(
-        getDirectoryPath(stewSourceConfigPath),
+        stewSourceDirectoryPath,
         someSegmentSourceConfig.segmentModulePath
       ),
     });
@@ -162,6 +166,7 @@ async function loadStewSourceConfig(api: LoadStewSourceConfigApi) {
 }
 
 interface LoadAndWriteSegmentModuleApi {
+  stewSourceDirectoryPath: string;
   segmentModulePath: string;
   modulesBuildDirectoryPath: string;
   cssBuildDirectoryPath: string;
@@ -171,6 +176,7 @@ interface LoadAndWriteSegmentModuleApi {
 
 async function loadAndWriteSegmentModule(api: LoadAndWriteSegmentModuleApi) {
   const {
+    stewSourceDirectoryPath,
     segmentModulePath,
     loadedSegmentModules,
     someSegmentSourceConfig,
@@ -182,6 +188,7 @@ async function loadAndWriteSegmentModule(api: LoadAndWriteSegmentModuleApi) {
   >({
     iifeResultName: "segmentModuleResult",
     ModuleResultSchema: Zod.any(),
+    stewSourceDirectoryPath,
     modulePath: segmentModulePath,
     segmentKey: someSegmentSourceConfig.segmentKey,
     onSegmentCssProcessed: async (processedSegmentCss) => {
@@ -254,6 +261,7 @@ interface LoadSegmentModuleApi<ModuleResult>
     LoadExternalModuleApi<ModuleResult>,
     "modulePath" | "iifeResultName" | "ModuleResultSchema"
   > {
+  stewSourceDirectoryPath: string;
   segmentKey: SourceSegmentConfig["segmentKey"];
   onSegmentCssProcessed: (processedSegmentCss: string) => Promise<void>;
 }
@@ -267,6 +275,7 @@ function loadSegmentModule<ModuleResult>(
     ModuleResultSchema,
     segmentKey,
     onSegmentCssProcessed,
+    stewSourceDirectoryPath,
   } = api;
   return loadExternalModule({
     modulePath,
@@ -290,7 +299,14 @@ function loadSegmentModule<ModuleResult>(
                 },
                 generateScopedName: `${segmentKey}_[hash:base64:6]`,
               }) as AcceptedPlugin,
-            ]).process(Deno.readTextFileSync(cssLoaderConfig.path));
+              postcssMinifyPlugin(),
+            ])
+              .use(
+                postcssImportPlugin({
+                  root: stewSourceDirectoryPath,
+                })
+              )
+              .process(Deno.readTextFileSync(cssLoaderConfig.path));
             await onSegmentCssProcessed(processedCssResult.css);
             return {
               loader: "json",
