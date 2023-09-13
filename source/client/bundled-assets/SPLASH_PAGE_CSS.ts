@@ -1,1 +1,1 @@
-export const SPLASH_PAGE_CSS = ".splash_ryy4Rx{color:orange}"
+export const SPLASH_PAGE_CSS = ".splash_oX4QXs{color:orange}"

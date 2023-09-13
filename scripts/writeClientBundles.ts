@@ -27,41 +27,41 @@ async function bundleAndWriteClientHtml() {
     platform: "browser",
     format: "iife",
     globalName: "_clientHtml",
-    // footer: { js: "_clientHtml.InitialStewHtml;" },
     entryPoints: ["./source/client/html/InitialStewHtml.tsx"],
     plugins: [
       {
         name: "stew-css-esbuild-plugin",
         setup(buildContext) {
-          buildContext.onLoad({ filter: /\.css$/ }, async (cssLoaderConfig) => {
-            let cssExportMapResult: Record<string, string> = {};
-            const processedCssResult = await postcssProcessor([
-              postcssNestingPlugin(),
-              postcssModulesPlugin({
-                getJSON: (cssFilename, nextCssExportMapResult) => {
-                  cssExportMapResult = nextCssExportMapResult;
-                },
-                generateScopedName: `splash_[hash:base64:6]`,
-              }) as AcceptedPlugin,
-              postcssMinifyPlugin(),
-            ])
-              .use(
-                postcssImportPlugin({
-                  root: `${Deno.cwd()}/source/client`,
-                })
-              )
-              .process(Deno.readTextFileSync(cssLoaderConfig.path));
-            Deno.writeTextFileSync(
-              "./source/client/bundled-assets/SPLASH_PAGE_CSS.ts",
-              `export const SPLASH_PAGE_CSS = "${processedCssResult.css
-                // .replaceAll('"', '\\"')
-                .trimEnd()}"`
-            );
-            return {
-              loader: "json",
-              contents: JSON.stringify(cssExportMapResult),
-            };
-          });
+          buildContext.onLoad(
+            { filter: /\.css$/, namespace: "css-namespace" },
+            async (cssLoaderConfig) => {
+              let cssExportMapResult: Record<string, string> = {};
+              const processedCssResult = await postcssProcessor([
+                postcssNestingPlugin(),
+                postcssModulesPlugin({
+                  getJSON: (cssFilename, nextCssExportMapResult) => {
+                    cssExportMapResult = nextCssExportMapResult;
+                  },
+                  generateScopedName: `splash_[hash:base64:6]`,
+                }) as AcceptedPlugin,
+                postcssMinifyPlugin(),
+              ])
+                .use(
+                  postcssImportPlugin({
+                    root: `${Deno.cwd()}/source/client`,
+                  })
+                )
+                .process(Deno.readTextFileSync(cssLoaderConfig.path));
+              Deno.writeTextFileSync(
+                "./source/client/bundled-assets/SPLASH_PAGE_CSS.ts",
+                `export const SPLASH_PAGE_CSS = "${processedCssResult.css.trimEnd()}"`
+              );
+              return {
+                loader: "json",
+                contents: JSON.stringify(cssExportMapResult),
+              };
+            }
+          );
         },
       },
       ...(denoPlugins({
@@ -94,7 +94,7 @@ async function bundleAndWriteClientApp() {
     entryPoints: ["./source/client/app/main.tsx"],
     plugins: [
       ...(denoPlugins({
-        loader: "native",
+        loader: "portable",
         configPath: resolve(`${Deno.cwd()}/deno.json`),
       }) as Array<Plugin>),
     ],

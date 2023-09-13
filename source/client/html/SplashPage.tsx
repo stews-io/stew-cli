@@ -1,4 +1,4 @@
-// @deno-types="../declaration.d.ts"
+// @deno-types="CssModule"
 import cssModule from "./SplashPage.module.css";
 
 export interface SplashPageProps {}
