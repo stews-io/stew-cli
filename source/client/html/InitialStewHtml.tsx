@@ -1,18 +1,18 @@
-// note: @jsxImportSource pragma seems to be needed for compile to work
-/** @jsxImportSource npm/preact */
 import { BuildStewConfig } from "../../shared/types/StewConfig.ts";
 import { SplashPage } from "./SplashPage.tsx";
 
 export interface InitialStewHtmlProps {
   stewBuildConfig: BuildStewConfig;
+  splashPageCss: string;
 }
 
 export function InitialStewHtml(props: InitialStewHtmlProps) {
-  const { stewBuildConfig } = props;
+  const { stewBuildConfig, splashPageCss } = props;
   return (
     <html lang={"en"}>
       <head></head>
       <body>
+        <style id={"splashPageStyle"}>{splashPageCss}</style>
         <div id={"appContainer"}>
           <SplashPage />
         </div>

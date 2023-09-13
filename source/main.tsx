@@ -14,8 +14,16 @@ import {
 } from "deno/x/esbuild/mod.js";
 import { denoPlugins } from "deno/x/esbuild_deno_loader/mod.ts";
 import * as Zod from "deno/x/zod/mod.ts";
+import postcssProcessor, { AcceptedPlugin } from "npm/postcss";
+import postcssImportPlugin from "npm/postcss-import";
+import postcssMinifyPlugin from "npm/postcss-minify";
+import postcssModulesPlugin from "npm/postcss-modules";
+import postcssNestingPlugin from "npm/postcss-nesting";
+import { h } from "npm/preact";
 import { renderToString } from "npm/preact-render-to-string";
-import { APP_BUNDLE_JS } from "./client/app/APP_BUNDLE_JS.ts";
+import { APP_BUNDLE_JS } from "./client/bundled-assets/APP_BUNDLE_JS.ts";
+import { INITIAL_HTML_BUNDLE_JS } from "./client/bundled-assets/INITIAL_HTML_BUNDLE_JS.ts";
+import { SPLASH_PAGE_CSS } from "./client/bundled-assets/SPLASH_PAGE_CSS.ts";
 import { throwInvalidErrorPath } from "./shared/general/throwInvalidPathError.ts";
 import {
   SegmentDataset,
@@ -28,13 +36,6 @@ import {
   SourceSegmentConfig,
   SourceStewConfigSchema,
 } from "./shared/types/StewConfig.ts";
-// import { HTML_BUNDLE_JS } from "./client/html/HTML_BUNDLE_JS.ts";
-import postcssProcessor, { AcceptedPlugin } from "npm/postcss";
-import postcssImportPlugin from "npm/postcss-import";
-import postcssMinifyPlugin from "npm/postcss-minify";
-import postcssModulesPlugin from "npm/postcss-modules";
-import postcssNestingPlugin from "npm/postcss-nesting";
-import { InitialStewHtml } from "./client/html/InitialStewHtml.tsx";
 
 runStewCommand({
   parsedDenoArgs: parseDenoArgs(Deno.args),
@@ -119,10 +120,12 @@ async function buildStewApp(api: BuildStewAppApi) {
       })
     ),
   };
+  const { clientHtmlModule } = loadClientHtmlModule();
   writeCoreBuildFiles({
     buildDirectoryPath,
     publicBuildDirectoryPath,
     stewBuildConfig,
+    clientHtmlModule,
   });
 }
 
@@ -230,16 +233,34 @@ async function loadAndWriteSegmentDataset(api: LoadAndWriteSegmentDatasetApi) {
   );
 }
 
+function loadClientHtmlModule() {
+  (window as unknown as any).h = h;
+  return {
+    clientHtmlModule: {
+      InitialStewHtml: new Function(
+        `${INITIAL_HTML_BUNDLE_JS}return _clientHtml.InitialStewHtml`
+      )(),
+      splashPageCss: SPLASH_PAGE_CSS,
+    },
+  };
+}
+
 interface WriteCoreBuildFilesApi
   extends Pick<
-    ReturnType<typeof setupBuildDirectory>,
-    "buildDirectoryPath" | "publicBuildDirectoryPath"
-  > {
+      ReturnType<typeof setupBuildDirectory>,
+      "buildDirectoryPath" | "publicBuildDirectoryPath"
+    >,
+    Pick<ReturnType<typeof loadClientHtmlModule>, "clientHtmlModule"> {
   stewBuildConfig: BuildStewConfig;
 }
 
 function writeCoreBuildFiles(api: WriteCoreBuildFilesApi) {
-  const { publicBuildDirectoryPath, stewBuildConfig, buildDirectoryPath } = api;
+  const {
+    publicBuildDirectoryPath,
+    stewBuildConfig,
+    clientHtmlModule,
+    buildDirectoryPath,
+  } = api;
   Deno.writeTextFileSync(
     `${publicBuildDirectoryPath}/stew.config.json`,
     JSON.stringify(stewBuildConfig)
@@ -247,7 +268,10 @@ function writeCoreBuildFiles(api: WriteCoreBuildFilesApi) {
   Deno.writeTextFileSync(
     `${buildDirectoryPath}/index.html`,
     `<!DOCTYPE html>${renderToString(
-      <InitialStewHtml stewBuildConfig={stewBuildConfig} />
+      <clientHtmlModule.InitialStewHtml
+        stewBuildConfig={stewBuildConfig}
+        splashPageCss={clientHtmlModule.splashPageCss}
+      />
     )}`
   );
   Deno.writeTextFileSync(

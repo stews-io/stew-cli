@@ -1,6 +1,8 @@
-// note: @jsxImportSource pragma seems to be needed for compile to work
-/** @jsxImportSource npm/preact */
+// @deno-types="../declaration.d.ts"
+import cssModule from "./SplashPage.module.css";
 
-export function SplashPage() {
-  return <div>loading...</div>;
+export interface SplashPageProps {}
+
+export function SplashPage(props: SplashPageProps) {
+  return <div className={cssModule.foo}>loading...</div>;
 }

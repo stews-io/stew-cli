@@ -3,7 +3,8 @@
   // note: @jsxImportSource pragma seems to be needed for compile to work
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "npm/preact"
+    "jsxImportSource": "npm/preact",
+    "types": ["./declaration.d.ts"]
   },
   "fmt": {
     "useTabs": false,
@@ -12,6 +13,7 @@
     "indentWidth": 2
   },
   "lint": {
+    "exclude": ["./source/client"],
     "rules": {
       "exclude": ["no-empty-interface"]
     }
@@ -34,6 +36,6 @@
   },
   "tasks": {
     "runCommand": "deno run -A ./source/main.tsx",
-    "compileCli": "deno run -A ./scripts/compileCli.ts"
+    "writeClientBundles": "deno run -A ./scripts/writeClientBundles.ts"
   }
 }
