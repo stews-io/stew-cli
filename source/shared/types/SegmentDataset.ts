@@ -1,4 +1,4 @@
-import Zod from "deps/zod.ts";
+import Zod from "../../../deps/zod.ts";
 
 export type SegmentDataset<SomeSegmentItem extends SegmentItem> =
   Array<SomeSegmentItem>;

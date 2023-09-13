@@ -1,4 +1,4 @@
-import Zod from "deps/zod.ts";
+import Zod from "../../../deps/zod.ts";
 import { SegmentItem } from "./SegmentDataset.ts";
 import { SegmentSortOption } from "./SegmentModule.ts";
 
