@@ -1,4 +1,4 @@
-import { JSX } from "npm/preact";
+import { JSX } from "deps/preact.ts";
 import { SegmentItem } from "./SegmentDataset.ts";
 
 export interface SegmentModule<SomeSegmentItem extends SegmentItem> {

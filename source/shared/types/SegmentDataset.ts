@@ -1,4 +1,4 @@
-import * as Zod from "deno/x/zod/mod.ts";
+import Zod from "deps/zod.ts";
 
 export type SegmentDataset<SomeSegmentItem extends SegmentItem> =
   Array<SomeSegmentItem>;
