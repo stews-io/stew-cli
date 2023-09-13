@@ -1,6 +1,6 @@
-import { parse as parseDenoArgs } from "deno/std/flags/mod.ts";
-import { contentType } from "https://deno.land/std/media_types/mod.ts";
-import { extname } from "deno/std/path/mod.ts";
+import { parseDenoArgs } from "./deps/std/flags.ts";
+import { getContentType } from "./deps/std/media_types.ts";
+import { getPathExtension } from "./deps/std/path.ts";
 
 const buildDirectoryPath = parseDenoArgs(Deno.args)._[0];
 
@@ -13,7 +13,7 @@ async function handleRequest(someRequest: Request) {
     }`;
     const responseContentLength = (await Deno.stat(filePath)).size;
     const responseContentType =
-      contentType(extname(filePath)) ?? "application/octet-stream";
+      getContentType(getPathExtension(filePath)) ?? "application/octet-stream";
     const responseBody = (await Deno.open(filePath)).readable;
     console.log(filePath);
     console.log(responseContentLength);

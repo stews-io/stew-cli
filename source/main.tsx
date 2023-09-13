@@ -1,29 +1,26 @@
 // note: @jsxImportSource pragma seems to be needed for compile to work
 /** @jsxImportSource npm/preact */
-import { parse as parseDenoArgs } from "deno/std/flags/mod.ts";
-import {
-  dirname as getDirectoryPath,
-  join as joinPaths,
-} from "deno/std/path/mod.ts";
-import { cryptoRandomString as getRandomCryptoString } from "deno/x/crypto-random-string/mod.ts";
-import { TsconfigRaw } from "deno/x/esbuild/mod.d.ts";
-import {
-  Plugin as EsbuildPlugin,
-  build as buildBundle,
-  stop as closeEsbuild,
-} from "deno/x/esbuild/mod.js";
-import { denoPlugins } from "deno/x/esbuild_deno_loader/mod.ts";
-import * as Zod from "deno/x/zod/mod.ts";
-import postcssProcessor, { AcceptedPlugin } from "npm/postcss";
-import postcssImportPlugin from "npm/postcss-import";
-import postcssMinifyPlugin from "npm/postcss-minify";
-import postcssModulesPlugin from "npm/postcss-modules";
-import postcssNestingPlugin from "npm/postcss-nesting";
-import { h } from "npm/preact";
-import { renderToString } from "npm/preact-render-to-string";
 import { APP_BUNDLE_JS } from "./client/bundled-assets/APP_BUNDLE_JS.ts";
 import { INITIAL_HTML_BUNDLE_JS } from "./client/bundled-assets/INITIAL_HTML_BUNDLE_JS.ts";
 import { SPLASH_PAGE_CSS } from "./client/bundled-assets/SPLASH_PAGE_CSS.ts";
+import { getRandomCryptoString } from "./deps/crypto-random-string/mod.ts";
+import { denoLoaderPlugins } from "./deps/esbuild/deno_loader.ts";
+import {
+  EsbuildPlugin,
+  TsconfigRaw,
+  closeEsbuild,
+  runEsbuild,
+} from "./deps/esbuild/mod.ts";
+import { PostcssPlugin, postcssProcessor } from "./deps/postcss/mod.ts";
+import { postcssImportTransformer } from "./deps/postcss/postcss-import.ts";
+import { postcssMinifyPlugin } from "./deps/postcss/postcss-minify.ts";
+import { postcssModulesPlugin } from "./deps/postcss/postcss-modules.ts";
+import { postcssNestingPlugin } from "./deps/postcss/postcss-nesting.ts";
+import { h } from "./deps/preact/mod.ts";
+import { preactRenderToString } from "./deps/preact/render-to-string.ts";
+import { parseDenoArgs } from "./deps/std/flags.ts";
+import { getDirectoryPath, joinPaths } from "./deps/std/path.ts";
+import { Zod } from "./deps/zod/mod.ts";
 import { throwInvalidErrorPath } from "./shared/general/throwInvalidPathError.ts";
 import {
   SegmentDataset,
@@ -267,7 +264,7 @@ function writeCoreBuildFiles(api: WriteCoreBuildFilesApi) {
   );
   Deno.writeTextFileSync(
     `${buildDirectoryPath}/index.html`,
-    `<!DOCTYPE html>${renderToString(
+    `<!DOCTYPE html>${preactRenderToString(
       <clientHtmlModule.InitialStewHtml
         stewBuildConfig={stewBuildConfig}
         splashPageCss={clientHtmlModule.splashPageCss}
@@ -322,11 +319,11 @@ function loadSegmentModule<ModuleResult>(
                   cssExportMapResult = nextCssExportMapResult;
                 },
                 generateScopedName: `${segmentKey}_[hash:base64:6]`,
-              }) as AcceptedPlugin,
+              }) as PostcssPlugin,
               postcssMinifyPlugin(),
             ])
               .use(
-                postcssImportPlugin({
+                postcssImportTransformer({
                   root: stewSourceDirectoryPath,
                 })
               )
@@ -380,7 +377,7 @@ async function loadExternalModule<ModuleResult>(
     tsCompilerOptions,
     ModuleResultSchema,
   } = api;
-  const buildBundleResult = await buildBundle({
+  const buildBundleResult = await runEsbuild({
     bundle: true,
     write: false,
     minify: true,
@@ -390,7 +387,7 @@ async function loadExternalModule<ModuleResult>(
     entryPoints: [modulePath],
     plugins: [
       ...esbuildPlugins,
-      ...(denoPlugins({
+      ...(denoLoaderPlugins({
         loader: "portable",
         configPath: `${Deno.cwd()}/deno.json`,
       }) as Array<EsbuildPlugin>),

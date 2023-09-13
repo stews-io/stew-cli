@@ -1,26 +1,21 @@
-import {
-  build as buildBundle,
-  stop as closeEsbuild,
-  Plugin,
-} from "deno/x/esbuild/mod.js";
-import { denoPlugins } from "deno/x/esbuild_deno_loader/mod.ts";
-import { resolve } from "deno/std/path/mod.ts";
-import postcssProcessor, { AcceptedPlugin } from "npm/postcss";
-import postcssImportPlugin from "npm/postcss-import";
-import postcssMinifyPlugin from "npm/postcss-minify";
-import postcssModulesPlugin from "npm/postcss-modules";
-import postcssNestingPlugin from "npm/postcss-nesting";
+import { denoLoaderPlugins } from "./deps/esbuild/deno_loader.ts";
+import { EsbuildPlugin, closeEsbuild, runEsbuild } from "./deps/esbuild/mod.ts";
+import { PostcssPlugin, postcssProcessor } from "./deps/postcss/mod.ts";
+import { postcssMinifyPlugin } from "./deps/postcss/postcss-minify.ts";
+import { postcssModulesPlugin } from "./deps/postcss/postcss-modules.ts";
+import { postcssNestingPlugin } from "./deps/postcss/postcss-nesting.ts";
+import { resolvePath } from "./deps/std/path.ts";
 
-bundleClientScripts();
+writeClientBundleAssets();
 
-async function bundleClientScripts() {
+async function writeClientBundleAssets() {
   await bundleAndWriteClientHtml();
   await bundleAndWriteClientApp();
   closeEsbuild();
 }
 
 async function bundleAndWriteClientHtml() {
-  const bundleClientResult = await buildBundle({
+  const bundleClientResult = await runEsbuild({
     bundle: true,
     minify: true,
     write: false,
@@ -43,7 +38,7 @@ async function bundleAndWriteClientHtml() {
                     cssExportMapResult = nextCssExportMapResult;
                   },
                   generateScopedName: `splash_[hash:base64:6]`,
-                }) as AcceptedPlugin,
+                }) as PostcssPlugin,
                 postcssMinifyPlugin(),
               ])
                 .use(
@@ -64,10 +59,10 @@ async function bundleAndWriteClientHtml() {
           );
         },
       },
-      ...(denoPlugins({
+      ...(denoLoaderPlugins({
         loader: "portable",
-        configPath: resolve(`${Deno.cwd()}/deno.json`),
-      }) as Array<Plugin>),
+        configPath: resolvePath(`${Deno.cwd()}/deno.json`),
+      }) as Array<EsbuildPlugin>),
     ],
     tsconfigRaw: {
       compilerOptions: {
@@ -85,7 +80,7 @@ async function bundleAndWriteClientHtml() {
 }
 
 async function bundleAndWriteClientApp() {
-  const bundleClientResult = await buildBundle({
+  const bundleClientResult = await runEsbuild({
     bundle: true,
     minify: true,
     write: false,
@@ -93,10 +88,10 @@ async function bundleAndWriteClientApp() {
     format: "iife",
     entryPoints: ["./source/client/app/main.tsx"],
     plugins: [
-      ...(denoPlugins({
+      ...(denoLoaderPlugins({
         loader: "portable",
-        configPath: resolve(`${Deno.cwd()}/deno.json`),
-      }) as Array<Plugin>),
+        configPath: resolvePath(`${Deno.cwd()}/deno.json`),
+      }) as Array<EsbuildPlugin>),
     ],
     tsconfigRaw: {
       compilerOptions: {
@@ -111,4 +106,8 @@ async function bundleAndWriteClientApp() {
       .replaceAll('"', '\\"')
       .trimEnd()}"`
   );
+}
+
+function postcssImportPlugin(arg0: { root: string }): PostcssPlugin {
+  throw new Error("Function not implemented.");
 }

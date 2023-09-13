@@ -18,24 +18,11 @@
   },
   "imports": {
     "CssModule": "./declaration.d.ts",
-    // "deps/": "./deps/",
-    "deno/std/": "https://deno.land/std@0.200.0/",
-    "deno/x/crypto-random-string/": "https://deno.land/x/crypto_random_string@1.0.0/",
-    "deno/x/esbuild/": "https://deno.land/x/esbuild@v0.19.2/",
-    "deno/x/esbuild_deno_loader/": "../esbuild_deno_loader/",
-    "deno/x/zod/": "https://deno.land/x/zod@v3.22.2/",
-    "npm/preact": "https://esm.sh/preact@10.17.1",
-    "npm/preact/hooks": "https://esm.sh/preact@10.17.1/hooks",
-    "npm/preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime",
-    "npm/preact-render-to-string": "https://esm.sh/preact-render-to-string@6.2.1?deps=preact@10.17.1",
-    "npm/postcss": "https://esm.sh/postcss@8.4.29",
-    "npm/postcss-modules": "https://esm.sh/postcss-modules@6.0.0",
-    "npm/postcss-nesting": "https://esm.sh/postcss-nesting@12.0.1",
-    "npm/postcss-import": "https://esm.sh/postcss-import@15.1.0",
-    "npm/postcss-minify": "https://esm.sh/postcss-minify@1.1.0"
+    "npm/preact": "./source/deps/preact/mod.ts",
+    "npm/preact/jsx-runtime": "./source/deps/preact/jsx-runtime.ts"
   },
   "tasks": {
-    "runCommand": "deno run -A ./source/main.tsx",
-    "writeClientBundles": "deno run -A ./scripts/writeClientBundles.ts"
+    "runStewCommand": "deno run -A ./source/main.tsx",
+    "writeClientBundleAssets": "deno run -A ./scripts/writeClientBundleAssets.ts"
   }
 }
