@@ -1,6 +1,7 @@
 import { denoLoaderPlugins } from "./deps/esbuild/deno_loader.ts";
 import { EsbuildPlugin, closeEsbuild, runEsbuild } from "./deps/esbuild/mod.ts";
 import { PostcssPlugin, postcssProcessor } from "./deps/postcss/mod.ts";
+import { postcssImportTransformer } from "./deps/postcss/postcss-import.ts";
 import { postcssMinifyPlugin } from "./deps/postcss/postcss-minify.ts";
 import { postcssModulesPlugin } from "./deps/postcss/postcss-modules.ts";
 import { postcssNestingPlugin } from "./deps/postcss/postcss-nesting.ts";
@@ -27,36 +28,33 @@ async function bundleAndWriteClientHtml() {
       {
         name: "stew-css-esbuild-plugin",
         setup(buildContext) {
-          buildContext.onLoad(
-            { filter: /\.css$/, namespace: "css-namespace" },
-            async (cssLoaderConfig) => {
-              let cssExportMapResult: Record<string, string> = {};
-              const processedCssResult = await postcssProcessor([
-                postcssNestingPlugin(),
-                postcssModulesPlugin({
-                  getJSON: (cssFilename, nextCssExportMapResult) => {
-                    cssExportMapResult = nextCssExportMapResult;
-                  },
-                  generateScopedName: `splash_[hash:base64:6]`,
-                }) as PostcssPlugin,
-                postcssMinifyPlugin(),
-              ])
-                .use(
-                  postcssImportPlugin({
-                    root: `${Deno.cwd()}/source/client`,
-                  })
-                )
-                .process(Deno.readTextFileSync(cssLoaderConfig.path));
-              Deno.writeTextFileSync(
-                "./source/client/bundled-assets/SPLASH_PAGE_CSS.ts",
-                `export const SPLASH_PAGE_CSS = "${processedCssResult.css.trimEnd()}"`
-              );
-              return {
-                loader: "json",
-                contents: JSON.stringify(cssExportMapResult),
-              };
-            }
-          );
+          buildContext.onLoad({ filter: /\.css$/ }, async (cssLoaderConfig) => {
+            let cssExportMapResult: Record<string, string> = {};
+            const processedCssResult = await postcssProcessor([
+              postcssNestingPlugin(),
+              postcssModulesPlugin({
+                getJSON: (cssFilename, nextCssExportMapResult) => {
+                  cssExportMapResult = nextCssExportMapResult;
+                },
+                generateScopedName: `splash_[hash:base64:6]`,
+              }) as PostcssPlugin,
+              postcssMinifyPlugin(),
+            ])
+              .use(
+                postcssImportTransformer({
+                  root: `${Deno.cwd()}/source/client`,
+                })
+              )
+              .process(Deno.readTextFileSync(cssLoaderConfig.path));
+            Deno.writeTextFileSync(
+              "./source/client/bundled-assets/SPLASH_PAGE_CSS.ts",
+              `export const SPLASH_PAGE_CSS = "${processedCssResult.css.trimEnd()}"`
+            );
+            return {
+              loader: "json",
+              contents: JSON.stringify(cssExportMapResult),
+            };
+          });
         },
       },
       ...(denoLoaderPlugins({
@@ -106,8 +104,4 @@ async function bundleAndWriteClientApp() {
       .replaceAll('"', '\\"')
       .trimEnd()}"`
   );
-}
-
-function postcssImportPlugin(arg0: { root: string }): PostcssPlugin {
-  throw new Error("Function not implemented.");
 }

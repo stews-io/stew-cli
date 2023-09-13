@@ -1,5 +1,5 @@
-import { StateUpdater, useEffect, useState } from "npm/preact/hooks";
-import { Fragment } from "npm/preact/jsx-runtime";
+import { Fragment } from "../../deps/preact/mod.ts";
+import { StateUpdater, useEffect, useState } from "../../deps/preact/hooks.ts";
 import {
   SegmentDataset,
   SegmentItem,

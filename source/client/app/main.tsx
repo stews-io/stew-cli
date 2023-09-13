@@ -1,7 +1,7 @@
-import { render, h } from "npm/preact";
-import { StewApp } from "./StewApp.tsx";
+import { h, render } from "../../deps/preact/mod.ts";
 import { throwInvalidErrorPath } from "../../shared/general/throwInvalidPathError.ts";
 import { BuildStewConfig } from "../../shared/types/StewConfig.ts";
+import { StewApp } from "./StewApp.tsx";
 
 (window as unknown as any).h = h;
 loadApp();
