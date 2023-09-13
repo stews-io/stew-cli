@@ -1,6 +1,6 @@
-import { SegmentSortOption } from "./SegmentModule.ts";
-import { SegmentItem } from "./SegmentDataset.ts";
 import Zod from "deps/zod.ts";
+import { SegmentItem } from "./SegmentDataset.ts";
+import { SegmentSortOption } from "./SegmentModule.ts";
 
 export interface SourceStewConfig extends StewConfigBase<SourceSegmentConfig> {}
 
