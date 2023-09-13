@@ -3,8 +3,8 @@ import { SourceStewConfig } from "../source/shared/types/StewConfig.ts";
 export default {
   stewInfo: {
     stewName: "hello-stew",
-    stewStatus: "just stewin",
-    stewDescription: "an assortment of awesome stuff",
+    stewTagline: "just stewin",
+    stewMessage: "an assortment of awesome stuff",
     stewExternalLinks: [],
   },
   stewSegments: [
