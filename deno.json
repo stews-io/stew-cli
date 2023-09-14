@@ -22,8 +22,10 @@
     "stewcli_preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime"
   },
   "tasks": {
+    "writeClientBundleAssets": "deno run -A ./scripts/writeClientBundleAssets.ts",
     "runStewCommand": "deno run -A ./source/main.ts",
+    "buildExampleStew": "deno task runStewCommand build ./example-stew/stew.config.ts",
     "serveStewBuild": "deno run -A ./scripts/serveStewBuild.ts",
-    "writeClientBundleAssets": "deno run -A ./scripts/writeClientBundleAssets.ts"
+    "buildAndServeExampleStew": "rm -rf ./build_hello-stew && deno task writeClientBundleAssets && deno task buildExampleStew && deno task serveStewBuild ./build_hello-stew"
   }
 }

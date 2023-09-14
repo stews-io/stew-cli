@@ -1,3 +1,4 @@
+import { SourceStewConfig } from "../mod.ts";
 import { APP_BUNDLE_JS } from "./client/bundled-assets/APP_BUNDLE_JS.ts";
 import { INITIAL_HTML_BUNDLE_JS } from "./client/bundled-assets/INITIAL_HTML_BUNDLE_JS.ts";
 import { SPLASH_PAGE_CSS } from "./client/bundled-assets/SPLASH_PAGE_CSS.ts";
@@ -19,6 +20,7 @@ import { preactRenderToString } from "./deps/preact/render-to-string.ts";
 import { parseDenoArgs } from "./deps/std/flags.ts";
 import { getDirectoryPath, joinPaths } from "./deps/std/path.ts";
 import { Zod } from "./deps/zod/mod.ts";
+import { getStewResourceMap } from "./shared/general/getStewResourceMap.ts";
 import { throwInvalidErrorPath } from "./shared/general/throwInvalidPathError.ts";
 import {
   SegmentDataset,
@@ -50,6 +52,7 @@ async function runStewCommand(api: RunStewComandApi) {
         : throwInvalidErrorPath("parsedDenoArgs._[1]");
     await buildStewApp({
       stewSourceConfigPath: maybeStewSourceConfigPath,
+      maybeBuildDirectoryPath: parsedDenoArgs["buildDirectoryPath"] ?? null,
     });
     // esbuild needs to be closed for process to terminate
     closeEsbuild();
@@ -60,40 +63,40 @@ async function runStewCommand(api: RunStewComandApi) {
 
 interface BuildStewAppApi {
   stewSourceConfigPath: string;
+  maybeBuildDirectoryPath: string | null;
 }
 
 async function buildStewApp(api: BuildStewAppApi) {
-  const { stewSourceConfigPath } = api;
-  const stewSourceDirectoryPath = getDirectoryPath(stewSourceConfigPath);
-  const {
-    modulesBuildDirectoryPath,
-    cssBuildDirectoryPath,
-    datasetsBuildDirectoryPath,
-    stewBuildId,
-    buildDirectoryPath,
-    publicBuildDirectoryPath,
-  } = setupBuildDirectory();
+  const { stewSourceConfigPath, maybeBuildDirectoryPath } = api;
   const { stewSourceConfig } = await loadStewSourceConfig({
     stewSourceConfigPath,
   });
+  const {
+    modulesBuildDirectoryPath,
+    stylesBuildDirectoryPath,
+    datasetsBuildDirectoryPath,
+    stewBuildId,
+    buildDirectoryPath,
+    configBuildPath,
+  } = setupBuildDirectory({
+    maybeBuildDirectoryPath,
+    stewSourceConfig,
+  });
+  const stewSourceDirectoryPath = getDirectoryPath(stewSourceConfigPath);
   const loadedSegmentModules: Record<string, SegmentModule<SegmentItem>> = {};
   for (const someSegmentSourceConfig of stewSourceConfig.stewSegments) {
     await loadAndWriteSegmentModule({
-      stewSourceDirectoryPath,
       modulesBuildDirectoryPath,
-      cssBuildDirectoryPath,
+      stylesBuildDirectoryPath,
+      stewSourceDirectoryPath,
       loadedSegmentModules,
       someSegmentSourceConfig,
-      segmentModulePath: joinPaths(
-        stewSourceDirectoryPath,
-        someSegmentSourceConfig.segmentModulePath
-      ),
     });
     await loadAndWriteSegmentDataset({
       datasetsBuildDirectoryPath,
       someSegmentSourceConfig,
       segmentDatasetPath: joinPaths(
-        getDirectoryPath(stewSourceConfigPath),
+        stewSourceDirectoryPath,
         someSegmentSourceConfig.segmentDatasetPath
       ),
     });
@@ -118,43 +121,25 @@ async function buildStewApp(api: BuildStewAppApi) {
   const { clientHtmlModule } = loadClientHtmlModule();
   writeCoreBuildFiles({
     buildDirectoryPath,
-    publicBuildDirectoryPath,
+    configBuildPath,
     stewBuildConfig,
     clientHtmlModule,
   });
 }
 
-function setupBuildDirectory() {
-  const stewBuildId = getRandomCryptoString({
-    length: 6,
-    type: "alphanumeric",
-  });
-  const buildDirectoryPath = `./build_${stewBuildId}`;
-  const publicBuildDirectoryPath = `${buildDirectoryPath}/public`;
-  const modulesBuildDirectoryPath = `${publicBuildDirectoryPath}/modules`;
-  const datasetsBuildDirectoryPath = `${publicBuildDirectoryPath}/datasets`;
-  const cssBuildDirectoryPath = `${publicBuildDirectoryPath}/css`;
-  Deno.mkdirSync(publicBuildDirectoryPath, { recursive: true });
-  Deno.mkdirSync(modulesBuildDirectoryPath);
-  Deno.mkdirSync(datasetsBuildDirectoryPath);
-  Deno.mkdirSync(cssBuildDirectoryPath);
-  return {
-    stewBuildId,
-    buildDirectoryPath,
-    publicBuildDirectoryPath,
-    modulesBuildDirectoryPath,
-    datasetsBuildDirectoryPath,
-    cssBuildDirectoryPath,
-  };
-}
-
 interface LoadStewSourceConfigApi
   extends Pick<BuildStewAppApi, "stewSourceConfigPath"> {}
 
-async function loadStewSourceConfig(api: LoadStewSourceConfigApi) {
+interface LoadStewSourceConfigResult {
+  stewSourceConfig: SourceStewConfig;
+}
+
+async function loadStewSourceConfig(
+  api: LoadStewSourceConfigApi
+): Promise<LoadStewSourceConfigResult> {
   const { stewSourceConfigPath } = api;
   const [stewSourceConfig] = await loadBasicExternalModule({
-    modulePath: stewSourceConfigPath,
+    moduleEntryPath: stewSourceConfigPath,
     iifeResultName: "stewConfigIifeResult",
     ModuleResultSchema: SourceStewConfigSchema(),
   });
@@ -163,11 +148,50 @@ async function loadStewSourceConfig(api: LoadStewSourceConfigApi) {
   };
 }
 
-interface LoadAndWriteSegmentModuleApi {
-  stewSourceDirectoryPath: string;
-  segmentModulePath: string;
-  modulesBuildDirectoryPath: string;
-  cssBuildDirectoryPath: string;
+interface SetupBuildDirectoryApi
+  extends Pick<BuildStewAppApi, "maybeBuildDirectoryPath">,
+    Pick<LoadStewSourceConfigResult, "stewSourceConfig"> {}
+
+function setupBuildDirectory(api: SetupBuildDirectoryApi) {
+  const { maybeBuildDirectoryPath, stewSourceConfig } = api;
+  const buildDirectoryPath =
+    maybeBuildDirectoryPath ?? `./build_${stewSourceConfig.stewInfo.stewName}`;
+  const stewBuildId = getRandomCryptoString({
+    length: 6,
+    type: "alphanumeric",
+  });
+  const stewResourceMap = getStewResourceMap({
+    stewBuildId,
+  });
+  const stewResourcesBuildDirectoryPath = `${buildDirectoryPath}${stewResourceMap.stewResourcesDirectoryPath}`;
+  const configBuildPath = `${buildDirectoryPath}${stewResourceMap.configPath}`;
+  const modulesBuildDirectoryPath = `${buildDirectoryPath}${stewResourceMap.modulesDirectoryPath}`;
+  const datasetsBuildDirectoryPath = `${buildDirectoryPath}${stewResourceMap.datasetsDirectoryPath}`;
+  const stylesBuildDirectoryPath = `${buildDirectoryPath}${stewResourceMap.stylesDirectoryPath}`;
+  // Deno.removeSync(buildDirectoryPath, { recursive: true });
+  Deno.mkdirSync(stewResourcesBuildDirectoryPath, { recursive: true });
+  Deno.mkdirSync(modulesBuildDirectoryPath);
+  Deno.mkdirSync(datasetsBuildDirectoryPath);
+  Deno.mkdirSync(stylesBuildDirectoryPath);
+  return {
+    stewBuildId,
+    buildDirectoryPath,
+    stewResourcesBuildDirectoryPath,
+    configBuildPath,
+    modulesBuildDirectoryPath,
+    datasetsBuildDirectoryPath,
+    stylesBuildDirectoryPath,
+  };
+}
+
+interface LoadAndWriteSegmentModuleApi
+  extends Pick<
+    ReturnType<typeof setupBuildDirectory>,
+    "modulesBuildDirectoryPath" | "stylesBuildDirectoryPath"
+  > {
+  stewSourceDirectoryPath: LoadSegmentModuleApi<
+    SegmentModule<SegmentItem>
+  >["cssImportBaseDirectoryPath"];
   someSegmentSourceConfig: SourceSegmentConfig;
   loadedSegmentModules: Record<string, SegmentModule<SegmentItem>>;
 }
@@ -175,10 +199,9 @@ interface LoadAndWriteSegmentModuleApi {
 async function loadAndWriteSegmentModule(api: LoadAndWriteSegmentModuleApi) {
   const {
     stewSourceDirectoryPath,
-    segmentModulePath,
     loadedSegmentModules,
     someSegmentSourceConfig,
-    cssBuildDirectoryPath,
+    stylesBuildDirectoryPath,
     modulesBuildDirectoryPath,
   } = api;
   const [segmentModule, segmentModuleIifeScript] = await loadSegmentModule<
@@ -186,12 +209,15 @@ async function loadAndWriteSegmentModule(api: LoadAndWriteSegmentModuleApi) {
   >({
     iifeResultName: "segmentModuleResult",
     ModuleResultSchema: Zod.any(),
-    stewSourceDirectoryPath,
-    modulePath: segmentModulePath,
+    cssImportBaseDirectoryPath: stewSourceDirectoryPath,
     segmentKey: someSegmentSourceConfig.segmentKey,
+    moduleEntryPath: joinPaths(
+      stewSourceDirectoryPath,
+      someSegmentSourceConfig.segmentModulePath
+    ),
     onSegmentCssProcessed: async (processedSegmentCss) => {
       await Deno.writeTextFile(
-        `${cssBuildDirectoryPath}/${someSegmentSourceConfig.segmentKey}.css`,
+        `${stylesBuildDirectoryPath}/${someSegmentSourceConfig.segmentKey}.css`,
         processedSegmentCss
       );
     },
@@ -203,84 +229,12 @@ async function loadAndWriteSegmentModule(api: LoadAndWriteSegmentModuleApi) {
   loadedSegmentModules[someSegmentSourceConfig.segmentKey] = segmentModule;
 }
 
-interface LoadAndWriteSegmentDatasetApi {
-  segmentDatasetPath: string;
-  datasetsBuildDirectoryPath: string;
-  someSegmentSourceConfig: SourceSegmentConfig;
-}
-
-async function loadAndWriteSegmentDataset(api: LoadAndWriteSegmentDatasetApi) {
-  const {
-    segmentDatasetPath,
-    someSegmentSourceConfig,
-    datasetsBuildDirectoryPath,
-  } = api;
-  const [segmentDataset] = await loadBasicExternalModule<
-    SegmentDataset<SegmentItem>
-  >({
-    iifeResultName: "segmentDatasetResult",
-    ModuleResultSchema: Zod.array(SegmentItemSchema()),
-    modulePath: segmentDatasetPath,
-  });
-  await Deno.writeTextFile(
-    `${datasetsBuildDirectoryPath}/${someSegmentSourceConfig.segmentKey}.json`,
-    JSON.stringify(segmentDataset)
-  );
-}
-
-function loadClientHtmlModule() {
-  (window as unknown as any).h = h;
-  return {
-    clientHtmlModule: {
-      InitialStewHtml: new Function(
-        `${INITIAL_HTML_BUNDLE_JS}return _clientHtml.InitialStewHtml`
-      )(),
-      splashPageCss: SPLASH_PAGE_CSS,
-    },
-  };
-}
-
-interface WriteCoreBuildFilesApi
-  extends Pick<
-      ReturnType<typeof setupBuildDirectory>,
-      "buildDirectoryPath" | "publicBuildDirectoryPath"
-    >,
-    Pick<ReturnType<typeof loadClientHtmlModule>, "clientHtmlModule"> {
-  stewBuildConfig: BuildStewConfig;
-}
-
-function writeCoreBuildFiles(api: WriteCoreBuildFilesApi) {
-  const {
-    publicBuildDirectoryPath,
-    stewBuildConfig,
-    clientHtmlModule,
-    buildDirectoryPath,
-  } = api;
-  Deno.writeTextFileSync(
-    `${publicBuildDirectoryPath}/stew.config.json`,
-    JSON.stringify(stewBuildConfig)
-  );
-  Deno.writeTextFileSync(
-    `${buildDirectoryPath}/index.html`,
-    `<!DOCTYPE html>${preactRenderToString(
-      h(clientHtmlModule.InitialStewHtml as FunctionComponent<any>, {
-        stewBuildConfig,
-        splashPageCss: clientHtmlModule.splashPageCss,
-      })
-    )}`
-  );
-  Deno.writeTextFileSync(
-    `${buildDirectoryPath}/app.${stewBuildConfig.stewBuildId}.js`,
-    APP_BUNDLE_JS
-  );
-}
-
 interface LoadSegmentModuleApi<ModuleResult>
   extends Pick<
     LoadExternalModuleApi<ModuleResult>,
-    "modulePath" | "iifeResultName" | "ModuleResultSchema"
+    "moduleEntryPath" | "iifeResultName" | "ModuleResultSchema"
   > {
-  stewSourceDirectoryPath: string;
+  cssImportBaseDirectoryPath: string;
   segmentKey: SourceSegmentConfig["segmentKey"];
   onSegmentCssProcessed: (processedSegmentCss: string) => Promise<void>;
 }
@@ -289,15 +243,15 @@ function loadSegmentModule<ModuleResult>(
   api: LoadSegmentModuleApi<ModuleResult>
 ) {
   const {
-    modulePath,
+    moduleEntryPath,
     iifeResultName,
     ModuleResultSchema,
     segmentKey,
     onSegmentCssProcessed,
-    stewSourceDirectoryPath,
+    cssImportBaseDirectoryPath,
   } = api;
   return loadExternalModule({
-    modulePath,
+    moduleEntryPath,
     iifeResultName,
     ModuleResultSchema,
     tsCompilerOptions: {
@@ -322,7 +276,7 @@ function loadSegmentModule<ModuleResult>(
             ])
               .use(
                 postcssImportTransformer({
-                  root: stewSourceDirectoryPath,
+                  root: cssImportBaseDirectoryPath,
                 })
               )
               .process(Deno.readTextFileSync(cssLoaderConfig.path));
@@ -338,18 +292,90 @@ function loadSegmentModule<ModuleResult>(
   });
 }
 
+interface LoadAndWriteSegmentDatasetApi
+  extends Pick<
+    ReturnType<typeof setupBuildDirectory>,
+    "datasetsBuildDirectoryPath"
+  > {
+  segmentDatasetPath: string;
+  someSegmentSourceConfig: SourceSegmentConfig;
+}
+
+async function loadAndWriteSegmentDataset(api: LoadAndWriteSegmentDatasetApi) {
+  const {
+    segmentDatasetPath,
+    someSegmentSourceConfig,
+    datasetsBuildDirectoryPath,
+  } = api;
+  const [segmentDataset] = await loadBasicExternalModule<
+    SegmentDataset<SegmentItem>
+  >({
+    iifeResultName: "segmentDatasetResult",
+    ModuleResultSchema: Zod.array(SegmentItemSchema()),
+    moduleEntryPath: segmentDatasetPath,
+  });
+  await Deno.writeTextFile(
+    `${datasetsBuildDirectoryPath}/${someSegmentSourceConfig.segmentKey}.json`,
+    JSON.stringify(segmentDataset)
+  );
+}
+
+function loadClientHtmlModule() {
+  (window as unknown as any).h = h;
+  return {
+    clientHtmlModule: {
+      InitialStewHtml: new Function(
+        `${INITIAL_HTML_BUNDLE_JS}return _clientHtml.InitialStewHtml`
+      )(),
+      splashPageCss: SPLASH_PAGE_CSS,
+    },
+  };
+}
+
+interface WriteCoreBuildFilesApi
+  extends Pick<
+      ReturnType<typeof setupBuildDirectory>,
+      "buildDirectoryPath" | "configBuildPath"
+    >,
+    Pick<ReturnType<typeof loadClientHtmlModule>, "clientHtmlModule"> {
+  stewBuildConfig: BuildStewConfig;
+}
+
+function writeCoreBuildFiles(api: WriteCoreBuildFilesApi) {
+  const {
+    configBuildPath,
+    stewBuildConfig,
+    clientHtmlModule,
+    buildDirectoryPath,
+  } = api;
+  Deno.writeTextFileSync(configBuildPath, JSON.stringify(stewBuildConfig));
+  Deno.writeTextFileSync(
+    `${buildDirectoryPath}/index.html`,
+    `<!DOCTYPE html>${preactRenderToString(
+      h(clientHtmlModule.InitialStewHtml as FunctionComponent<any>, {
+        stewBuildConfig,
+        splashPageCss: clientHtmlModule.splashPageCss,
+      })
+    )}`
+  );
+  Deno.writeTextFileSync(
+    `${buildDirectoryPath}/app.${stewBuildConfig.stewBuildId}.js`,
+    APP_BUNDLE_JS
+  );
+}
+
 interface LoadBasicExternalModuleApi<ModuleResult>
   extends Pick<
     LoadExternalModuleApi<ModuleResult>,
-    "modulePath" | "iifeResultName" | "ModuleResultSchema"
+    "moduleEntryPath" | "iifeResultName" | "ModuleResultSchema"
   > {}
 
 function loadBasicExternalModule<ModuleResult>(
   api: LoadBasicExternalModuleApi<ModuleResult>
 ) {
-  const { modulePath, iifeResultName, ModuleResultSchema } = api;
+  const { moduleEntryPath, iifeResultName, ModuleResultSchema } = api;
   return loadExternalModule({
-    modulePath,
+    moduleEntryPath,
     iifeResultName,
     ModuleResultSchema,
     esbuildPlugins: [],
@@ -358,7 +384,7 @@ function loadBasicExternalModule<ModuleResult>(
 }
 
 interface LoadExternalModuleApi<ModuleResult> {
-  modulePath: string;
+  moduleEntryPath: string;
   iifeResultName: string;
   esbuildPlugins: Array<EsbuildPlugin>;
   tsCompilerOptions: NonNullable<TsconfigRaw["compilerOptions"]>;
@@ -369,7 +395,7 @@ async function loadExternalModule<ModuleResult>(
   api: LoadExternalModuleApi<ModuleResult>
 ): Promise<[ModuleResult, string]> {
   const {
-    modulePath,
+    moduleEntryPath,
     iifeResultName,
     esbuildPlugins,
     tsCompilerOptions,
@@ -382,7 +408,7 @@ async function loadExternalModule<ModuleResult>(
     outdir: "out",
     format: "iife",
     globalName: iifeResultName,
-    entryPoints: [modulePath],
+    entryPoints: [moduleEntryPath],
     plugins: [
       ...esbuildPlugins,
       ...(denoLoaderPlugins({
@@ -396,7 +422,8 @@ async function loadExternalModule<ModuleResult>(
   });
   const bundleIifeScript = buildBundleResult.outputFiles[0].text;
   const iifeResult: unknown = new Function(
-    `${bundleIifeScript}; return ${iifeResultName}.default;`
+    // note: not sure semicolon is necessary
+    `${bundleIifeScript};return ${iifeResultName}.default;`
   )();
   return [ModuleResultSchema.parse(iifeResult), bundleIifeScript];
 }
