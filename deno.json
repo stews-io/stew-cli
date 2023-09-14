@@ -18,8 +18,8 @@
   },
   "imports": {
     "CssModule": "./declaration.d.ts",
-    "npm/preact": "https://esm.sh/preact@10.17.1",
-    "npm/preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime"
+    "npm/preact": "./source/deps/preact/mod.ts",
+    "npm/preact/jsx-runtime": "./source/deps/preact/jsx-runtime.ts"
   },
   "tasks": {
     "runStewCommand": "deno run -A ./source/main.tsx",
