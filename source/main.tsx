@@ -1,4 +1,3 @@
-/** @jsxImportSource npm/preact */
 import { APP_BUNDLE_JS } from "./client/bundled-assets/APP_BUNDLE_JS.ts";
 import { INITIAL_HTML_BUNDLE_JS } from "./client/bundled-assets/INITIAL_HTML_BUNDLE_JS.ts";
 import { SPLASH_PAGE_CSS } from "./client/bundled-assets/SPLASH_PAGE_CSS.ts";
@@ -264,10 +263,10 @@ function writeCoreBuildFiles(api: WriteCoreBuildFilesApi) {
   Deno.writeTextFileSync(
     `${buildDirectoryPath}/index.html`,
     `<!DOCTYPE html>${preactRenderToString(
-      <clientHtmlModule.InitialStewHtml
-        stewBuildConfig={stewBuildConfig}
-        splashPageCss={clientHtmlModule.splashPageCss}
-      />
+      (h as any)(clientHtmlModule.InitialStewHtml, {
+        stewBuildConfig,
+        splashPageCss: clientHtmlModule.splashPageCss,
+      })
     )}`
   );
   Deno.writeTextFileSync(
