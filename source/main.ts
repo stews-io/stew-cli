@@ -14,7 +14,7 @@ import { postcssImportTransformer } from "./deps/postcss/postcss-import.ts";
 import { postcssMinifyPlugin } from "./deps/postcss/postcss-minify.ts";
 import { postcssModulesPlugin } from "./deps/postcss/postcss-modules.ts";
 import { postcssNestingPlugin } from "./deps/postcss/postcss-nesting.ts";
-import { h } from "./deps/preact/mod.ts";
+import { FunctionComponent, h } from "./deps/preact/mod.ts";
 import { preactRenderToString } from "./deps/preact/render-to-string.ts";
 import { parseDenoArgs } from "./deps/std/flags.ts";
 import { getDirectoryPath, joinPaths } from "./deps/std/path.ts";
@@ -263,7 +263,7 @@ function writeCoreBuildFiles(api: WriteCoreBuildFilesApi) {
   Deno.writeTextFileSync(
     `${buildDirectoryPath}/index.html`,
     `<!DOCTYPE html>${preactRenderToString(
-      (h as any)(clientHtmlModule.InitialStewHtml, {
+      h(clientHtmlModule.InitialStewHtml as FunctionComponent<any>, {
         stewBuildConfig,
         splashPageCss: clientHtmlModule.splashPageCss,
       })
