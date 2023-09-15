@@ -7,7 +7,7 @@ import {
   bundlePreactModule,
   loadModuleBundle,
 } from "../shared/general/bundleModule.ts";
-import { getBundledAssetsClientPathMap } from "../shared/general/getBundledAssetsClientPathMap.ts";
+import { getBundledAssetsLocationMap } from "../shared/general/getBundledAssetsLocationMap.ts";
 import { throwInvalidPathError } from "../shared/general/throwInvalidPathError.ts";
 import {
   SegmentDataset,
@@ -267,21 +267,22 @@ interface BundledAssetsDataMap {
 async function fetchBundledAssets(): Promise<{
   bundleAssetsDataMap: BundledAssetsDataMap;
 }> {
-  const bundledAssetClientPathMap = getBundledAssetsClientPathMap();
-  const scriptBaseDirectoryUrl = getDirectoryPath(import.meta.url);
+  const bundledAssetClientPathMap = getBundledAssetsLocationMap({
+    baseLocation: getDirectoryPath(import.meta.url),
+  });
   const [appScript, appCss, initialHtmlScript, splashPageCss] =
     await Promise.all([
       fetchBundleAsset({
-        bundledAssetUrl: `${scriptBaseDirectoryUrl}${bundledAssetClientPathMap.appScript}`,
+        bundledAssetUrl: bundledAssetClientPathMap.appScript,
       }),
       fetchBundleAsset({
-        bundledAssetUrl: `${scriptBaseDirectoryUrl}${bundledAssetClientPathMap.appCss}`,
+        bundledAssetUrl: bundledAssetClientPathMap.appCss,
       }),
       fetchBundleAsset({
-        bundledAssetUrl: `${scriptBaseDirectoryUrl}${bundledAssetClientPathMap.initialHtmlScript}`,
+        bundledAssetUrl: bundledAssetClientPathMap.initialHtmlScript,
       }),
       fetchBundleAsset({
-        bundledAssetUrl: `${scriptBaseDirectoryUrl}${bundledAssetClientPathMap.splashPageCss}`,
+        bundledAssetUrl: bundledAssetClientPathMap.splashPageCss,
       }),
     ]);
   return {

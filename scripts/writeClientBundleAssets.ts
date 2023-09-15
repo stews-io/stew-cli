@@ -1,8 +1,9 @@
 import { bundlePreactModule } from "../shared/general/bundleModule.ts";
 import { Esbuild } from "../shared/deps/esbuild/mod.ts";
-import { getBundledAssetsClientPathMap } from "../shared/general/getBundledAssetsClientPathMap.ts";
+import { getBundledAssetsLocationMap } from "../shared/general/getBundledAssetsLocationMap.ts";
 
-writeClientBundleAssets();
+await writeClientBundleAssets();
+Esbuild.close();
 
 async function writeClientBundleAssets() {
   const [[initialHtmlScript, splashPageCss], [appScript, appCss]] =
@@ -14,19 +15,17 @@ async function writeClientBundleAssets() {
         moduleEntryPath: "./source/client/app/main.tsx",
       }),
     ]);
-  const bundledAssetClientPathMap = getBundledAssetsClientPathMap();
+  const bundledAssetClientPathMap = getBundledAssetsLocationMap({
+    baseLocation: "./source",
+  });
   Deno.writeTextFileSync(
-    `./source${bundledAssetClientPathMap.initialHtmlScript}`,
+    bundledAssetClientPathMap.initialHtmlScript,
     initialHtmlScript
   );
   Deno.writeTextFileSync(
-    `./source${bundledAssetClientPathMap.splashPageCss}`,
+    bundledAssetClientPathMap.splashPageCss,
     splashPageCss
   );
-  Deno.writeTextFileSync(
-    `./source${bundledAssetClientPathMap.appScript}`,
-    appScript
-  );
-  Deno.writeTextFileSync(`./source${bundledAssetClientPathMap.appCss}`, appCss);
-  Esbuild.close();
+  Deno.writeTextFileSync(bundledAssetClientPathMap.appScript, appScript);
+  Deno.writeTextFileSync(bundledAssetClientPathMap.appCss, appCss);
 }
