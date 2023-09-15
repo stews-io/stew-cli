@@ -1,9 +1,9 @@
-import { esbuildDenoAdapterPlugins } from "./deps/esbuild/deno-adapter-plugin.ts";
-import { Esbuild, EsbuildPlugin, TsconfigRaw } from "./deps/esbuild/mod.ts";
-import { postcssMinifyPlugin } from "./deps/postcss/minify-plugin.ts";
-import { PostcssPlugin, postcssProcessor } from "./deps/postcss/mod.ts";
-import { postcssModulesPlugin } from "./deps/postcss/modules-plugin.ts";
-import { resolvePath } from "./deps/std/path.ts";
+import { esbuildDenoAdapterPlugins } from "../deps/esbuild/deno-adapter-plugin.ts";
+import { Esbuild, EsbuildPlugin, TsconfigRaw } from "../deps/esbuild/mod.ts";
+import { postcssMinifyPlugin } from "../deps/postcss/minify-plugin.ts";
+import { PostcssPlugin, postcssProcessor } from "../deps/postcss/mod.ts";
+import { postcssModulesPlugin } from "../deps/postcss/modules-plugin.ts";
+import { resolvePath } from "../deps/std/path.ts";
 
 export interface BundlePreactModuleApi
   extends Pick<BundleModuleApi, "moduleEntryPath"> {}

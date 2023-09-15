@@ -1,11 +1,15 @@
-import { Fragment } from "../../deps/preact/mod.ts";
-import { StateUpdater, useEffect, useState } from "../../deps/preact/hooks.ts";
+import { Fragment } from "../../../shared/deps/preact/mod.ts";
+import {
+  useState,
+  useEffect,
+  StateUpdater,
+} from "../../../shared/deps/preact/hooks.ts";
 import {
   SegmentDataset,
   SegmentItem,
-} from "../../shared/types/SegmentDataset.ts";
-import { SegmentModule } from "../../shared/types/SegmentModule.ts";
-import { BuildStewConfig } from "../../shared/types/StewConfig.ts";
+} from "../../../shared/types/SegmentDataset.ts";
+import { SegmentModule } from "../../../shared/types/SegmentModule.ts";
+import { BuildStewConfig } from "../../../shared/types/StewConfig.ts";
 import { StewResourceMap } from "../../shared/types/StewResourceMap.ts";
 
 export interface StewAppProps {

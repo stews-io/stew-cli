@@ -1,4 +1,4 @@
-import { SegmentItemDisplayProps } from "../../source/shared/types/SegmentModule.ts";
+import { SegmentItemDisplayProps } from "../../shared/types/SegmentModule.ts";
 import { MusicItem } from "./MusicItem.ts";
 // @deno-types="CssModule"
 import cssModule from "./MusicItemDisplay.module.css";

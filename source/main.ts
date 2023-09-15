@@ -1,30 +1,30 @@
-import { SourceStewConfig } from "../mod.ts";
+import { Esbuild } from "../shared/deps/esbuild/mod.ts";
+import { FunctionComponent, h as preactH } from "../shared/deps/preact/mod.ts";
+import { Zod } from "../shared/deps/zod/mod.ts";
 import {
   BundleModuleApi,
   bundleModule,
   bundlePreactModule,
   loadModuleBundle,
-} from "../shared/bundleModule.ts";
-import { Esbuild } from "../shared/deps/esbuild/mod.ts";
-import { getRandomCryptoString } from "./deps/crypto-random-string/mod.ts";
-import { FunctionComponent, h as preactH } from "./deps/preact/mod.ts";
-import { preactRenderToString } from "./deps/preact/render-to-string.ts";
-import { parseDenoArgs } from "./deps/std/flags.ts";
-import { getDirectoryPath, joinPaths } from "./deps/std/path.ts";
-import { Zod } from "./deps/zod/mod.ts";
-import { getStewResourceMap } from "./shared/general/getStewResourceMap.ts";
-import { throwInvalidErrorPath } from "./shared/general/throwInvalidPathError.ts";
+} from "../shared/general/bundleModule.ts";
+import { throwInvalidPathError } from "../shared/general/throwInvalidPathError.ts";
 import {
   SegmentDataset,
   SegmentItem,
   SegmentItemSchema,
-} from "./shared/types/SegmentDataset.ts";
-import { SegmentModule } from "./shared/types/SegmentModule.ts";
+} from "../shared/types/SegmentDataset.ts";
+import { SegmentModule } from "../shared/types/SegmentModule.ts";
 import {
   BuildStewConfig,
   SourceSegmentConfig,
+  SourceStewConfig,
   SourceStewConfigSchema,
-} from "./shared/types/StewConfig.ts";
+} from "../shared/types/StewConfig.ts";
+import { getRandomCryptoString } from "./deps/crypto-random-string/mod.ts";
+import { preactRenderToString } from "./deps/preact/render-to-string.ts";
+import { parseDenoArgs } from "./deps/std/flags.ts";
+import { getDirectoryPath, joinPaths } from "./deps/std/path.ts";
+import { getStewResourceMap } from "./shared/general/getStewResourceMap.ts";
 
 runStewCommand({
   parsedDenoArgs: parseDenoArgs(Deno.args),
@@ -41,7 +41,7 @@ async function runStewCommand(api: RunStewComandApi) {
     const maybeStewSourceConfigPath =
       typeof parsedDenoArgs._[1] === "string"
         ? parsedDenoArgs._[1]
-        : throwInvalidErrorPath("parsedDenoArgs._[1]");
+        : throwInvalidPathError("parsedDenoArgs._[1]");
     await buildStewApp({
       stewSourceConfigPath: maybeStewSourceConfigPath,
       maybeBuildDirectoryPath: parsedDenoArgs["buildDirectoryPath"] ?? null,
@@ -137,7 +137,7 @@ async function loadStewSourceConfig(
   api: LoadStewSourceConfigApi
 ): Promise<LoadStewSourceConfigResult> {
   const { stewSourceConfigPath } = api;
-  const [stewSourceConfig] = await loadBasicModule({
+  const [stewSourceConfig] = await loadBasicModule<SourceStewConfig>({
     moduleEntryPath: stewSourceConfigPath,
     ModuleResultSchema: SourceStewConfigSchema(),
   });

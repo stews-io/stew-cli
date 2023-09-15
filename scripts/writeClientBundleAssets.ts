@@ -1,4 +1,4 @@
-import { bundlePreactModule } from "../shared/bundleModule.ts";
+import { bundlePreactModule } from "../shared/general/bundleModule.ts";
 import { Esbuild } from "../shared/deps/esbuild/mod.ts";
 
 writeClientBundleAssets();

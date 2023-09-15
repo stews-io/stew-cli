@@ -1,18 +1,21 @@
-import { h, render } from "../../deps/preact/mod.ts";
+import {
+  h as preactH,
+  render as preactRender,
+} from "../../../shared/deps/preact/mod.ts";
+import { throwInvalidPathError } from "../../../shared/general/throwInvalidPathError.ts";
+import { BuildStewConfig } from "../../../shared/types/StewConfig.ts";
 import { getStewResourceMap } from "../../shared/general/getStewResourceMap.ts";
-import { throwInvalidErrorPath } from "../../shared/general/throwInvalidPathError.ts";
-import { BuildStewConfig } from "../../shared/types/StewConfig.ts";
 import { StewApp } from "./StewApp.tsx";
 
-(window as unknown as any).h = h;
+(window as unknown as any).h = preactH;
 loadApp();
 
 async function loadApp() {
   const { stewConfig, stewResourceMap } = await loadStewConfig();
-  render(
+  preactRender(
     <StewApp stewConfig={stewConfig} stewResourceMap={stewResourceMap} />,
     document.getElementById("appContainer") ??
-      throwInvalidErrorPath("hydrate.appContainer")
+      throwInvalidPathError("hydrate.appContainer")
   );
   document.getElementById("splashPageStyle")?.remove();
   console.info(stewConfig);
@@ -21,7 +24,7 @@ async function loadApp() {
 async function loadStewConfig() {
   const stewBuildId =
     document.getElementById("appScript")?.dataset["stew_build_id"] ??
-    throwInvalidErrorPath("loadApp.stewBuildId");
+    throwInvalidPathError("loadApp.stewBuildId");
   const stewResourceMap = getStewResourceMap({
     stewBuildId,
   });

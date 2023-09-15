@@ -1,4 +1,4 @@
-import { BuildStewConfig } from "../../shared/types/StewConfig.ts";
+import { BuildStewConfig } from "../../../shared/types/StewConfig.ts";
 import { SplashPage } from "./SplashPage.tsx";
 
 export interface InitialStewHtmlProps {
