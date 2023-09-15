@@ -47,8 +47,8 @@ async function bundleAndWriteClientHtml() {
               )
               .process(Deno.readTextFileSync(cssLoaderConfig.path));
             Deno.writeTextFileSync(
-              "./source/client/bundled-assets/SPLASH_PAGE_CSS.ts",
-              `export const SPLASH_PAGE_CSS = "${processedCssResult.css.trimEnd()}"`
+              "./source/client/__bundled-assets__/SPLASH_PAGE.css",
+              processedCssResult.css
             );
             return {
               loader: "json",
@@ -70,10 +70,8 @@ async function bundleAndWriteClientHtml() {
     },
   });
   Deno.writeTextFileSync(
-    "./source/client/bundled-assets/INITIAL_HTML_BUNDLE_JS.ts",
-    `export const INITIAL_HTML_BUNDLE_JS = "${bundleClientResult.outputFiles[0].text
-      .replaceAll('"', '\\"')
-      .trimEnd()}"`
+    "./source/client/__bundled-assets__/INITIAL_HTML_BUNDLE_IIFE.js",
+    bundleClientResult.outputFiles[0].text
   );
 }
 
@@ -99,9 +97,7 @@ async function bundleAndWriteClientApp() {
     },
   });
   Deno.writeTextFileSync(
-    "./source/client/bundled-assets/APP_BUNDLE_JS.ts",
-    `export const APP_BUNDLE_JS = "${bundleClientResult.outputFiles[0].text
-      .replaceAll('"', '\\"')
-      .trimEnd()}"`
+    "./source/client/__bundled-assets__/APP_BUNDLE_IIFE.js",
+    bundleClientResult.outputFiles[0].text
   );
 }

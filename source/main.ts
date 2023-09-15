@@ -1,7 +1,4 @@
 import { SourceStewConfig } from "../mod.ts";
-import { APP_BUNDLE_JS } from "./client/bundled-assets/APP_BUNDLE_JS.ts";
-import { INITIAL_HTML_BUNDLE_JS } from "./client/bundled-assets/INITIAL_HTML_BUNDLE_JS.ts";
-import { SPLASH_PAGE_CSS } from "./client/bundled-assets/SPLASH_PAGE_CSS.ts";
 import { getRandomCryptoString } from "./deps/crypto-random-string/mod.ts";
 import { denoLoaderPlugins } from "./deps/esbuild/deno_loader.ts";
 import {
@@ -15,7 +12,7 @@ import { postcssImportTransformer } from "./deps/postcss/postcss-import.ts";
 import { postcssMinifyPlugin } from "./deps/postcss/postcss-minify.ts";
 import { postcssModulesPlugin } from "./deps/postcss/postcss-modules.ts";
 import { postcssNestingPlugin } from "./deps/postcss/postcss-nesting.ts";
-import { FunctionComponent, h } from "./deps/preact/mod.ts";
+import { FunctionComponent, h as preactH } from "./deps/preact/mod.ts";
 import { preactRenderToString } from "./deps/preact/render-to-string.ts";
 import { parseDenoArgs } from "./deps/std/flags.ts";
 import { getDirectoryPath, joinPaths } from "./deps/std/path.ts";
@@ -118,12 +115,15 @@ async function buildStewApp(api: BuildStewAppApi) {
       })
     ),
   };
-  const { clientHtmlModule } = loadClientHtmlModule();
+  const { initialHtmlBundleIifeScript, splashPageCss, appBundleIifeScript } =
+    await fetchBundledAssets();
   writeCoreBuildFiles({
     buildDirectoryPath,
     configBuildPath,
     stewBuildConfig,
-    clientHtmlModule,
+    initialHtmlBundleIifeScript,
+    splashPageCss,
+    appBundleIifeScript,
   });
 }
 
@@ -168,7 +168,6 @@ function setupBuildDirectory(api: SetupBuildDirectoryApi) {
   const modulesBuildDirectoryPath = `${buildDirectoryPath}${stewResourceMap.modulesDirectoryPath}`;
   const datasetsBuildDirectoryPath = `${buildDirectoryPath}${stewResourceMap.datasetsDirectoryPath}`;
   const stylesBuildDirectoryPath = `${buildDirectoryPath}${stewResourceMap.stylesDirectoryPath}`;
-  // Deno.removeSync(buildDirectoryPath, { recursive: true });
   Deno.mkdirSync(stewResourcesBuildDirectoryPath, { recursive: true });
   Deno.mkdirSync(modulesBuildDirectoryPath);
   Deno.mkdirSync(datasetsBuildDirectoryPath);
@@ -267,10 +266,10 @@ function loadSegmentModule<ModuleResult>(
             const processedCssResult = await postcssProcessor([
               postcssNestingPlugin(),
               postcssModulesPlugin({
+                generateScopedName: `${segmentKey}_[hash:base64:6]`,
                 getJSON: (cssFilename, nextCssExportMapResult) => {
                   cssExportMapResult = nextCssExportMapResult;
                 },
-                generateScopedName: `${segmentKey}_[hash:base64:6]`,
               }) as PostcssPlugin,
               postcssMinifyPlugin(),
             ])
@@ -320,16 +319,43 @@ async function loadAndWriteSegmentDataset(api: LoadAndWriteSegmentDatasetApi) {
   );
 }
 
-function loadClientHtmlModule() {
-  (window as unknown as any).h = h;
-  return {
-    clientHtmlModule: {
-      InitialStewHtml: new Function(
-        `${INITIAL_HTML_BUNDLE_JS}return _clientHtml.InitialStewHtml`
-      )(),
-      splashPageCss: SPLASH_PAGE_CSS,
-    },
-  };
+interface FetchBundledAssetsResult {
+  appBundleIifeScript: string;
+  initialHtmlBundleIifeScript: string;
+  splashPageCss: string;
+}
+
+async function fetchBundledAssets(): Promise<FetchBundledAssetsResult> {
+  const scriptBaseDirectoryUrl = getDirectoryPath(import.meta.url);
+  const bundleAssetsDirectoryUrl = `${scriptBaseDirectoryUrl}/client/__bundled-assets__`;
+  const [appBundleIifeScript, initialHtmlBundleIifeScript, splashPageCss] =
+    await Promise.all([
+      fetchBundleAsset({
+        bundleAssetsDirectoryUrl,
+        assetFilename: "APP_BUNDLE_IIFE.js",
+      }),
+      fetchBundleAsset({
+        bundleAssetsDirectoryUrl,
+        assetFilename: "INITIAL_HTML_BUNDLE_IIFE.js",
+      }),
+      fetchBundleAsset({
+        bundleAssetsDirectoryUrl,
+        assetFilename: "SPLASH_PAGE.css",
+      }),
+    ]);
+  return { appBundleIifeScript, initialHtmlBundleIifeScript, splashPageCss };
+}
+
+interface FetchBundleAssetApi {
+  bundleAssetsDirectoryUrl: string;
+  assetFilename: string;
+}
+
+function fetchBundleAsset(api: FetchBundleAssetApi) {
+  const { bundleAssetsDirectoryUrl, assetFilename } = api;
+  return fetch(`${bundleAssetsDirectoryUrl}/${assetFilename}`).then(
+    (fetchBundleAssetResponse) => fetchBundleAssetResponse.text()
+  );
 }
 
 interface WriteCoreBuildFilesApi
@@ -337,7 +363,10 @@ interface WriteCoreBuildFilesApi
       ReturnType<typeof setupBuildDirectory>,
       "buildDirectoryPath" | "configBuildPath"
     >,
-    Pick<ReturnType<typeof loadClientHtmlModule>, "clientHtmlModule"> {
+    Pick<
+      FetchBundledAssetsResult,
+      "appBundleIifeScript" | "initialHtmlBundleIifeScript" | "splashPageCss"
+    > {
   stewBuildConfig: BuildStewConfig;
 }
 
@@ -345,22 +374,28 @@ function writeCoreBuildFiles(api: WriteCoreBuildFilesApi) {
   const {
     configBuildPath,
     stewBuildConfig,
-    clientHtmlModule,
     buildDirectoryPath,
+    initialHtmlBundleIifeScript,
+    splashPageCss,
+    appBundleIifeScript,
   } = api;
   Deno.writeTextFileSync(configBuildPath, JSON.stringify(stewBuildConfig));
+  (window as any).h = preactH;
+  const initialStewHtmlComponent: FunctionComponent<any> = new Function(
+    `${initialHtmlBundleIifeScript}return _clientHtml.InitialStewHtml`
+  )();
   Deno.writeTextFileSync(
     `${buildDirectoryPath}/index.html`,
     `<!DOCTYPE html>${preactRenderToString(
-      h(clientHtmlModule.InitialStewHtml as FunctionComponent<any>, {
+      preactH(initialStewHtmlComponent, {
         stewBuildConfig,
-        splashPageCss: clientHtmlModule.splashPageCss,
+        splashPageCss,
       })
     )}`
   );
   Deno.writeTextFileSync(
     `${buildDirectoryPath}/app.${stewBuildConfig.stewBuildId}.js`,
-    APP_BUNDLE_JS
+    appBundleIifeScript
   );
 }
 
