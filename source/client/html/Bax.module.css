@@ -1,4 +1,5 @@
-.splash_page {
+.bax {
   composes: foo from "./foo.module.css";
-  color: orange;
+  font-size: 40px;
+  color: lime;
 }

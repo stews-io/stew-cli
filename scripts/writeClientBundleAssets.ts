@@ -1,10 +1,8 @@
 import { denoLoaderPlugins } from "./deps/esbuild/deno_loader.ts";
-import { EsbuildPlugin, closeEsbuild, runEsbuild } from "./deps/esbuild/mod.ts";
+import { EsbuildPlugin, Esbuild } from "./deps/esbuild/mod.ts";
 import { PostcssPlugin, postcssProcessor } from "./deps/postcss/mod.ts";
-import { postcssImportTransformer } from "./deps/postcss/postcss-import.ts";
 import { postcssMinifyPlugin } from "./deps/postcss/postcss-minify.ts";
 import { postcssModulesPlugin } from "./deps/postcss/postcss-modules.ts";
-import { postcssNestingPlugin } from "./deps/postcss/postcss-nesting.ts";
 import { resolvePath } from "./deps/std/path.ts";
 
 writeClientBundleAssets();
@@ -12,51 +10,19 @@ writeClientBundleAssets();
 async function writeClientBundleAssets() {
   await bundleAndWriteClientHtml();
   await bundleAndWriteClientApp();
-  closeEsbuild();
+  Esbuild.close();
 }
 
 async function bundleAndWriteClientHtml() {
-  const bundleClientResult = await runEsbuild({
+  const bundleClientResult = await Esbuild.runBuild({
     bundle: true,
-    minify: true,
     write: false,
     platform: "browser",
     format: "iife",
     globalName: "_clientHtml",
+    outdir: "out",
     entryPoints: ["./source/client/html/InitialStewHtml.tsx"],
     plugins: [
-      {
-        name: "stew-css-esbuild-plugin",
-        setup(buildContext) {
-          buildContext.onLoad({ filter: /\.css$/ }, async (cssLoaderConfig) => {
-            let cssExportMapResult: Record<string, string> = {};
-            const processedCssResult = await postcssProcessor([
-              postcssNestingPlugin(),
-              postcssModulesPlugin({
-                getJSON: (cssFilename, nextCssExportMapResult) => {
-                  cssExportMapResult = nextCssExportMapResult;
-                },
-                generateScopedName: `splash_[hash:base64:6]`,
-              }) as PostcssPlugin,
-              postcssMinifyPlugin(),
-            ])
-              .use(
-                postcssImportTransformer({
-                  root: `${Deno.cwd()}/source/client`,
-                })
-              )
-              .process(Deno.readTextFileSync(cssLoaderConfig.path));
-            Deno.writeTextFileSync(
-              "./source/client/__bundled-assets__/SPLASH_PAGE.css",
-              processedCssResult.css
-            );
-            return {
-              loader: "json",
-              contents: JSON.stringify(cssExportMapResult),
-            };
-          });
-        },
-      },
       ...(denoLoaderPlugins({
         loader: "portable",
         configPath: resolvePath(`${Deno.cwd()}/deno.json`),
@@ -69,14 +35,47 @@ async function bundleAndWriteClientHtml() {
       },
     },
   });
+  let cssExportMapResult: Record<string, string> = {};
+  const minifiedCssResult = await postcssProcessor([
+    postcssModulesPlugin({
+      generateScopedName: `splash_[hash:base64:6]`,
+      getJSON: (cssFilename, nextCssExportMapResult) => {
+        cssExportMapResult = nextCssExportMapResult;
+      },
+    }) as PostcssPlugin,
+    postcssMinifyPlugin(),
+  ]).process(bundleClientResult.outputFiles[1].text);
+  const modifiedCssImportsBundle =
+    bundleClientResult.outputFiles[0].text.replaceAll(
+      /\s+\/\/.+\.module.css\n\s+var\s.+_default\s\=\s{\n(.+\n)+/g,
+      (cssImportString) =>
+        Object.keys(cssExportMapResult).reduce(
+          (modifiedCssImportStringResult, someStaleImportKey) =>
+            modifiedCssImportStringResult.replaceAll(
+              someStaleImportKey,
+              cssExportMapResult[someStaleImportKey]
+            ),
+          cssImportString
+        )
+    );
+  const minifyHtmlBundleResult = await Esbuild.runTransform(
+    modifiedCssImportsBundle,
+    {
+      minify: true,
+    }
+  );
   Deno.writeTextFileSync(
     "./source/client/__bundled-assets__/INITIAL_HTML_BUNDLE_IIFE.js",
-    bundleClientResult.outputFiles[0].text
+    minifyHtmlBundleResult.code
+  );
+  Deno.writeTextFileSync(
+    "./source/client/__bundled-assets__/SPLASH_PAGE.css",
+    minifiedCssResult.css
   );
 }
 
 async function bundleAndWriteClientApp() {
-  const bundleClientResult = await runEsbuild({
+  const bundleClientResult = await Esbuild.runBuild({
     bundle: true,
     minify: true,
     write: false,
