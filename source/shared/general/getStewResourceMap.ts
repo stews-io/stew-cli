@@ -11,6 +11,9 @@ export function getStewResourceMap<StewBuildId extends string>(
   const stewResourcesDirectoryPath: `/stew_${StewBuildId}` = `/stew_${stewBuildId}`;
   return {
     stewResourcesDirectoryPath,
+    indexHtml: "/index.html",
+    appScript: `/app.${stewBuildId}.js`,
+    appCss: `/app.${stewBuildId}.css`,
     configPath: `${stewResourcesDirectoryPath}/stew.config.json`,
     modulesDirectoryPath: `${stewResourcesDirectoryPath}/modules`,
     datasetsDirectoryPath: `${stewResourcesDirectoryPath}/datasets`,

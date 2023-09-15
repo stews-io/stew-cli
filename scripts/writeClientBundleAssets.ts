@@ -1,39 +1,32 @@
 import { bundlePreactModule } from "../shared/general/bundleModule.ts";
 import { Esbuild } from "../shared/deps/esbuild/mod.ts";
+import { getBundledAssetsClientPathMap } from "../shared/general/getBundledAssetsClientPathMap.ts";
 
 writeClientBundleAssets();
 
 async function writeClientBundleAssets() {
-  await bundleAndWriteClientHtml();
-  await bundleAndWriteClientApp();
+  const [[initialHtmlScript, splashPageCss], [appScript, appCss]] =
+    await Promise.all([
+      bundlePreactModule({
+        moduleEntryPath: "./source/client/html/InitialStewHtml.tsx",
+      }),
+      bundlePreactModule({
+        moduleEntryPath: "./source/client/app/main.tsx",
+      }),
+    ]);
+  const bundledAssetClientPathMap = getBundledAssetsClientPathMap();
+  Deno.writeTextFileSync(
+    `./source${bundledAssetClientPathMap.initialHtmlScript}`,
+    initialHtmlScript
+  );
+  Deno.writeTextFileSync(
+    `./source${bundledAssetClientPathMap.splashPageCss}`,
+    splashPageCss
+  );
+  Deno.writeTextFileSync(
+    `./source${bundledAssetClientPathMap.appScript}`,
+    appScript
+  );
+  Deno.writeTextFileSync(`./source${bundledAssetClientPathMap.appCss}`, appCss);
   Esbuild.close();
-}
-
-async function bundleAndWriteClientHtml() {
-  const [initialHtmlIifeBundleScript, splashPageBundleCss] =
-    await bundlePreactModule({
-      moduleEntryPath: "./source/client/html/InitialStewHtml.tsx",
-    });
-  Deno.writeTextFileSync(
-    "./source/client/__bundled-assets__/INITIAL_HTML_IIFE_BUNDLE.js",
-    initialHtmlIifeBundleScript
-  );
-  Deno.writeTextFileSync(
-    "./source/client/__bundled-assets__/SPLASH_PAGE_BUNDLE.css",
-    splashPageBundleCss
-  );
-}
-
-async function bundleAndWriteClientApp() {
-  const [appIifeBundleScript, appBundleCss] = await bundlePreactModule({
-    moduleEntryPath: "./source/client/app/main.tsx",
-  });
-  Deno.writeTextFileSync(
-    "./source/client/__bundled-assets__/APP_IIFE_BUNDLE.js",
-    appIifeBundleScript
-  );
-  Deno.writeTextFileSync(
-    "./source/client/__bundled-assets__/APP_BUNDLE.css",
-    appBundleCss
-  );
 }

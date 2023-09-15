@@ -3,16 +3,16 @@ import { SplashPage } from "./SplashPage.tsx";
 
 export interface InitialStewHtmlProps {
   stewBuildConfig: BuildStewConfig;
-  splashPageBundleCss: string;
+  splashPageCss: string;
 }
 
 export function InitialStewHtml(props: InitialStewHtmlProps) {
-  const { stewBuildConfig, splashPageBundleCss } = props;
+  const { stewBuildConfig, splashPageCss } = props;
   return (
     <html lang={"en"}>
       <head></head>
       <body>
-        <style id={"splashPageStyle"}>{splashPageBundleCss}</style>
+        <style id={"splashPageStyle"}>{splashPageCss}</style>
         <div id={"appContainer"}>
           <SplashPage />
         </div>
