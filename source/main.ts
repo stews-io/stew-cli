@@ -1,17 +1,12 @@
 import { SourceStewConfig } from "../mod.ts";
-import { getRandomCryptoString } from "./deps/crypto-random-string/mod.ts";
-import { denoLoaderPlugins } from "./deps/esbuild/deno_loader.ts";
 import {
-  EsbuildPlugin,
-  TsconfigRaw,
-  closeEsbuild,
-  runEsbuild,
-} from "./deps/esbuild/mod.ts";
-import { PostcssPlugin, postcssProcessor } from "./deps/postcss/mod.ts";
-import { postcssImportTransformer } from "./deps/postcss/postcss-import.ts";
-import { postcssMinifyPlugin } from "./deps/postcss/postcss-minify.ts";
-import { postcssModulesPlugin } from "./deps/postcss/postcss-modules.ts";
-import { postcssNestingPlugin } from "./deps/postcss/postcss-nesting.ts";
+  BundleModuleApi,
+  bundleModule,
+  bundlePreactModule,
+  loadModuleBundle,
+} from "../shared/bundleModule.ts";
+import { getRandomCryptoString } from "./deps/crypto-random-string/mod.ts";
+import { closeEsbuild } from "./deps/esbuild/mod.ts";
 import { FunctionComponent, h as preactH } from "./deps/preact/mod.ts";
 import { preactRenderToString } from "./deps/preact/render-to-string.ts";
 import { parseDenoArgs } from "./deps/std/flags.ts";
@@ -115,15 +110,20 @@ async function buildStewApp(api: BuildStewAppApi) {
       })
     ),
   };
-  const { initialHtmlBundleIifeScript, splashPageCss, appBundleIifeScript } =
-    await fetchBundledAssets();
+  const {
+    initialHtmlIifeBundleScript,
+    splashPageBundleCss,
+    appIifeBundleScript,
+    appBundleCss,
+  } = await fetchBundledAssets();
   writeCoreBuildFiles({
     buildDirectoryPath,
     configBuildPath,
     stewBuildConfig,
-    initialHtmlBundleIifeScript,
-    splashPageCss,
-    appBundleIifeScript,
+    initialHtmlIifeBundleScript,
+    splashPageBundleCss,
+    appIifeBundleScript,
+    appBundleCss,
   });
 }
 
@@ -138,9 +138,8 @@ async function loadStewSourceConfig(
   api: LoadStewSourceConfigApi
 ): Promise<LoadStewSourceConfigResult> {
   const { stewSourceConfigPath } = api;
-  const [stewSourceConfig] = await loadBasicExternalModule({
+  const [stewSourceConfig] = await loadBasicModule({
     moduleEntryPath: stewSourceConfigPath,
-    iifeResultName: "stewConfigIifeResult",
     ModuleResultSchema: SourceStewConfigSchema(),
   });
   return {
@@ -188,9 +187,7 @@ interface LoadAndWriteSegmentModuleApi
     ReturnType<typeof setupBuildDirectory>,
     "modulesBuildDirectoryPath" | "stylesBuildDirectoryPath"
   > {
-  stewSourceDirectoryPath: LoadSegmentModuleApi<
-    SegmentModule<SegmentItem>
-  >["cssImportBaseDirectoryPath"];
+  stewSourceDirectoryPath: string;
   someSegmentSourceConfig: SourceSegmentConfig;
   loadedSegmentModules: Record<string, SegmentModule<SegmentItem>>;
 }
@@ -203,92 +200,25 @@ async function loadAndWriteSegmentModule(api: LoadAndWriteSegmentModuleApi) {
     stylesBuildDirectoryPath,
     modulesBuildDirectoryPath,
   } = api;
-  const [segmentModule, segmentModuleIifeScript] = await loadSegmentModule<
-    SegmentModule<SegmentItem>
-  >({
-    iifeResultName: "segmentModuleResult",
-    ModuleResultSchema: Zod.any(),
-    cssImportBaseDirectoryPath: stewSourceDirectoryPath,
-    segmentKey: someSegmentSourceConfig.segmentKey,
+  const [segmentModuleIifeScript, segmentModuleCss] = await bundlePreactModule({
     moduleEntryPath: joinPaths(
       stewSourceDirectoryPath,
       someSegmentSourceConfig.segmentModulePath
     ),
-    onSegmentCssProcessed: async (processedSegmentCss) => {
-      await Deno.writeTextFile(
-        `${stylesBuildDirectoryPath}/${someSegmentSourceConfig.segmentKey}.css`,
-        processedSegmentCss
-      );
-    },
   });
+  const segmentModule = loadModuleBundle({
+    moduleExportKey: "default",
+    moduleIifeBundleScript: segmentModuleIifeScript,
+  });
+  loadedSegmentModules[someSegmentSourceConfig.segmentKey] = segmentModule;
   await Deno.writeTextFile(
     `${modulesBuildDirectoryPath}/${someSegmentSourceConfig.segmentKey}.js`,
     segmentModuleIifeScript
   );
-  loadedSegmentModules[someSegmentSourceConfig.segmentKey] = segmentModule;
-}
-
-interface LoadSegmentModuleApi<ModuleResult>
-  extends Pick<
-    LoadExternalModuleApi<ModuleResult>,
-    "moduleEntryPath" | "iifeResultName" | "ModuleResultSchema"
-  > {
-  cssImportBaseDirectoryPath: string;
-  segmentKey: SourceSegmentConfig["segmentKey"];
-  onSegmentCssProcessed: (processedSegmentCss: string) => Promise<void>;
-}
-
-function loadSegmentModule<ModuleResult>(
-  api: LoadSegmentModuleApi<ModuleResult>
-) {
-  const {
-    moduleEntryPath,
-    iifeResultName,
-    ModuleResultSchema,
-    segmentKey,
-    onSegmentCssProcessed,
-    cssImportBaseDirectoryPath,
-  } = api;
-  return loadExternalModule({
-    moduleEntryPath,
-    iifeResultName,
-    ModuleResultSchema,
-    tsCompilerOptions: {
-      jsxFactory: "h",
-      jsxFragmentFactory: "Fragment",
-    },
-    esbuildPlugins: [
-      {
-        name: "stew-css-esbuild-plugin",
-        setup(buildContext) {
-          buildContext.onLoad({ filter: /\.css$/ }, async (cssLoaderConfig) => {
-            let cssExportMapResult: Record<string, string> = {};
-            const processedCssResult = await postcssProcessor([
-              postcssNestingPlugin(),
-              postcssModulesPlugin({
-                generateScopedName: `${segmentKey}_[hash:base64:6]`,
-                getJSON: (cssFilename, nextCssExportMapResult) => {
-                  cssExportMapResult = nextCssExportMapResult;
-                },
-              }) as PostcssPlugin,
-              postcssMinifyPlugin(),
-            ])
-              .use(
-                postcssImportTransformer({
-                  root: cssImportBaseDirectoryPath,
-                })
-              )
-              .process(Deno.readTextFileSync(cssLoaderConfig.path));
-            await onSegmentCssProcessed(processedCssResult.css);
-            return {
-              loader: "json",
-              contents: JSON.stringify(cssExportMapResult),
-            };
-          });
-        },
-      },
-    ],
-  });
+  await Deno.writeTextFile(
+    `${stylesBuildDirectoryPath}/${someSegmentSourceConfig.segmentKey}.css`,
+    segmentModuleCss
+  );
 }
 
 interface LoadAndWriteSegmentDatasetApi
@@ -306,10 +236,7 @@ async function loadAndWriteSegmentDataset(api: LoadAndWriteSegmentDatasetApi) {
     someSegmentSourceConfig,
     datasetsBuildDirectoryPath,
   } = api;
-  const [segmentDataset] = await loadBasicExternalModule<
-    SegmentDataset<SegmentItem>
-  >({
-    iifeResultName: "segmentDatasetResult",
+  const [segmentDataset] = await loadBasicModule<SegmentDataset<SegmentItem>>({
     ModuleResultSchema: Zod.array(SegmentItemSchema()),
     moduleEntryPath: segmentDatasetPath,
   });
@@ -320,30 +247,44 @@ async function loadAndWriteSegmentDataset(api: LoadAndWriteSegmentDatasetApi) {
 }
 
 interface FetchBundledAssetsResult {
-  appBundleIifeScript: string;
-  initialHtmlBundleIifeScript: string;
-  splashPageCss: string;
+  appIifeBundleScript: string;
+  appBundleCss: string;
+  initialHtmlIifeBundleScript: string;
+  splashPageBundleCss: string;
 }
 
 async function fetchBundledAssets(): Promise<FetchBundledAssetsResult> {
   const scriptBaseDirectoryUrl = getDirectoryPath(import.meta.url);
   const bundleAssetsDirectoryUrl = `${scriptBaseDirectoryUrl}/client/__bundled-assets__`;
-  const [appBundleIifeScript, initialHtmlBundleIifeScript, splashPageCss] =
-    await Promise.all([
-      fetchBundleAsset({
-        bundleAssetsDirectoryUrl,
-        assetFilename: "APP_BUNDLE_IIFE.js",
-      }),
-      fetchBundleAsset({
-        bundleAssetsDirectoryUrl,
-        assetFilename: "INITIAL_HTML_BUNDLE_IIFE.js",
-      }),
-      fetchBundleAsset({
-        bundleAssetsDirectoryUrl,
-        assetFilename: "SPLASH_PAGE.css",
-      }),
-    ]);
-  return { appBundleIifeScript, initialHtmlBundleIifeScript, splashPageCss };
+  const [
+    appIifeBundleScript,
+    appBundleCss,
+    initialHtmlIifeBundleScript,
+    splashPageBundleCss,
+  ] = await Promise.all([
+    fetchBundleAsset({
+      bundleAssetsDirectoryUrl,
+      assetFilename: "APP_IIFE_BUNDLE.js",
+    }),
+    fetchBundleAsset({
+      bundleAssetsDirectoryUrl,
+      assetFilename: "APP_BUNDLE.css",
+    }),
+    fetchBundleAsset({
+      bundleAssetsDirectoryUrl,
+      assetFilename: "INITIAL_HTML_IIFE_BUNDLE.js",
+    }),
+    fetchBundleAsset({
+      bundleAssetsDirectoryUrl,
+      assetFilename: "SPLASH_PAGE_BUNDLE.css",
+    }),
+  ]);
+  return {
+    appIifeBundleScript,
+    appBundleCss,
+    initialHtmlIifeBundleScript,
+    splashPageBundleCss,
+  };
 }
 
 interface FetchBundleAssetApi {
@@ -365,7 +306,10 @@ interface WriteCoreBuildFilesApi
     >,
     Pick<
       FetchBundledAssetsResult,
-      "appBundleIifeScript" | "initialHtmlBundleIifeScript" | "splashPageCss"
+      | "appIifeBundleScript"
+      | "appBundleCss"
+      | "initialHtmlIifeBundleScript"
+      | "splashPageBundleCss"
     > {
   stewBuildConfig: BuildStewConfig;
 }
@@ -375,90 +319,54 @@ function writeCoreBuildFiles(api: WriteCoreBuildFilesApi) {
     configBuildPath,
     stewBuildConfig,
     buildDirectoryPath,
-    initialHtmlBundleIifeScript,
-    splashPageCss,
-    appBundleIifeScript,
+    initialHtmlIifeBundleScript,
+    splashPageBundleCss,
+    appIifeBundleScript,
+    appBundleCss,
   } = api;
   Deno.writeTextFileSync(configBuildPath, JSON.stringify(stewBuildConfig));
   (window as any).h = preactH;
-  const initialStewHtmlComponent: FunctionComponent<any> = new Function(
-    `${initialHtmlBundleIifeScript}return _clientHtml.InitialStewHtml`
-  )();
+  const initialStewHtmlComponent: FunctionComponent<any> = loadModuleBundle({
+    moduleExportKey: "InitialStewHtml",
+    moduleIifeBundleScript: initialHtmlIifeBundleScript,
+  });
   Deno.writeTextFileSync(
     `${buildDirectoryPath}/index.html`,
     `<!DOCTYPE html>${preactRenderToString(
       preactH(initialStewHtmlComponent, {
         stewBuildConfig,
-        splashPageCss,
+        splashPageBundleCss,
       })
     )}`
   );
   Deno.writeTextFileSync(
     `${buildDirectoryPath}/app.${stewBuildConfig.stewBuildId}.js`,
-    appBundleIifeScript
+    appIifeBundleScript
+  );
+  Deno.writeTextFileSync(
+    `${buildDirectoryPath}/app.${stewBuildConfig.stewBuildId}.css`,
+    appBundleCss
   );
 }
 
-interface LoadBasicExternalModuleApi<ModuleResult>
-  extends Pick<
-    LoadExternalModuleApi<ModuleResult>,
-    "moduleEntryPath" | "iifeResultName" | "ModuleResultSchema"
-  > {}
-
-function loadBasicExternalModule<ModuleResult>(
-  api: LoadBasicExternalModuleApi<ModuleResult>
-) {
-  const { moduleEntryPath, iifeResultName, ModuleResultSchema } = api;
-  return loadExternalModule({
-    moduleEntryPath,
-    iifeResultName,
-    ModuleResultSchema,
-    esbuildPlugins: [],
-    tsCompilerOptions: {},
-  });
-}
-
-interface LoadExternalModuleApi<ModuleResult> {
-  moduleEntryPath: string;
-  iifeResultName: string;
-  esbuildPlugins: Array<EsbuildPlugin>;
-  tsCompilerOptions: NonNullable<TsconfigRaw["compilerOptions"]>;
+interface LoadBasicModuleApi<ModuleResult>
+  extends Pick<BundleModuleApi, "moduleEntryPath"> {
   ModuleResultSchema: Zod.ZodType<ModuleResult, Zod.ZodTypeDef, unknown>;
 }
 
-async function loadExternalModule<ModuleResult>(
-  api: LoadExternalModuleApi<ModuleResult>
+async function loadBasicModule<ModuleResult>(
+  api: LoadBasicModuleApi<ModuleResult>
 ): Promise<[ModuleResult, string]> {
-  const {
+  const { moduleEntryPath, ModuleResultSchema } = api;
+  const buildBundleResult = await bundleModule({
     moduleEntryPath,
-    iifeResultName,
-    esbuildPlugins,
-    tsCompilerOptions,
-    ModuleResultSchema,
-  } = api;
-  const buildBundleResult = await runEsbuild({
-    bundle: true,
-    write: false,
-    minify: true,
-    outdir: "out",
-    format: "iife",
-    globalName: iifeResultName,
-    entryPoints: [moduleEntryPath],
-    plugins: [
-      ...esbuildPlugins,
-      ...(denoLoaderPlugins({
-        loader: "portable",
-        configPath: `${Deno.cwd()}/deno.json`,
-      }) as Array<EsbuildPlugin>),
-    ],
-    tsconfigRaw: {
-      compilerOptions: tsCompilerOptions,
-    },
+    minifyBundle: true,
+    tsConfig: {},
   });
-  const bundleIifeScript = buildBundleResult.outputFiles[0].text;
-  const iifeResult: unknown = new Function(
-    // note: not sure semicolon is necessary
-    `${bundleIifeScript};return ${iifeResultName}.default;`
-  )();
-  return [ModuleResultSchema.parse(iifeResult), bundleIifeScript];
+  const iifeBundleScript = buildBundleResult.outputFiles[0].text;
+  const iifeResult: unknown = loadModuleBundle({
+    moduleExportKey: "default",
+    moduleIifeBundleScript: iifeBundleScript,
+  });
+  return [ModuleResultSchema.parse(iifeResult), iifeBundleScript];
 }

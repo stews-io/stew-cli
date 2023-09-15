@@ -101,7 +101,7 @@ async function loadSegment(api: LoadSegmentApi) {
         .then((getSegmentModuleScript) => getSegmentModuleScript.text())
         .then((nextSegmentModuleScript) =>
           new Function(
-            `${nextSegmentModuleScript}return segmentModuleResult.default`
+            `${nextSegmentModuleScript}return __moduleIifeResult.default`
           )()
         ),
       fetch(

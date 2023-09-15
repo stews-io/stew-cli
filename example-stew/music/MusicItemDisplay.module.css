@@ -1,7 +1,5 @@
-@import "theme.css";
-
 .fooClass {
-  composes: shared-thing;
+  composes: shared-thing from "../theme.module.css";
 }
 
 .bazClass {
