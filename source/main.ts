@@ -5,8 +5,8 @@ import {
   bundlePreactModule,
   loadModuleBundle,
 } from "../shared/bundleModule.ts";
+import { Esbuild } from "../shared/deps/esbuild/mod.ts";
 import { getRandomCryptoString } from "./deps/crypto-random-string/mod.ts";
-import { closeEsbuild } from "./deps/esbuild/mod.ts";
 import { FunctionComponent, h as preactH } from "./deps/preact/mod.ts";
 import { preactRenderToString } from "./deps/preact/render-to-string.ts";
 import { parseDenoArgs } from "./deps/std/flags.ts";
@@ -46,8 +46,7 @@ async function runStewCommand(api: RunStewComandApi) {
       stewSourceConfigPath: maybeStewSourceConfigPath,
       maybeBuildDirectoryPath: parsedDenoArgs["buildDirectoryPath"] ?? null,
     });
-    // esbuild needs to be closed for process to terminate
-    closeEsbuild();
+    Esbuild.close();
   } else {
     throw new Error(`unrecognized command: ${userStewCommand}`);
   }
