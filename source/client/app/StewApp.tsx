@@ -11,25 +11,27 @@ import {
 import { SegmentModule } from "../../../shared/types/SegmentModule.ts";
 import { BuildStewConfig } from "../../../shared/types/StewConfig.ts";
 import { StewResourceMap } from "../../shared/types/StewResourceMap.ts";
+import { fetchSegmentComponents } from "./fetchSegmentComponents.ts";
+import { StewState } from "./StewState.ts";
 
 export interface StewAppProps {
   stewConfig: BuildStewConfig;
   stewResourceMap: StewResourceMap;
+  initialStewState: StewState;
 }
 
 export function StewApp(props: StewAppProps) {
-  const { stewConfig, stewResourceMap } = props;
-  const [segmentState, setSegmentState] = useState<SegmentState>({
-    loadingStatus: "loading",
-    segmentKey: stewConfig.stewSegments[0].segmentKey,
-  });
+  const { initialStewState, stewConfig, stewResourceMap } = props;
+  const [stewState, setStewState] = useState<StewState>(initialStewState);
   useEffect(() => {
-    loadSegment({
-      stewResourceMap,
-      segmentState,
-      setSegmentState,
-    });
-  }, [segmentState.segmentKey]);
+    if (stewState.segmentStatus === "loadingSegment") {
+      loadSegment({
+        stewResourceMap,
+        stewState,
+        setStewState,
+      });
+    }
+  }, [stewState.segmentKey]);
   return (
     <div>
       <div style={{ display: "flex", flexDirection: "row" }}>
@@ -42,8 +44,9 @@ export function StewApp(props: StewAppProps) {
               fontWeight: 700,
             }}
             onClick={() => {
-              setSegmentState({
-                loadingStatus: "loading",
+              setStewState({
+                ...stewState,
+                segmentStatus: "loadingSegment",
                 segmentKey: someSegmentConfig.segmentKey,
               });
             }}
@@ -52,69 +55,34 @@ export function StewApp(props: StewAppProps) {
           </div>
         ))}
       </div>
-      <div style={{ padding: 8, fontWeight: 300 }}>
-        {segmentState.segmentKey}
-      </div>
-      {segmentState.loadingStatus === "success" ? (
+      <div style={{ padding: 8, fontWeight: 300 }}>{stewState.segmentKey}</div>
+      {stewState.segmentStatus === "segmentLoaded" ? (
         <Fragment>
-          <segmentState.segmentModule.SegmentItemDisplay
-            someSegmentItem={segmentState.segmentDataset[0]}
+          <stewState.segmentModule.SegmentItemDisplay
+            someSegmentItem={stewState.segmentDataset[0]}
           />
-          <style>{segmentState.segmentCss}</style>
+          <style>{stewState.segmentCss}</style>
         </Fragment>
       ) : null}
     </div>
   );
 }
 
-type SegmentState =
-  | SuccessSegmentState
-  | LoadingSegmentState
-  | ErrorSegmentState;
-
-interface SuccessSegmentState extends SegmentStateBase<"success"> {
-  segmentDataset: SegmentDataset<SegmentItem>;
-  segmentModule: SegmentModule<SegmentItem>;
-  segmentCss: string;
-}
-
-interface LoadingSegmentState extends SegmentStateBase<"loading"> {}
-
-interface ErrorSegmentState extends SegmentStateBase<"error"> {}
-
-interface SegmentStateBase<LoadingStatus extends string> {
-  loadingStatus: LoadingStatus;
-  segmentKey: string;
-}
-
 interface LoadSegmentApi extends Pick<StewAppProps, "stewResourceMap"> {
-  segmentState: SegmentState;
-  setSegmentState: StateUpdater<SegmentState>;
+  stewState: StewState;
+  setStewState: StateUpdater<StewState>;
 }
 
 async function loadSegment(api: LoadSegmentApi) {
-  const { stewResourceMap, segmentState, setSegmentState } = api;
+  const { stewResourceMap, stewState, setStewState } = api;
   const [nextSegmentDataset, nextSegmentModule, nextSegmentCss] =
-    await Promise.all([
-      fetch(
-        `${stewResourceMap.datasetsDirectoryPath}/${segmentState.segmentKey}.json`
-      ).then((getSegmentDataset) => getSegmentDataset.json()),
-      fetch(
-        `${stewResourceMap.modulesDirectoryPath}/${segmentState.segmentKey}.js`
-      )
-        .then((getSegmentModuleScript) => getSegmentModuleScript.text())
-        .then((nextSegmentModuleScript) =>
-          new Function(
-            `${nextSegmentModuleScript}return __moduleIifeResult.default`
-          )()
-        ),
-      fetch(
-        `${stewResourceMap.stylesDirectoryPath}/${segmentState.segmentKey}.css`
-      ).then((getSegmentCss) => getSegmentCss.text()),
-    ]);
-  setSegmentState({
-    loadingStatus: "success",
-    segmentKey: segmentState.segmentKey,
+    await fetchSegmentComponents({
+      stewResourceMap,
+      someSegmentKey: stewState.segmentKey,
+    });
+  setStewState({
+    ...stewState,
+    segmentStatus: "segmentLoaded",
     segmentDataset: nextSegmentDataset as SegmentDataset<SegmentItem>,
     segmentModule: nextSegmentModule as SegmentModule<SegmentItem>,
     segmentCss: nextSegmentCss,

@@ -1,6 +1,7 @@
 import { Zod } from "../deps/zod/mod.ts";
 import { SegmentItem } from "./SegmentDataset.ts";
 import { SegmentSortOption } from "./SegmentModule.ts";
+import { ArrayOfAtLeastOne, ArrayOfOneSchema } from "./general.ts";
 
 export interface SourceStewConfig extends StewConfigBase<SourceSegmentConfig> {}
 
@@ -92,14 +93,14 @@ function StewExternalLinkSchema() {
 interface SegmentConfigBase {
   segmentKey: string;
   segmentSearchLabel: string;
-  segmentViews: Array<SegmentViewConfig>;
+  segmentViews: ArrayOfAtLeastOne<SegmentViewConfig>;
 }
 
 function SegmentConfigBaseSchema() {
   return Zod.object({
     segmentKey: Zod.string(),
     segmentSearchLabel: Zod.string(),
-    segmentViews: Zod.array(SegmentViewConfigSchema()),
+    segmentViews: ArrayOfOneSchema(SegmentViewConfigSchema()),
   });
 }
 

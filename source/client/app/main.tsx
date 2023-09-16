@@ -6,14 +6,21 @@ import { throwInvalidPathError } from "../../../shared/general/throwInvalidPathE
 import { BuildStewConfig } from "../../../shared/types/StewConfig.ts";
 import { getStewResourceMap } from "../../shared/general/getStewResourceMap.ts";
 import { StewApp } from "./StewApp.tsx";
+import { StewState } from "./StewState.ts";
+import { fetchSegmentComponents } from "./fetchSegmentComponents.ts";
 
 (window as unknown as any).h = preactH;
-loadApp();
+loadStewApp();
 
-async function loadApp() {
-  const { stewConfig, stewResourceMap } = await loadStewConfig();
+async function loadStewApp() {
+  const { stewConfig, stewResourceMap, initialStewState } =
+    await loadStewResources();
   preactRender(
-    <StewApp stewConfig={stewConfig} stewResourceMap={stewResourceMap} />,
+    <StewApp
+      stewConfig={stewConfig}
+      stewResourceMap={stewResourceMap}
+      initialStewState={initialStewState}
+    />,
     document.getElementById("appContainer") ??
       throwInvalidPathError("hydrate.appContainer")
   );
@@ -21,17 +28,61 @@ async function loadApp() {
   console.info(stewConfig);
 }
 
-async function loadStewConfig() {
+async function loadStewResources() {
+  // display splash page for minimum amount of time
+  const minimumSplashDisplayPromise = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, 700);
+  });
   const stewBuildId =
     document.getElementById("appScript")?.dataset["stew_build_id"] ??
-    throwInvalidPathError("loadApp.stewBuildId");
+    throwInvalidPathError("loadStewResources.stewBuildId");
   const stewResourceMap = getStewResourceMap({
     stewBuildId,
   });
-  const getConfigResponse = await fetch(stewResourceMap.configPath);
-  const stewConfig: BuildStewConfig = await getConfigResponse.json();
+  const stewConfig = await fetch(stewResourceMap.configPath).then(
+    (getConfigResponse) =>
+      getConfigResponse.json() as unknown as BuildStewConfig
+  );
+  const [_, urlSegmentKey, urlViewKey] = window.location.pathname.split("/");
+  const initialSearchParams = new URLSearchParams(window.location.search);
+  const initialSegmentConfig =
+    stewConfig.stewSegments.find(
+      (someSegmentConfig) => someSegmentConfig.segmentKey === urlSegmentKey
+    ) ?? stewConfig.stewSegments[0];
+  const fetchInitialSegmentComponentsResult = fetchSegmentComponents({
+    stewResourceMap,
+    someSegmentKey: initialSegmentConfig.segmentKey,
+  });
+  const initialSegmentViewConfig =
+    initialSegmentConfig.segmentViews.find(
+      (someViewConfig) => someViewConfig.viewKey === urlViewKey
+    ) ?? initialSegmentConfig.segmentViews[0];
+  const initialSegmentSortOptionConfig =
+    initialSegmentConfig.segmentSortOptions.find(
+      (someOptionConfig) =>
+        someOptionConfig.sortOptionKey === initialSearchParams.get("sort")
+    ) ?? initialSegmentConfig.segmentSortOptions[0];
+  const [[initialSegmentDataset, initialSegmentModule, initialSegmentCss]] =
+    await Promise.all([
+      fetchInitialSegmentComponentsResult,
+      minimumSplashDisplayPromise,
+    ]);
   return {
     stewResourceMap,
     stewConfig,
+    // what if errorLoadingSegment
+    initialStewState: {
+      viewPageIndex: 0,
+      segmentStatus: "segmentLoaded",
+      segmentDataset: initialSegmentDataset,
+      segmentModule: initialSegmentModule,
+      segmentCss: initialSegmentCss,
+      segmentKey: initialSegmentConfig.segmentKey,
+      segmentViewKey: initialSegmentViewConfig.viewKey,
+      segmentSortKey: initialSegmentSortOptionConfig.sortOptionKey,
+      viewSearchQuery: initialSearchParams.get("search") ?? "",
+    } satisfies StewState,
   };
 }

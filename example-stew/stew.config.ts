@@ -1,4 +1,6 @@
 import { SourceStewConfig } from "../shared/types/StewConfig.ts";
+import musicDataset from "./music/music.dataset.ts";
+import spotsDataset from "./spots/spots.dataset.ts";
 
 export default {
   stewInfo: {
@@ -13,14 +15,28 @@ export default {
       segmentDatasetPath: "./music/music.dataset.ts",
       segmentKey: "music",
       segmentSearchLabel: "music",
-      segmentViews: [],
+      segmentViews: [
+        {
+          viewKey: "all",
+          viewLabel: "all",
+          viewItemIds: musicDataset.map(
+            (someMusicItem) => someMusicItem.itemId
+          ),
+        },
+      ],
     },
     {
       segmentModulePath: "./spots/spots.module.tsx",
       segmentDatasetPath: "./spots/spots.dataset.ts",
       segmentKey: "spots",
       segmentSearchLabel: "spots",
-      segmentViews: [],
+      segmentViews: [
+        {
+          viewKey: "all",
+          viewLabel: "all",
+          viewItemIds: spotsDataset.map((someSpotItem) => someSpotItem.itemId),
+        },
+      ],
     },
   ],
 } satisfies SourceStewConfig;
