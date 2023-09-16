@@ -1,0 +1,40 @@
+.flex-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.flex-child {
+  flex-grow: 0;
+  flex-shrink: 1;
+  flex-basis: auto;
+}
+
+.item-container {
+  composes: flex-container;
+  justify-content: center;
+  align-items: center;
+}
+
+.row-container {
+  composes: flex-container;
+  flex-direction: row;
+}
+
+.column-container {
+  composes: flex-container;
+  flex-direction: column;
+}
+
+.text-container {
+  display: block;
+}
+
+.text-ellipsis {
+  composes: text-container;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

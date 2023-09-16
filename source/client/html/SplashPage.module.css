@@ -1,4 +1,36 @@
-.splash_page {
-  composes: foo from "./foo.module.css";
-  color: orange;
+.splashPage {
+  composes: item-container from global;
+  /* https://github.com/tailwindlabs/tailwindcss/discussions/4515#discussioncomment-2112460 */
+  /* equivalent to 100dvh in major browsers */
+  min-height: calc(
+    100vh - env(safe-area-inset-bottom, 0) - env(safe-area-inset-top, 0)
+  );
+}
+
+/* https://github.com/tailwindlabs/tailwindcss/discussions/4515#discussioncomment-2112460 */
+/* for ios safari 15, safe-area-inset-bottom is 0, so a special fix apply here */
+@supports (-webkit-touch-callout: none) {
+  .splashPage {
+    min-height: -webkit-fill-available;
+  }
+}
+
+.splashContent {
+  composes: item-container from global;
+  flex-grow: 1;
+  max-width: 512px;
+  align-self: stretch;
+}
+
+.splashGraphic {
+  margin-top: calc(11 / 60 * -100%);
+  width: calc(2 / 3 * 100%);
+}
+
+.splashTextPath {
+  stroke: black;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.25mm;
+  fill: none;
 }

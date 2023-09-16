@@ -1,5 +1,0 @@
-.bax {
-  composes: foo from "./foo.module.css";
-  font-size: 40px;
-  color: lime;
-}

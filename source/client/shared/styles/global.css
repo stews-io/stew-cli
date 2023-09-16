@@ -1,0 +1,62 @@
+@import "./normalize.css";
+@import "./layout.css";
+
+:root {
+  --theme-spacer: 8px;
+
+  --theme-background-color: #ffffff;
+  --theme-text-background-color: #eeeeee;
+  --theme-disabled-color: #aaaaaa;
+  --theme-button-text-color: #5e35b1;
+  --theme-outline-color: #2196f3;
+
+  --theme-border: 1.5px solid black;
+  --theme-border-radius: 4px;
+
+  --theme-outline-width: 3px;
+  --theme-outline: solid var(--theme-outline-width) transparent;
+  --theme-outline-offset: 0;
+  --theme-outline-radius: 4px;
+  --theme-box-shadow-outline: 0 0 0 var(--theme-outline-width)
+    var(--theme-outline-color);
+}
+
+.default-box-model {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.default-layout {
+  composes: flex-container from global;
+  composes: flex-child from global;
+}
+
+.default-font {
+  font-family: "Red Hat Mono", monospace;
+  /* ios seems to put a floor on input line-height at 1.4 */
+  line-height: 1.4;
+  color: black;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.theme-border {
+  border: var(--theme-border);
+  border-radius: var(--theme-border-radius);
+}
+
+.theme-focus-outline {
+  outline: var(--theme-outline);
+  outline-offset: var(--theme-outline-offset);
+  box-shadow: var(--theme-box-shadow-outline);
+  border-radius: var(--theme-outline-radius);
+}
+
+.theme-focus-without-outline {
+  outline: none;
+  box-shadow: none;
+  border-radius: 0;
+}
