@@ -18,5 +18,6 @@ export function getStewResourceMap<StewBuildId extends string>(
     modulesDirectoryPath: `${stewResourcesDirectoryPath}/modules`,
     datasetsDirectoryPath: `${stewResourcesDirectoryPath}/datasets`,
     stylesDirectoryPath: `${stewResourcesDirectoryPath}/styles`,
+    viewsDirectoryPath: `${stewResourcesDirectoryPath}/views`,
   };
 }

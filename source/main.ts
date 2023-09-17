@@ -68,6 +68,10 @@ async function buildStewApp(api: BuildStewAppApi) {
     maybeBuildDirectoryPath,
     stewSourceConfig,
   });
+  await writeSegmentsViewsMap({
+    stewSourceConfig,
+    buildDirectoryMap,
+  });
   const stewSourceDirectoryPath = getDirectoryPath(stewSourceConfigPath);
   const loadedSegmentModules: Record<string, SegmentModule<SegmentItem>> = {};
   for (const someSegmentSourceConfig of stewSourceConfig.stewSegments) {
@@ -150,10 +154,36 @@ function setupBuildDirectories(api: SetupBuildDirectoriesApi) {
   Deno.mkdirSync(buildDirectoryMap.datasetsDirectoryPath);
   Deno.mkdirSync(buildDirectoryMap.modulesDirectoryPath);
   Deno.mkdirSync(buildDirectoryMap.stylesDirectoryPath);
+  Deno.mkdirSync(buildDirectoryMap.viewsDirectoryPath);
   return {
     stewBuildId,
     buildDirectoryMap,
   };
+}
+
+interface WriteSegmentsViewsMapApi
+  extends Pick<LoadStewSourceConfigResult, "stewSourceConfig">,
+    Pick<ReturnType<typeof setupBuildDirectories>, "buildDirectoryMap"> {}
+
+function writeSegmentsViewsMap(api: WriteSegmentsViewsMapApi) {
+  const { stewSourceConfig, buildDirectoryMap } = api;
+  return Promise.all(
+    stewSourceConfig.stewSegments.map((someSegmentConfig) =>
+      Deno.writeTextFile(
+        `${buildDirectoryMap.viewsDirectoryPath}/${someSegmentConfig.segmentKey}.json`,
+        JSON.stringify(
+          someSegmentConfig.segmentViews.reduce<Record<string, Array<number>>>(
+            (viewsMapResult, someViewConfig) => {
+              viewsMapResult[someViewConfig.viewKey] =
+                someViewConfig.viewItemIds;
+              return viewsMapResult;
+            },
+            {}
+          )
+        )
+      )
+    )
+  );
 }
 
 interface LoadAndWriteSegmentModuleApi

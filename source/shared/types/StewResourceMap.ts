@@ -10,4 +10,5 @@ export interface StewResourceMap<
   modulesDirectoryPath: `${StewResourcesDirectoryPath}/modules`;
   datasetsDirectoryPath: `${StewResourcesDirectoryPath}/datasets`;
   stylesDirectoryPath: `${StewResourcesDirectoryPath}/styles`;
+  viewsDirectoryPath: `${StewResourcesDirectoryPath}/views`;
 }
