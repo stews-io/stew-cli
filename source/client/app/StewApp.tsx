@@ -13,6 +13,7 @@ import { BuildStewConfig } from "../../../shared/types/StewConfig.ts";
 import { StewResourceMap } from "../../shared/types/StewResourceMap.ts";
 import { fetchSegmentComponents } from "./fetchSegmentComponents.ts";
 import { StewState } from "./StewState.ts";
+import { SegmentViewsMap } from "../../../shared/types/SegmentViewsMap.ts";
 
 export interface StewAppProps {
   stewConfig: BuildStewConfig;
@@ -125,16 +126,21 @@ interface LoadSegmentApi extends Pick<StewAppProps, "stewResourceMap"> {
 
 async function loadSegment(api: LoadSegmentApi) {
   const { stewResourceMap, stewState, setStewState } = api;
-  const [nextSegmentDataset, nextSegmentModule, nextSegmentCss] =
-    await fetchSegmentComponents({
-      stewResourceMap,
-      someSegmentKey: stewState.segmentKey,
-    });
+  const [
+    nextSegmentDataset,
+    nextSegmentModule,
+    nextSegmentViewsMap,
+    nextSegmentCss,
+  ] = await fetchSegmentComponents({
+    stewResourceMap,
+    someSegmentKey: stewState.segmentKey,
+  });
   setStewState({
     ...stewState,
     segmentStatus: "segmentLoaded",
     segmentDataset: nextSegmentDataset as SegmentDataset<SegmentItem>,
     segmentModule: nextSegmentModule as SegmentModule<SegmentItem>,
+    segmentViewsMap: nextSegmentViewsMap as SegmentViewsMap,
     segmentCss: nextSegmentCss,
   });
 }

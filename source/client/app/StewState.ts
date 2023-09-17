@@ -3,6 +3,7 @@ import {
   SegmentItem,
 } from "../../../shared/types/SegmentDataset.ts";
 import { SegmentModule } from "../../../shared/types/SegmentModule.ts";
+import { SegmentViewsMap } from "../../../shared/types/SegmentViewsMap.ts";
 
 export type StewState =
   | SegmentLoadedStewState
@@ -12,6 +13,7 @@ export type StewState =
 export interface SegmentLoadedStewState extends StewStateBase<"segmentLoaded"> {
   segmentDataset: SegmentDataset<SegmentItem>;
   segmentModule: SegmentModule<SegmentItem>;
+  segmentViewsMap: SegmentViewsMap;
   segmentCss: string;
 }
 

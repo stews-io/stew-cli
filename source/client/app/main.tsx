@@ -72,11 +72,17 @@ async function loadStewResources() {
       (someOptionConfig) =>
         someOptionConfig.sortOptionKey === initialSearchParams.get("sort")
     ) ?? initialSegmentConfig.segmentSortOptions[0];
-  const [[initialSegmentDataset, initialSegmentModule, initialSegmentCss]] =
-    await Promise.all([
-      fetchInitialSegmentComponentsResult,
-      minimumSplashDisplayPromise,
-    ]);
+  const [
+    [
+      initialSegmentDataset,
+      initialSegmentModule,
+      initialSegmentViewsMap,
+      initialSegmentCss,
+    ],
+  ] = await Promise.all([
+    fetchInitialSegmentComponentsResult,
+    minimumSplashDisplayPromise,
+  ]);
   return {
     stewResourceMap,
     stewConfig,
@@ -86,6 +92,7 @@ async function loadStewResources() {
       segmentStatus: "segmentLoaded",
       segmentDataset: initialSegmentDataset,
       segmentModule: initialSegmentModule,
+      segmentViewsMap: initialSegmentViewsMap,
       segmentCss: initialSegmentCss,
       segmentKey: initialSegmentConfig.segmentKey,
       segmentViewKey: initialSegmentViewConfig.viewKey,

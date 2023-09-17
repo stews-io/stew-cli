@@ -15,6 +15,7 @@ import {
   SegmentItemSchema,
 } from "../shared/types/SegmentDataset.ts";
 import { SegmentModule } from "../shared/types/SegmentModule.ts";
+import { SegmentViewsMap } from "../shared/types/SegmentViewsMap.ts";
 import {
   BuildStewConfig,
   SourceSegmentConfig,
@@ -173,12 +174,13 @@ function writeSegmentViews(api: WriteSegmentViewsApi) {
   return Deno.writeTextFile(
     `${buildDirectoryMap.viewsDirectoryPath}/${someSegmentSourceConfig.segmentKey}.json`,
     JSON.stringify(
-      someSegmentSourceConfig.segmentViews.reduce<
-        Record<string, Array<number>>
-      >((viewsMapResult, someViewConfig) => {
-        viewsMapResult[someViewConfig.viewKey] = someViewConfig.viewItemIds;
-        return viewsMapResult;
-      }, {})
+      someSegmentSourceConfig.segmentViews.reduce<SegmentViewsMap>(
+        (viewsMapResult, someViewConfig) => {
+          viewsMapResult[someViewConfig.viewKey] = someViewConfig.viewItemIds;
+          return viewsMapResult;
+        },
+        {}
+      )
     )
   );
 }

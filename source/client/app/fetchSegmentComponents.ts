@@ -3,6 +3,7 @@ import {
   SegmentItem,
 } from "../../../shared/types/SegmentDataset.ts";
 import { SegmentModule } from "../../../shared/types/SegmentModule.ts";
+import { SegmentViewsMap } from "../../../shared/types/SegmentViewsMap.ts";
 import { StewResourceMap } from "../../shared/types/StewResourceMap.ts";
 
 export interface FetchSegmentComponentsApi {
@@ -16,6 +17,7 @@ export function fetchSegmentComponents(
   [
     segmentDataset: SegmentDataset<SegmentItem>,
     segmentModule: SegmentModule<SegmentItem>,
+    segmentViews: SegmentViewsMap,
     segmentCss: string
   ]
 > {
@@ -31,6 +33,9 @@ export function fetchSegmentComponents(
           `${nextSegmentModuleScript}return __moduleIifeResult.default`
         )()
       ),
+    fetch(`${stewResourceMap.viewsDirectoryPath}/${someSegmentKey}.json`).then(
+      (getSegmentViews) => getSegmentViews.json()
+    ),
     fetch(`${stewResourceMap.stylesDirectoryPath}/${someSegmentKey}.css`).then(
       (getSegmentCss) => getSegmentCss.text()
     ),
