@@ -86,23 +86,11 @@ async function buildStewApp(api: BuildStewAppApi) {
       ),
     });
   }
-  const stewBuildConfig: BuildStewConfig = {
+  const { stewBuildConfig } = getStewBuildConfig({
+    stewSourceConfig,
     stewBuildId,
-    stewInfo: stewSourceConfig.stewInfo,
-    stewSegments: stewSourceConfig.stewSegments.map(
-      (someSourceSegmentConfig) => ({
-        segmentKey: someSourceSegmentConfig.segmentKey,
-        segmentSearchLabel: someSourceSegmentConfig.segmentSearchLabel,
-        segmentViews: someSourceSegmentConfig.segmentViews,
-        segmentSortOptions: loadedSegmentModules[
-          someSourceSegmentConfig.segmentKey
-        ].segmentSortOptions.map((someSegmentSortOption) => ({
-          sortOptionKey: someSegmentSortOption.sortOptionKey,
-          sortOptionLabel: someSegmentSortOption.sortOptionLabel,
-        })),
-      })
-    ),
-  };
+    loadedSegmentModules,
+  });
   await fetchBundledAssetsAndWriteCoreBuildFiles({
     buildDirectoryMap,
     stewBuildConfig,
@@ -168,41 +156,6 @@ function setupBuildDirectories(api: SetupBuildDirectoriesApi) {
   };
 }
 
-interface FetchBundledAssetsAndWriteCoreBuildFilesApi
-  extends Pick<ReturnType<typeof setupBuildDirectories>, "buildDirectoryMap"> {
-  stewBuildConfig: BuildStewConfig;
-}
-
-async function fetchBundledAssetsAndWriteCoreBuildFiles(
-  api: FetchBundledAssetsAndWriteCoreBuildFilesApi
-) {
-  const { buildDirectoryMap, stewBuildConfig } = api;
-  const { bundleAssetsDataMap } = await fetchBundledAssets();
-  Deno.writeTextFileSync(
-    buildDirectoryMap.configPath,
-    JSON.stringify(stewBuildConfig)
-  );
-  Deno.writeTextFileSync(
-    buildDirectoryMap.appScript,
-    bundleAssetsDataMap.appScript
-  );
-  Deno.writeTextFileSync(buildDirectoryMap.appCss, bundleAssetsDataMap.appCss);
-  (window as any).h = preactH;
-  const initialStewHtmlComponent: FunctionComponent<any> = loadModuleBundle({
-    moduleExportKey: "InitialStewHtml",
-    moduleIifeBundleScript: bundleAssetsDataMap.initialHtmlScript,
-  });
-  Deno.writeTextFileSync(
-    buildDirectoryMap.indexHtml,
-    `<!DOCTYPE html>${preactRenderToString(
-      preactH(initialStewHtmlComponent, {
-        stewBuildConfig,
-        splashPageCss: bundleAssetsDataMap.splashPageCss,
-      })
-    )}`
-  );
-}
-
 interface LoadAndWriteSegmentModuleApi
   extends Pick<ReturnType<typeof setupBuildDirectories>, "buildDirectoryMap"> {
   stewSourceDirectoryPath: string;
@@ -254,6 +207,83 @@ async function loadAndWriteSegmentDataset(api: LoadAndWriteSegmentDatasetApi) {
   await Deno.writeTextFile(
     `${buildDirectoryMap.datasetsDirectoryPath}/${someSegmentSourceConfig.segmentKey}.json`,
     JSON.stringify(segmentDataset)
+  );
+}
+
+interface GetStewBuildConfigApi
+  extends Pick<LoadStewSourceConfigResult, "stewSourceConfig">,
+    Pick<ReturnType<typeof setupBuildDirectories>, "stewBuildId"> {
+  loadedSegmentModules: Record<string, SegmentModule<SegmentItem>>;
+}
+
+function getStewBuildConfig(api: GetStewBuildConfigApi) {
+  const { stewBuildId, stewSourceConfig, loadedSegmentModules } = api;
+  return {
+    stewBuildConfig: {
+      stewBuildId,
+      stewInfo: stewSourceConfig.stewInfo,
+      stewSegments: stewSourceConfig.stewSegments.reduce<
+        BuildStewConfig["stewSegments"]
+      >((buildSegmentsResult, someSourceSegmentConfig, segmentIndex) => {
+        buildSegmentsResult[someSourceSegmentConfig.segmentKey] = {
+          segmentIndex,
+          segmentKey: someSourceSegmentConfig.segmentKey,
+          segmentSearchLabel: someSourceSegmentConfig.segmentSearchLabel,
+          segmentViews: someSourceSegmentConfig.segmentViews.reduce<
+            BuildStewConfig["stewSegments"][string]["segmentViews"]
+          >((buildViewsResult, someViewSourceConfig, viewIndex) => {
+            buildViewsResult[someViewSourceConfig.viewKey] = {
+              viewIndex,
+              viewKey: someViewSourceConfig.viewKey,
+              viewLabel: someViewSourceConfig.viewLabel,
+            };
+            return buildViewsResult;
+          }, {}),
+          segmentSortOptions: loadedSegmentModules[
+            someSourceSegmentConfig.segmentKey
+          ].segmentSortOptions.map((someSegmentSortOption) => ({
+            sortOptionKey: someSegmentSortOption.sortOptionKey,
+            sortOptionLabel: someSegmentSortOption.sortOptionLabel,
+          })),
+        };
+        return buildSegmentsResult;
+      }, {}),
+    } satisfies BuildStewConfig,
+  };
+}
+
+interface FetchBundledAssetsAndWriteCoreBuildFilesApi
+  extends Pick<ReturnType<typeof setupBuildDirectories>, "buildDirectoryMap"> {
+  stewBuildConfig: BuildStewConfig;
+}
+
+async function fetchBundledAssetsAndWriteCoreBuildFiles(
+  api: FetchBundledAssetsAndWriteCoreBuildFilesApi
+) {
+  const { buildDirectoryMap, stewBuildConfig } = api;
+  const { bundleAssetsDataMap } = await fetchBundledAssets();
+  Deno.writeTextFileSync(
+    buildDirectoryMap.configPath,
+    JSON.stringify(stewBuildConfig)
+  );
+  Deno.writeTextFileSync(
+    buildDirectoryMap.appScript,
+    bundleAssetsDataMap.appScript
+  );
+  Deno.writeTextFileSync(buildDirectoryMap.appCss, bundleAssetsDataMap.appCss);
+  (window as any).h = preactH;
+  const initialStewHtmlComponent: FunctionComponent<any> = loadModuleBundle({
+    moduleExportKey: "InitialStewHtml",
+    moduleIifeBundleScript: bundleAssetsDataMap.initialHtmlScript,
+  });
+  Deno.writeTextFileSync(
+    buildDirectoryMap.indexHtml,
+    `<!DOCTYPE html>${preactRenderToString(
+      preactH(initialStewHtmlComponent, {
+        stewBuildConfig,
+        splashPageCss: bundleAssetsDataMap.splashPageCss,
+      })
+    )}`
   );
 }
 

@@ -24,6 +24,20 @@ export function StewApp(props: StewAppProps) {
   const { initialStewState, stewConfig, stewResourceMap } = props;
   const [stewState, setStewState] = useState<StewState>(initialStewState);
   useEffect(() => {
+    const nextUrlSearchParams = new URLSearchParams();
+    nextUrlSearchParams.set("sort", `${stewState.segmentSortKey}`);
+    if (stewState.viewSearchQuery.length > 0) {
+      nextUrlSearchParams.set("search", stewState.viewSearchQuery);
+    }
+    window.history.replaceState(
+      null,
+      "noop",
+      `/${stewState.segmentKey}/${
+        stewState.segmentViewKey
+      }?${nextUrlSearchParams.toString()}`
+    );
+  }, [stewState]);
+  useEffect(() => {
     if (stewState.segmentStatus === "loadingSegment") {
       loadSegment({
         stewResourceMap,
@@ -35,27 +49,63 @@ export function StewApp(props: StewAppProps) {
   return (
     <div>
       <div style={{ display: "flex", flexDirection: "row" }}>
-        {stewConfig.stewSegments.map((someSegmentConfig) => (
-          <div
-            style={{
-              padding: 8,
-              color: "purple",
-              cursor: "pointer",
-              fontWeight: 700,
-            }}
-            onClick={() => {
-              setStewState({
-                ...stewState,
-                segmentStatus: "loadingSegment",
-                segmentKey: someSegmentConfig.segmentKey,
-              });
-            }}
-          >
-            {someSegmentConfig.segmentKey}
-          </div>
-        ))}
+        {Object.values(stewConfig.stewSegments)
+          .sort(
+            (segmentA, segmentB) =>
+              segmentA.segmentIndex - segmentB.segmentIndex
+          )
+          .map((someSegmentConfig) => (
+            <div
+              style={{
+                padding: 8,
+                color: "purple",
+                cursor: "pointer",
+                fontWeight: 700,
+                textDecoration:
+                  stewState.segmentKey === someSegmentConfig.segmentKey
+                    ? "underline"
+                    : "none",
+              }}
+              onClick={() => {
+                setStewState({
+                  ...stewState,
+                  segmentStatus: "loadingSegment",
+                  segmentKey: someSegmentConfig.segmentKey,
+                });
+              }}
+            >
+              {someSegmentConfig.segmentKey}
+            </div>
+          ))}
       </div>
-      <div style={{ padding: 8, fontWeight: 300 }}>{stewState.segmentKey}</div>
+      <div style={{ display: "flex", flexDirection: "row" }}>
+        {Object.values(
+          stewConfig.stewSegments[stewState.segmentKey].segmentViews
+        )
+          .sort((viewA, viewB) => viewA.viewIndex - viewB.viewIndex)
+          .map((someViewConfig) => (
+            <div
+              style={{
+                padding: 8,
+                color: "blue",
+                cursor: "pointer",
+                fontWeight: 700,
+                textDecoration:
+                  stewState.segmentViewKey === someViewConfig.viewKey
+                    ? "underline"
+                    : "none",
+              }}
+              onClick={() => {
+                setStewState({
+                  ...stewState,
+                  segmentViewKey: someViewConfig.viewKey,
+                });
+              }}
+            >
+              {someViewConfig.viewKey}
+            </div>
+          ))}
+      </div>
       {stewState.segmentStatus === "segmentLoaded" ? (
         <Fragment>
           <stewState.segmentModule.SegmentItemDisplay

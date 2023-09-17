@@ -48,17 +48,25 @@ async function loadStewResources() {
   const [_, urlSegmentKey, urlViewKey] = window.location.pathname.split("/");
   const initialSearchParams = new URLSearchParams(window.location.search);
   const initialSegmentConfig =
-    stewConfig.stewSegments.find(
+    Object.values(stewConfig.stewSegments).find(
       (someSegmentConfig) => someSegmentConfig.segmentKey === urlSegmentKey
-    ) ?? stewConfig.stewSegments[0];
+    ) ??
+    Object.values(stewConfig.stewSegments).find(
+      (someSegmentConfig) => someSegmentConfig.segmentIndex === 0
+    ) ??
+    throwInvalidPathError("initialSegmentConfig");
   const fetchInitialSegmentComponentsResult = fetchSegmentComponents({
     stewResourceMap,
     someSegmentKey: initialSegmentConfig.segmentKey,
   });
   const initialSegmentViewConfig =
-    initialSegmentConfig.segmentViews.find(
+    Object.values(initialSegmentConfig.segmentViews).find(
       (someViewConfig) => someViewConfig.viewKey === urlViewKey
-    ) ?? initialSegmentConfig.segmentViews[0];
+    ) ??
+    Object.values(initialSegmentConfig.segmentViews).find(
+      (someViewConfig) => someViewConfig.viewIndex === 0
+    ) ??
+    throwInvalidPathError("initialSegmentViewConfig");
   const initialSegmentSortOptionConfig =
     initialSegmentConfig.segmentSortOptions.find(
       (someOptionConfig) =>
