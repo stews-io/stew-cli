@@ -241,5 +241,16 @@
     "https://raw.githubusercontent.com/stews-io/esbuild_deno_loader/fix/allow-css-passthrough/src/plugin_deno_loader.ts": "8b1f7eeb80f8c539d5903fd414531ba7e60436a5be67b93ed080defea7970aba",
     "https://raw.githubusercontent.com/stews-io/esbuild_deno_loader/fix/allow-css-passthrough/src/plugin_deno_resolver.ts": "0449ed23ae93db1ec74d015a46934aefd7ba7a8f719f7a4980b616cb3f5bbee4",
     "https://raw.githubusercontent.com/stews-io/esbuild_deno_loader/fix/allow-css-passthrough/src/shared.ts": "33052684aeb542ebd24da372816bbbf885cd090a7ab0fde7770801f7f5b49572"
+  },
+  "npm": {
+    "specifiers": {
+      "@types/node": "@types/node@18.16.19"
+    },
+    "packages": {
+      "@types/node@18.16.19": {
+        "integrity": "sha512-IXl7o+R9iti9eBW4Wg2hx1xQDig183jj7YLn8F7udNceyfkbn1ZxmzZXuak20gR40D7pIkIY1kYGx5VIGbaHKA==",
+        "dependencies": {}
+      }
+    }
   }
 }

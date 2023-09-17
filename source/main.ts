@@ -103,10 +103,19 @@ async function loadStewSourceConfig(
   api: LoadStewSourceConfigApi
 ): Promise<LoadStewSourceConfigResult> {
   const { stewSourceConfigPath } = api;
-  const [stewSourceConfig] = await loadBasicModule<SourceStewConfig>({
+  const sourceConfigBundleResult = await bundleModule({
     moduleEntryPath: stewSourceConfigPath,
-    ModuleResultSchema: SourceStewConfigSchema(),
+    minifyBundle: true,
+    tsConfig: {},
   });
+  const sourceConfigIifeScript = sourceConfigBundleResult.outputFiles[0].text;
+  const stewSourceConfigResult: unknown = await loadModuleBundle({
+    moduleExportKey: "default",
+    moduleIifeBundleScript: sourceConfigIifeScript,
+  });
+  const stewSourceConfig: SourceStewConfig = SourceStewConfigSchema().parse(
+    stewSourceConfigResult
+  );
   return {
     stewSourceConfig,
   };
@@ -199,7 +208,7 @@ async function loadAndWriteSegmentModule(api: LoadAndWriteSegmentModuleApi) {
       someSegmentSourceConfig.segmentModulePath
     ),
   });
-  const segmentModule = loadModuleBundle({
+  const segmentModule = await loadModuleBundle({
     moduleExportKey: "default",
     moduleIifeBundleScript: segmentModuleIifeScript,
   });
@@ -338,26 +347,4 @@ function fetchBundleAsset(api: FetchBundleAssetApi) {
   return fetch(bundledAssetUrl).then((getBundleAssetResponse) =>
     getBundleAssetResponse.text()
   );
-}
-
-interface LoadBasicModuleApi<ModuleResult>
-  extends Pick<BundleModuleApi, "moduleEntryPath"> {
-  ModuleResultSchema: Zod.ZodType<ModuleResult, Zod.ZodTypeDef, unknown>;
-}
-
-async function loadBasicModule<ModuleResult>(
-  api: LoadBasicModuleApi<ModuleResult>
-): Promise<[ModuleResult, string]> {
-  const { moduleEntryPath, ModuleResultSchema } = api;
-  const buildBundleResult = await bundleModule({
-    moduleEntryPath,
-    minifyBundle: true,
-    tsConfig: {},
-  });
-  const iifeBundleScript = buildBundleResult.outputFiles[0].text;
-  const iifeBundleResult: unknown = loadModuleBundle({
-    moduleExportKey: "default",
-    moduleIifeBundleScript: iifeBundleScript,
-  });
-  return [ModuleResultSchema.parse(iifeBundleResult), iifeBundleScript];
 }
