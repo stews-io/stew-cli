@@ -11,8 +11,8 @@ export default {
   },
   stewSegments: [
     {
+      segmentDataset: musicDataset,
       segmentModulePath: "./music/music.module.tsx",
-      segmentDatasetPath: "./music/music.dataset.ts",
       segmentKey: "music",
       segmentSearchLabel: "music",
       segmentViews: [
@@ -26,8 +26,8 @@ export default {
       ],
     },
     {
+      segmentDataset: spotsDataset,
       segmentModulePath: "./spots/spots.module.tsx",
-      segmentDatasetPath: "./spots/spots.dataset.ts",
       segmentKey: "spots",
       segmentSearchLabel: "spots",
       segmentViews: [

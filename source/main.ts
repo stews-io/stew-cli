@@ -9,11 +9,7 @@ import {
 } from "../shared/general/bundleModule.ts";
 import { getBundledAssetsLocationMap } from "../shared/general/getBundledAssetsLocationMap.ts";
 import { throwInvalidPathError } from "../shared/general/throwInvalidPathError.ts";
-import {
-  SegmentDataset,
-  SegmentItem,
-  SegmentItemSchema,
-} from "../shared/types/SegmentDataset.ts";
+import { SegmentItem } from "../shared/types/SegmentDataset.ts";
 import { SegmentModule } from "../shared/types/SegmentModule.ts";
 import { SegmentViewsMap } from "../shared/types/SegmentViewsMap.ts";
 import {
@@ -73,7 +69,7 @@ async function buildStewApp(api: BuildStewAppApi) {
   const loadedSegmentModules: Record<string, SegmentModule<SegmentItem>> = {};
   for (const someSegmentSourceConfig of stewSourceConfig.stewSegments) {
     await Promise.all([
-      writeSegmentViews({
+      writeSegmentDatasetAndViews({
         buildDirectoryMap,
         someSegmentSourceConfig,
       }),
@@ -82,14 +78,6 @@ async function buildStewApp(api: BuildStewAppApi) {
         stewSourceDirectoryPath,
         loadedSegmentModules,
         someSegmentSourceConfig,
-      }),
-      loadAndWriteSegmentDataset({
-        buildDirectoryMap,
-        someSegmentSourceConfig,
-        segmentDatasetPath: joinPaths(
-          stewSourceDirectoryPath,
-          someSegmentSourceConfig.segmentDatasetPath
-        ),
       }),
     ]);
   }
@@ -164,25 +152,31 @@ function setupBuildDirectories(api: SetupBuildDirectoriesApi) {
   };
 }
 
-interface WriteSegmentViewsApi
+interface WriteSegmentDatasetAndViewsApi
   extends Pick<ReturnType<typeof setupBuildDirectories>, "buildDirectoryMap"> {
   someSegmentSourceConfig: SourceSegmentConfig;
 }
 
-function writeSegmentViews(api: WriteSegmentViewsApi) {
+function writeSegmentDatasetAndViews(api: WriteSegmentDatasetAndViewsApi) {
   const { someSegmentSourceConfig, buildDirectoryMap } = api;
-  return Deno.writeTextFile(
-    `${buildDirectoryMap.viewsDirectoryPath}/${someSegmentSourceConfig.segmentKey}.json`,
-    JSON.stringify(
-      someSegmentSourceConfig.segmentViews.reduce<SegmentViewsMap>(
-        (viewsMapResult, someViewConfig) => {
-          viewsMapResult[someViewConfig.viewKey] = someViewConfig.viewItemIds;
-          return viewsMapResult;
-        },
-        {}
+  return Promise.all([
+    Deno.writeTextFile(
+      `${buildDirectoryMap.datasetsDirectoryPath}/${someSegmentSourceConfig.segmentKey}.json`,
+      JSON.stringify(someSegmentSourceConfig.segmentDataset)
+    ),
+    Deno.writeTextFile(
+      `${buildDirectoryMap.viewsDirectoryPath}/${someSegmentSourceConfig.segmentKey}.json`,
+      JSON.stringify(
+        someSegmentSourceConfig.segmentViews.reduce<SegmentViewsMap>(
+          (viewsMapResult, someViewConfig) => {
+            viewsMapResult[someViewConfig.viewKey] = someViewConfig.viewItemIds;
+            return viewsMapResult;
+          },
+          {}
+        )
       )
-    )
-  );
+    ),
+  ]);
 }
 
 interface LoadAndWriteSegmentModuleApi
@@ -217,25 +211,6 @@ async function loadAndWriteSegmentModule(api: LoadAndWriteSegmentModuleApi) {
   await Deno.writeTextFile(
     `${buildDirectoryMap.stylesDirectoryPath}/${someSegmentSourceConfig.segmentKey}.css`,
     segmentModuleCss
-  );
-}
-
-interface LoadAndWriteSegmentDatasetApi
-  extends Pick<ReturnType<typeof setupBuildDirectories>, "buildDirectoryMap"> {
-  segmentDatasetPath: string;
-  someSegmentSourceConfig: SourceSegmentConfig;
-}
-
-async function loadAndWriteSegmentDataset(api: LoadAndWriteSegmentDatasetApi) {
-  const { segmentDatasetPath, someSegmentSourceConfig, buildDirectoryMap } =
-    api;
-  const [segmentDataset] = await loadBasicModule<SegmentDataset<SegmentItem>>({
-    ModuleResultSchema: Zod.array(SegmentItemSchema()),
-    moduleEntryPath: segmentDatasetPath,
-  });
-  await Deno.writeTextFile(
-    `${buildDirectoryMap.datasetsDirectoryPath}/${someSegmentSourceConfig.segmentKey}.json`,
-    JSON.stringify(segmentDataset)
   );
 }
 
