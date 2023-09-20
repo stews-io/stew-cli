@@ -7,13 +7,13 @@ export default {
     {
       sortOptionKey: "musicTitleAsc",
       sortOptionLabel: "title: a → z",
-      sortSegmentItems: (segmentItemA, segmentItemB) =>
+      getSortOrder: (segmentItemA, segmentItemB) =>
         segmentItemA.musicTitle.localeCompare(segmentItemB.musicTitle),
     },
     {
       sortOptionKey: "musicTitleDesc",
       sortOptionLabel: "title: z → a",
-      sortSegmentItems: (segmentItemA, segmentItemB) =>
+      getSortOrder: (segmentItemA, segmentItemB) =>
         segmentItemB.musicTitle.localeCompare(segmentItemA.musicTitle),
     },
   ],

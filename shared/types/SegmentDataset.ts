@@ -18,6 +18,10 @@ export interface SegmentItem {
 
 export interface SourceSegmentItem extends SegmentItem, JsonObject {}
 
+export interface BuildSegmentItem extends SegmentItem {
+  __segment_item_search_space: string;
+}
+
 export function SourceSegmentItemSchema() {
   return Zod.intersection(
     Zod.object({

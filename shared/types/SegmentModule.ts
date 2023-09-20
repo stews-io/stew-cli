@@ -12,7 +12,7 @@ export interface SegmentModule<SomeSegmentItem extends SegmentItem> {
 export interface SegmentSortOption<SomeSegmentItem extends SegmentItem> {
   sortOptionKey: string;
   sortOptionLabel: string;
-  sortSegmentItems: Parameters<Array<SomeSegmentItem>["sort"]>[0];
+  getSortOrder: Parameters<Array<SomeSegmentItem>["sort"]>[0];
 }
 
 export interface SegmentItemDisplayProps<SomeSegmentItem extends SegmentItem> {

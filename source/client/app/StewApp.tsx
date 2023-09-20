@@ -1,10 +1,12 @@
 import {
   StateUpdater,
   useEffect,
+  useMemo,
   useState,
 } from "../../../shared/deps/preact/hooks.ts";
 import { Fragment } from "../../../shared/deps/preact/mod.ts";
 import {
+  BuildSegmentItem,
   SegmentDataset,
   SegmentItem,
 } from "../../../shared/types/SegmentDataset.ts";
@@ -41,12 +43,46 @@ export function StewApp(props: StewAppProps) {
   }, [stewState]);
   useEffect(() => {
     if (stewState.segmentStatus === "loadingSegment") {
+      // todo: handle out of sequence segment loading
       loadSegment({
         stewResourceMap,
         stewState,
         setStewState,
       });
     }
+  }, [stewState]);
+  const { searchedAndSortedViewItems } = useMemo(() => {
+    const currentViewSearchQuery = stewState.viewSearchQuery;
+    return {
+      searchedAndSortedViewItems:
+        stewState.segmentStatus === "segmentLoaded"
+          ? stewState.segmentViewsMap[stewState.segmentViewKey]
+              .reduce<Array<BuildSegmentItem>>(
+                (searchedAndSortedViewItemsResult, someSegmentItemIndex) => {
+                  const currentSegmentViewItem =
+                    stewState.segmentDataset[someSegmentItemIndex];
+                  if (
+                    currentSegmentViewItem.__segment_item_search_space.includes(
+                      currentViewSearchQuery
+                    )
+                  ) {
+                    searchedAndSortedViewItemsResult.push(
+                      currentSegmentViewItem
+                    );
+                  }
+                  return searchedAndSortedViewItemsResult;
+                },
+                []
+              )
+              .sort(
+                stewState.segmentModule.segmentSortOptions[
+                  stewConfig.stewSegments[stewState.segmentKey]
+                    .segmentSortOptions[stewState.segmentSortOptionKey]
+                    .sortOptionIndex
+                ].getSortOrder
+              )
+          : [],
+    };
   }, [stewState]);
   return (
     <div>
@@ -181,9 +217,13 @@ export function StewApp(props: StewAppProps) {
       </div>
       {stewState.segmentStatus === "segmentLoaded" ? (
         <Fragment>
-          <stewState.segmentModule.SegmentItemDisplay
-            someSegmentItem={stewState.segmentDataset[0]}
-          />
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {searchedAndSortedViewItems.map((someViewItem) => (
+              <stewState.segmentModule.SegmentItemDisplay
+                someSegmentItem={someViewItem}
+              />
+            ))}
+          </div>
           <style>{stewState.segmentCss}</style>
         </Fragment>
       ) : null}
@@ -210,8 +250,8 @@ async function loadSegment(api: LoadSegmentApi) {
   setStewState({
     ...stewState,
     segmentStatus: "segmentLoaded",
-    segmentDataset: nextSegmentDataset as SegmentDataset<SegmentItem>,
-    segmentModule: nextSegmentModule as SegmentModule<SegmentItem>,
+    segmentDataset: nextSegmentDataset as SegmentDataset<BuildSegmentItem>,
+    segmentModule: nextSegmentModule as SegmentModule<BuildSegmentItem>,
     segmentViewsMap: nextSegmentViewsMap as SegmentViewsMap,
     segmentCss: nextSegmentCss,
   });

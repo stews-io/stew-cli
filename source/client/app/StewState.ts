@@ -1,6 +1,6 @@
 import {
+  BuildSegmentItem,
   SegmentDataset,
-  SegmentItem,
 } from "../../../shared/types/SegmentDataset.ts";
 import { SegmentModule } from "../../../shared/types/SegmentModule.ts";
 import { SegmentViewsMap } from "../../../shared/types/SegmentViewsMap.ts";
@@ -11,8 +11,8 @@ export type StewState =
   | ErrorLoadingSegmentStewState;
 
 export interface SegmentLoadedStewState extends StewStateBase<"segmentLoaded"> {
-  segmentDataset: SegmentDataset<SegmentItem>;
-  segmentModule: SegmentModule<SegmentItem>;
+  segmentDataset: SegmentDataset<BuildSegmentItem>;
+  segmentModule: SegmentModule<BuildSegmentItem>;
   segmentViewsMap: SegmentViewsMap;
   segmentCss: string;
 }
