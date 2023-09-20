@@ -1,19 +1,20 @@
-import { Fragment } from "../../../shared/deps/preact/mod.ts";
 import {
-  useState,
-  useEffect,
   StateUpdater,
+  useEffect,
+  useState,
 } from "../../../shared/deps/preact/hooks.ts";
+import { Fragment } from "../../../shared/deps/preact/mod.ts";
 import {
   SegmentDataset,
   SegmentItem,
 } from "../../../shared/types/SegmentDataset.ts";
 import { SegmentModule } from "../../../shared/types/SegmentModule.ts";
+import { SegmentViewsMap } from "../../../shared/types/SegmentViewsMap.ts";
 import { BuildStewConfig } from "../../../shared/types/StewConfig.ts";
 import { StewResourceMap } from "../../shared/types/StewResourceMap.ts";
-import { fetchSegmentComponents } from "./fetchSegmentComponents.ts";
 import { StewState } from "./StewState.ts";
-import { SegmentViewsMap } from "../../../shared/types/SegmentViewsMap.ts";
+import { fetchSegmentComponents } from "./fetchSegmentComponents.ts";
+import { findMapItem } from "./findMapItem.ts";
 
 export interface StewAppProps {
   stewConfig: BuildStewConfig;
@@ -26,7 +27,7 @@ export function StewApp(props: StewAppProps) {
   const [stewState, setStewState] = useState<StewState>(initialStewState);
   useEffect(() => {
     const nextUrlSearchParams = new URLSearchParams();
-    nextUrlSearchParams.set("sort", `${stewState.segmentSortKey}`);
+    nextUrlSearchParams.set("sort", `${stewState.segmentSortOptionKey}`);
     if (stewState.viewSearchQuery.length > 0) {
       nextUrlSearchParams.set("search", stewState.viewSearchQuery);
     }
@@ -46,7 +47,7 @@ export function StewApp(props: StewAppProps) {
         setStewState,
       });
     }
-  }, [stewState.segmentKey]);
+  }, [stewState]);
   return (
     <div>
       <div style={{ display: "flex", flexDirection: "row" }}>
@@ -68,14 +69,31 @@ export function StewApp(props: StewAppProps) {
                     : "none",
               }}
               onClick={() => {
-                setStewState({
-                  ...stewState,
-                  segmentStatus: "loadingSegment",
-                  segmentKey: someSegmentConfig.segmentKey,
-                });
+                if (stewState.segmentKey !== someSegmentConfig.segmentKey) {
+                  setStewState({
+                    segmentStatus: "loadingSegment",
+                    viewPageIndex: 0,
+                    viewSearchQuery: "",
+                    segmentKey: someSegmentConfig.segmentKey,
+                    segmentViewKey: findMapItem({
+                      itemTargetValue: 0,
+                      itemSearchKey: "viewIndex",
+                      someMap:
+                        stewConfig.stewSegments[someSegmentConfig.segmentKey]
+                          .segmentViews,
+                    })!.viewKey,
+                    segmentSortOptionKey: findMapItem({
+                      itemTargetValue: 0,
+                      itemSearchKey: "sortOptionIndex",
+                      someMap:
+                        stewConfig.stewSegments[someSegmentConfig.segmentKey]
+                          .segmentSortOptions,
+                    })!.sortOptionKey,
+                  });
+                }
               }}
             >
-              {someSegmentConfig.segmentKey}
+              {someSegmentConfig.segmentLabel}
             </div>
           ))}
       </div>
@@ -97,15 +115,69 @@ export function StewApp(props: StewAppProps) {
                     : "none",
               }}
               onClick={() => {
-                setStewState({
-                  ...stewState,
-                  segmentViewKey: someViewConfig.viewKey,
-                });
+                if (stewState.segmentViewKey !== someViewConfig.viewKey) {
+                  setStewState((currentStewState) => ({
+                    ...currentStewState,
+                    viewPageIndex: 0,
+                    segmentViewKey: someViewConfig.viewKey,
+                  }));
+                }
               }}
             >
-              {someViewConfig.viewKey}
+              {someViewConfig.viewLabel}
             </div>
           ))}
+      </div>
+      <div style={{ display: "flex", flexDirection: "row" }}>
+        {Object.values(
+          stewConfig.stewSegments[stewState.segmentKey].segmentSortOptions
+        )
+          .sort(
+            (sortOptionA, sortOptionB) =>
+              sortOptionA.sortOptionIndex - sortOptionB.sortOptionIndex
+          )
+          .map((someSortOptionConfig) => (
+            <div
+              style={{
+                padding: 8,
+                color: "green",
+                cursor: "pointer",
+                fontWeight: 700,
+                textDecoration:
+                  stewState.segmentSortOptionKey ===
+                  someSortOptionConfig.sortOptionKey
+                    ? "underline"
+                    : "none",
+              }}
+              onClick={() => {
+                if (
+                  stewState.segmentSortOptionKey !==
+                  someSortOptionConfig.sortOptionKey
+                ) {
+                  setStewState((currentStewState) => ({
+                    ...currentStewState,
+                    viewPageIndex: 0,
+                    segmentSortOptionKey: someSortOptionConfig.sortOptionKey,
+                  }));
+                }
+              }}
+            >
+              {someSortOptionConfig.sortOptionLabel}
+            </div>
+          ))}
+      </div>
+      <div style={{ padding: 8 }}>
+        <input
+          value={stewState.viewSearchQuery}
+          onInput={(someInputEvent) => {
+            const nextViewSearchQuery = someInputEvent.currentTarget.value;
+            setStewState((currentStewState) => ({
+              ...currentStewState,
+              viewPageIndex: 0,
+              viewSearchQuery: nextViewSearchQuery,
+            }));
+          }}
+        />
       </div>
       {stewState.segmentStatus === "segmentLoaded" ? (
         <Fragment>

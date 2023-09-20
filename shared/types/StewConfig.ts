@@ -54,7 +54,7 @@ export function BuildStewConfigSchema(): Zod.ZodType<BuildStewConfig> {
 interface BuildSegmentConfig
   extends SegmentConfigBase<Record<string, BuildSegmentViewConfig>> {
   segmentIndex: number;
-  segmentSortOptions: Array<BuildSortOptionConfig>;
+  segmentSortOptions: Record<string, BuildSortOptionConfig>;
 }
 
 function BuildSegmentConfigSchema(): Zod.ZodType<BuildSegmentConfig> {
@@ -62,12 +62,7 @@ function BuildSegmentConfigSchema(): Zod.ZodType<BuildSegmentConfig> {
     Zod.record(BuildSegmentViewConfigSchema())
   ).extend({
     segmentIndex: Zod.number(),
-    segmentSortOptions: Zod.array(
-      Zod.object({
-        sortOptionKey: Zod.string(),
-        sortOptionLabel: Zod.string(),
-      })
-    ),
+    segmentSortOptions: Zod.record(BuildSortOptionConfigSchema()),
   });
 }
 
@@ -75,7 +70,17 @@ interface BuildSortOptionConfig
   extends Pick<
     SegmentSortOption<SourceSegmentItem>,
     "sortOptionKey" | "sortOptionLabel"
-  > {}
+  > {
+  sortOptionIndex: number;
+}
+
+function BuildSortOptionConfigSchema(): Zod.ZodType<BuildSortOptionConfig> {
+  return Zod.object({
+    sortOptionIndex: Zod.number(),
+    sortOptionKey: Zod.string(),
+    sortOptionLabel: Zod.string(),
+  });
+}
 
 interface BuildSegmentViewConfig extends SegmentViewConfigBase {
   viewIndex: number;
@@ -131,7 +136,7 @@ function StewExternalLinkSchema() {
 
 interface SegmentConfigBase<SegmentViewsConfig> {
   segmentKey: string;
-  segmentSearchLabel: string;
+  segmentLabel: string;
   segmentViews: SegmentViewsConfig;
 }
 
@@ -140,7 +145,7 @@ function SegmentConfigBaseSchema<
 >(someSegmentViewsSchema: SegmentViewsConfigSchema) {
   return Zod.object({
     segmentKey: Zod.string(),
-    segmentSearchLabel: Zod.string(),
+    segmentLabel: Zod.string(),
     segmentViews: someSegmentViewsSchema,
   });
 }

@@ -22,7 +22,7 @@ async function getHelloStewConfig() {
         segmentDataset: musicDataset,
         segmentModulePath: "./music/music.module.tsx",
         segmentKey: "music",
-        segmentSearchLabel: "music",
+        segmentLabel: "music",
         segmentViews: [
           {
             viewKey: "all",
@@ -37,7 +37,7 @@ async function getHelloStewConfig() {
         segmentDataset: spotsDataset,
         segmentModulePath: "./spots/spots.module.tsx",
         segmentKey: "spots",
-        segmentSearchLabel: "spots",
+        segmentLabel: "spots",
         segmentViews: [
           {
             viewKey: "all",

@@ -6,13 +6,13 @@ export default {
     {
       sortOptionKey: "spotNameAsc",
       sortOptionLabel: "name: a → z",
-      compareSortItems: (stewItemA, stewItemB) =>
+      sortSegmentItems: (stewItemA, stewItemB) =>
         stewItemA.spotName.localeCompare(stewItemB.spotName),
     },
     {
       sortOptionKey: "spotNameDesc",
       sortOptionLabel: "name: z → a",
-      compareSortItems: (stewItemA, stewItemB) =>
+      sortSegmentItems: (stewItemA, stewItemB) =>
         stewItemB.spotName.localeCompare(stewItemA.spotName),
     },
   ],

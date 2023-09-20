@@ -26,7 +26,7 @@ export interface ErrorLoadingSegmentStewState
 interface StewStateBase<SegmentStatus extends string> {
   segmentStatus: SegmentStatus;
   segmentKey: string;
-  segmentSortKey: string;
+  segmentSortOptionKey: string;
   segmentViewKey: string;
   viewSearchQuery: string;
   viewPageIndex: number;

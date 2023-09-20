@@ -8,6 +8,7 @@ import { getStewResourceMap } from "../../shared/general/getStewResourceMap.ts";
 import { StewApp } from "./StewApp.tsx";
 import { StewState } from "./StewState.ts";
 import { fetchSegmentComponents } from "./fetchSegmentComponents.ts";
+import { findMapItem } from "./findMapItem.ts";
 
 (window as unknown as any).h = preactH;
 loadStewApp();
@@ -48,30 +49,35 @@ async function loadStewResources() {
   const [_, urlSegmentKey, urlViewKey] = window.location.pathname.split("/");
   const initialSearchParams = new URLSearchParams(window.location.search);
   const initialSegmentConfig =
-    Object.values(stewConfig.stewSegments).find(
-      (someSegmentConfig) => someSegmentConfig.segmentKey === urlSegmentKey
-    ) ??
-    Object.values(stewConfig.stewSegments).find(
-      (someSegmentConfig) => someSegmentConfig.segmentIndex === 0
-    ) ??
+    stewConfig.stewSegments[urlSegmentKey] ??
+    findMapItem({
+      itemTargetValue: 0,
+      itemSearchKey: "segmentIndex",
+      someMap: stewConfig.stewSegments,
+    }) ??
     throwInvalidPathError("initialSegmentConfig");
   const fetchInitialSegmentComponentsResult = fetchSegmentComponents({
     stewResourceMap,
     someSegmentKey: initialSegmentConfig.segmentKey,
   });
   const initialSegmentViewConfig =
-    Object.values(initialSegmentConfig.segmentViews).find(
-      (someViewConfig) => someViewConfig.viewKey === urlViewKey
-    ) ??
-    Object.values(initialSegmentConfig.segmentViews).find(
-      (someViewConfig) => someViewConfig.viewIndex === 0
-    ) ??
+    initialSegmentConfig.segmentViews[urlViewKey] ??
+    findMapItem({
+      itemTargetValue: 0,
+      itemSearchKey: "viewIndex",
+      someMap: initialSegmentConfig.segmentViews,
+    }) ??
     throwInvalidPathError("initialSegmentViewConfig");
   const initialSegmentSortOptionConfig =
-    initialSegmentConfig.segmentSortOptions.find(
-      (someOptionConfig) =>
-        someOptionConfig.sortOptionKey === initialSearchParams.get("sort")
-    ) ?? initialSegmentConfig.segmentSortOptions[0];
+    initialSegmentConfig.segmentSortOptions[
+      initialSearchParams.get("sort") ?? "__EMPTY_SORT_KEY__"
+    ] ??
+    findMapItem({
+      itemTargetValue: 0,
+      itemSearchKey: "sortOptionIndex",
+      someMap: initialSegmentConfig.segmentSortOptions,
+    }) ??
+    throwInvalidPathError("initialSegmentSortOptionConfig");
   const [
     [
       initialSegmentDataset,
@@ -96,7 +102,7 @@ async function loadStewResources() {
       segmentCss: initialSegmentCss,
       segmentKey: initialSegmentConfig.segmentKey,
       segmentViewKey: initialSegmentViewConfig.viewKey,
-      segmentSortKey: initialSegmentSortOptionConfig.sortOptionKey,
+      segmentSortOptionKey: initialSegmentSortOptionConfig.sortOptionKey,
       viewSearchQuery: initialSearchParams.get("search") ?? "",
     } satisfies StewState,
   };

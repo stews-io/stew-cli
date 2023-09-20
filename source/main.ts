@@ -1,8 +1,6 @@
 import { Esbuild } from "../shared/deps/esbuild/mod.ts";
 import { FunctionComponent, h as preactH } from "../shared/deps/preact/mod.ts";
-import { Zod } from "../shared/deps/zod/mod.ts";
 import {
-  BundleModuleApi,
   bundleModule,
   bundlePreactModule,
   loadModuleBundle,
@@ -208,19 +206,21 @@ async function loadAndWriteSegmentModule(api: LoadAndWriteSegmentModuleApi) {
       someSegmentSourceConfig.segmentModulePath
     ),
   });
-  const segmentModule = await loadModuleBundle({
+  const segmentModule = loadModuleBundle({
     moduleExportKey: "default",
     moduleIifeBundleScript: segmentModuleIifeScript,
   });
   loadedSegmentModules[someSegmentSourceConfig.segmentKey] = segmentModule;
-  await Deno.writeTextFile(
-    `${buildDirectoryMap.modulesDirectoryPath}/${someSegmentSourceConfig.segmentKey}.js`,
-    segmentModuleIifeScript
-  );
-  await Deno.writeTextFile(
-    `${buildDirectoryMap.stylesDirectoryPath}/${someSegmentSourceConfig.segmentKey}.css`,
-    segmentModuleCss
-  );
+  await Promise.all([
+    Deno.writeTextFile(
+      `${buildDirectoryMap.modulesDirectoryPath}/${someSegmentSourceConfig.segmentKey}.js`,
+      segmentModuleIifeScript
+    ),
+    Deno.writeTextFile(
+      `${buildDirectoryMap.stylesDirectoryPath}/${someSegmentSourceConfig.segmentKey}.css`,
+      segmentModuleCss
+    ),
+  ]);
 }
 
 interface GetStewBuildConfigApi
@@ -241,7 +241,7 @@ function getStewBuildConfig(api: GetStewBuildConfigApi) {
         buildSegmentsResult[someSourceSegmentConfig.segmentKey] = {
           segmentIndex,
           segmentKey: someSourceSegmentConfig.segmentKey,
-          segmentSearchLabel: someSourceSegmentConfig.segmentSearchLabel,
+          segmentLabel: someSourceSegmentConfig.segmentLabel,
           segmentViews: someSourceSegmentConfig.segmentViews.reduce<
             BuildStewConfig["stewSegments"][string]["segmentViews"]
           >((buildViewsResult, someViewSourceConfig, viewIndex) => {
@@ -254,10 +254,23 @@ function getStewBuildConfig(api: GetStewBuildConfigApi) {
           }, {}),
           segmentSortOptions: loadedSegmentModules[
             someSourceSegmentConfig.segmentKey
-          ].segmentSortOptions.map((someSegmentSortOption) => ({
-            sortOptionKey: someSegmentSortOption.sortOptionKey,
-            sortOptionLabel: someSegmentSortOption.sortOptionLabel,
-          })),
+          ].segmentSortOptions.reduce<
+            BuildStewConfig["stewSegments"][string]["segmentSortOptions"]
+          >(
+            (
+              segmentSortOptionsResult,
+              someSegmentSortOption,
+              sortOptionIndex
+            ) => {
+              segmentSortOptionsResult[someSegmentSortOption.sortOptionKey] = {
+                sortOptionIndex,
+                sortOptionKey: someSegmentSortOption.sortOptionKey,
+                sortOptionLabel: someSegmentSortOption.sortOptionLabel,
+              };
+              return segmentSortOptionsResult;
+            },
+            {}
+          ),
         };
         return buildSegmentsResult;
       }, {}),
