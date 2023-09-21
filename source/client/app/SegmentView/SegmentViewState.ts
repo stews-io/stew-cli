@@ -1,9 +1,9 @@
 import {
   BuildSegmentItem,
   SegmentDataset,
-} from "../../../shared/types/SegmentDataset.ts";
-import { SegmentModule } from "../../../shared/types/SegmentModule.ts";
-import { SegmentViewsMap } from "../../../shared/types/SegmentViewsMap.ts";
+  SegmentModule,
+} from "../../../../mod.ts";
+import { SegmentViewsMap } from "../../../../shared/types/SegmentViewsMap.ts";
 
 export type SegmentViewState =
   | SegmentLoadedStewState

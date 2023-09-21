@@ -5,10 +5,10 @@ import {
 import { throwInvalidPathError } from "../../../shared/general/throwInvalidPathError.ts";
 import { BuildStewConfig } from "../../../shared/types/StewConfig.ts";
 import { getStewResourceMap } from "../../shared/general/getStewResourceMap.ts";
-import { SegmentViewState } from "./SegmentViewState.ts";
+import { SegmentViewState } from "./SegmentView/SegmentViewState.ts";
+import { fetchSegmentComponents } from "./SegmentView/fetchSegmentComponents.ts";
 import { StewApp } from "./StewApp.tsx";
-import { fetchSegmentComponents } from "./fetchSegmentComponents.ts";
-import { findMapItem } from "./findMapItem.ts";
+import { findMapItem } from "./general/findMapItem.ts";
 
 (window as unknown as any).h = preactH;
 loadStewApp();
