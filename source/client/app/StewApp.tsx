@@ -84,6 +84,20 @@ export function StewApp(props: StewAppProps) {
           : [],
     };
   }, [stewState]);
+  const { viewPageCount, viewPageItems } = useMemo(() => {
+    const pageItemSize = 6;
+    const viewPageCount =
+      Math.ceil(searchedAndSortedViewItems.length / pageItemSize) || 1;
+    const pageIndexStart = pageItemSize * stewState.viewPageIndex;
+    const viewPageItems = searchedAndSortedViewItems.slice(
+      pageIndexStart,
+      pageIndexStart + pageItemSize
+    );
+    return {
+      viewPageCount,
+      viewPageItems,
+    };
+  }, [searchedAndSortedViewItems, stewState.viewPageIndex]);
   return (
     <div>
       <div style={{ display: "flex", flexDirection: "row" }}>
@@ -215,13 +229,69 @@ export function StewApp(props: StewAppProps) {
           }}
         />
       </div>
+      <div style={{ display: "flex", flexDirection: "row" }}>
+        <div
+          style={{
+            padding: 8,
+            color: "orange",
+            cursor: "pointer",
+            fontWeight: 700,
+          }}
+          onClick={() => {
+            if (stewState.viewPageIndex > 0) {
+              setStewState((currentStewState) => ({
+                ...currentStewState,
+                viewPageIndex: currentStewState.viewPageIndex - 1,
+              }));
+            }
+          }}
+        >
+          prev
+        </div>
+        <div
+          style={{
+            padding: 8,
+            color: "orange",
+            cursor: "pointer",
+            fontWeight: 700,
+          }}
+          onClick={() => {
+            if (stewState.viewPageIndex < viewPageCount - 1) {
+              setStewState((currentStewState) => ({
+                ...currentStewState,
+                viewPageIndex: currentStewState.viewPageIndex + 1,
+              }));
+            }
+          }}
+        >
+          next
+        </div>
+        <div
+          style={{
+            padding: 8,
+            color: "black",
+            cursor: "pointer",
+            fontWeight: 700,
+            fontStyle: "italic",
+          }}
+        >{`${stewState.viewPageIndex + 1} / ${viewPageCount}`}</div>
+      </div>
       {stewState.segmentStatus === "segmentLoaded" ? (
         <Fragment>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            {searchedAndSortedViewItems.map((someViewItem) => (
-              <stewState.segmentModule.SegmentItemDisplay
-                someSegmentItem={someViewItem}
-              />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              padding: 8,
+              paddingTop: 12,
+            }}
+          >
+            {viewPageItems.map((someViewItem) => (
+              <div style={{ paddingBottom: 8 }}>
+                <stewState.segmentModule.SegmentItemDisplay
+                  someSegmentItem={someViewItem}
+                />
+              </div>
             ))}
           </div>
           <style>{stewState.segmentCss}</style>
