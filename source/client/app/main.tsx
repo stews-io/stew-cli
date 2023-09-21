@@ -5,9 +5,9 @@ import {
 import { throwInvalidPathError } from "../../../shared/general/throwInvalidPathError.ts";
 import { BuildStewConfig } from "../../../shared/types/StewConfig.ts";
 import { getStewResourceMap } from "../../shared/general/getStewResourceMap.ts";
-import { SegmentViewState } from "./SegmentView/SegmentViewState.ts";
-import { fetchSegmentComponents } from "./SegmentView/fetchSegmentComponents.ts";
 import { StewApp } from "./StewApp.tsx";
+import { StewSegmentState } from "./StewSegment/StewSegmentState.ts";
+import { fetchSegmentComponents } from "./StewSegment/fetchSegmentComponents.ts";
 import { findMapItem } from "./general/findMapItem.ts";
 
 (window as unknown as any).h = preactH;
@@ -46,7 +46,7 @@ async function loadStewResources() {
     (getConfigResponse) =>
       getConfigResponse.json() as unknown as BuildStewConfig
   );
-  const [_, urlSegmentKey, urlViewKey] = window.location.pathname.split("/");
+  const [_, urlSegmentKey] = window.location.pathname.split("/");
   const initialSearchParams = new URLSearchParams(window.location.search);
   const initialSegmentConfig =
     stewConfig.stewSegments[urlSegmentKey] ??
@@ -61,7 +61,9 @@ async function loadStewResources() {
     someSegmentKey: initialSegmentConfig.segmentKey,
   });
   const initialSegmentViewConfig =
-    initialSegmentConfig.segmentViews[urlViewKey] ??
+    initialSegmentConfig.segmentViews[
+      initialSearchParams.get("view") ?? "__EMPTY_VIEW_KEY__"
+    ] ??
     findMapItem({
       itemTargetValue: 0,
       itemSearchKey: "viewIndex",
@@ -104,6 +106,6 @@ async function loadStewResources() {
       segmentViewKey: initialSegmentViewConfig.viewKey,
       segmentSortOptionKey: initialSegmentSortOptionConfig.sortOptionKey,
       viewSearchQuery: initialSearchParams.get("search") ?? "",
-    } satisfies SegmentViewState,
+    } satisfies StewSegmentState,
   };
 }
