@@ -92,7 +92,7 @@ async function loadStewResources() {
   return {
     stewResourceMap,
     stewConfig,
-    // what if errorLoadingSegment
+    // what if errorLoadingSegment => currently splash page just hangs without notifying user
     initialStewState: {
       viewPageIndex: 0,
       segmentStatus: "segmentLoaded",

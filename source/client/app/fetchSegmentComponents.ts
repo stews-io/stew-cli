@@ -1,3 +1,4 @@
+import { BuildSegmentItem } from "../../../mod.ts";
 import {
   SegmentDataset,
   SegmentItem,
@@ -15,8 +16,8 @@ export function fetchSegmentComponents(
   api: FetchSegmentComponentsApi
 ): Promise<
   [
-    segmentDataset: SegmentDataset<SegmentItem>,
-    segmentModule: SegmentModule<SegmentItem>,
+    segmentDataset: SegmentDataset<BuildSegmentItem>,
+    segmentModule: SegmentModule<BuildSegmentItem>,
     segmentViews: SegmentViewsMap,
     segmentCss: string
   ]
