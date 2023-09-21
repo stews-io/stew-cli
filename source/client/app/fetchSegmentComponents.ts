@@ -12,16 +12,16 @@ export interface FetchSegmentComponentsApi {
   someSegmentKey: string;
 }
 
+export type FetchSegmentComponentsResult = [
+  segmentDataset: SegmentDataset<BuildSegmentItem>,
+  segmentModule: SegmentModule<BuildSegmentItem>,
+  segmentViews: SegmentViewsMap,
+  segmentCss: string
+];
+
 export function fetchSegmentComponents(
   api: FetchSegmentComponentsApi
-): Promise<
-  [
-    segmentDataset: SegmentDataset<BuildSegmentItem>,
-    segmentModule: SegmentModule<BuildSegmentItem>,
-    segmentViews: SegmentViewsMap,
-    segmentCss: string
-  ]
-> {
+): Promise<FetchSegmentComponentsResult> {
   const { stewResourceMap, someSegmentKey } = api;
   return Promise.all([
     fetch(
