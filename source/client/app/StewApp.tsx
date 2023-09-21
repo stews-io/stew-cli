@@ -10,7 +10,7 @@ import { throwInvalidPathError } from "../../../shared/general/throwInvalidPathE
 import { BuildSegmentItem } from "../../../shared/types/SegmentDataset.ts";
 import { BuildStewConfig } from "../../../shared/types/StewConfig.ts";
 import { StewResourceMap } from "../../shared/types/StewResourceMap.ts";
-import { StewState } from "./StewState.ts";
+import { SegmentViewState } from "./SegmentViewState.ts";
 import {
   FetchSegmentComponentsResult,
   fetchSegmentComponents,
@@ -20,41 +20,103 @@ import { findMapItem } from "./findMapItem.ts";
 export interface StewAppProps {
   stewConfig: BuildStewConfig;
   stewResourceMap: StewResourceMap;
-  initialStewState: StewState;
+  initialSegmentViewState: SegmentViewState;
 }
 
 export function StewApp(props: StewAppProps) {
-  const { initialStewState, stewConfig, stewResourceMap } = props;
-  const { stewState, setStewState } = useStewState({
-    initialStewState,
-    stewResourceMap,
-    updateSegmentComponents: ([
-      nextSegmentDataset,
-      nextSegmentModule,
-      nextSegmentViewsMap,
-      nextSegmentCss,
-    ]) => {
-      setStewState((currentStewState) => ({
-        ...currentStewState,
-        segmentStatus: "segmentLoaded",
-        segmentDataset: nextSegmentDataset,
-        segmentModule: nextSegmentModule,
-        segmentViewsMap: nextSegmentViewsMap,
-        segmentCss: nextSegmentCss,
-      }));
-    },
-  });
-  const { segmentView } = useSegmentView({
+  const { stewConfig, stewResourceMap, initialSegmentViewState } = props;
+  const { segmentViewState, segmentViewData, segmentViewMutations } =
+    useSegmentView({
+      stewConfig,
+      stewResourceMap,
+      initialSegmentViewState,
+    });
+  return (
+    <SegmentViewDisplay
+      stewConfig={stewConfig}
+      segmentViewState={segmentViewState}
+      segmentViewData={segmentViewData}
+      selectStewSegment={segmentViewMutations.selectStewSegment}
+      selectSegmentView={segmentViewMutations.selectSegmentView}
+      selectSegmentSortOption={segmentViewMutations.selectSegmentSortOption}
+      updateSegmentViewSearch={segmentViewMutations.updateSegmentViewSearch}
+      clearSegmentViewSearch={segmentViewMutations.clearSegmentViewSearch}
+      gotoPreviousViewPage={segmentViewMutations.gotoPreviousViewPage}
+      gotoNextViewPage={segmentViewMutations.gotoNextViewPage}
+    />
+  );
+}
+
+interface UseSegmentViewApi
+  extends Pick<
+    StewAppProps,
+    "stewConfig" | "stewResourceMap" | "initialSegmentViewState"
+  > {}
+
+interface UseSegmentViewResult
+  extends Pick<UseSegmentViewMutationsResult, "segmentViewMutations">,
+    Pick<UseSegmentViewDataResult, "segmentViewData"> {
+  segmentViewState: SegmentViewState;
+}
+
+function useSegmentView(api: UseSegmentViewApi): UseSegmentViewResult {
+  const { initialSegmentViewState, stewConfig, stewResourceMap } = api;
+  const [segmentViewState, setSegmentViewState] = useState<SegmentViewState>(
+    initialSegmentViewState
+  );
+  const { segmentViewMutations } = useSegmentViewMutations({
     stewConfig,
-    stewState,
+    setSegmentViewState,
+  });
+  const { segmentViewData } = useSegmentViewData({
+    stewConfig,
+    segmentViewState,
     viewPageItemSize: 6,
   });
-  return (
-    <SegmentViewPage
-      stewConfig={stewConfig}
-      stewState={stewState}
-      segmentView={segmentView}
-      selectStewSegment={(nextSegmentKey) => {
+  useSegmentComponents({
+    stewResourceMap,
+    segmentViewState,
+    updateSegmentComponents: segmentViewMutations.updateSegmentComponents,
+  });
+  useSegmentViewUrl({
+    segmentViewState,
+  });
+  return {
+    segmentViewState,
+    segmentViewMutations,
+    segmentViewData,
+  };
+}
+
+interface UseSegmentViewMutationsApi
+  extends Pick<UseSegmentViewApi, "stewConfig"> {
+  setSegmentViewState: StateUpdater<SegmentViewState>;
+}
+
+interface UseSegmentViewMutationsResult {
+  segmentViewMutations: SegmentViewMutations;
+}
+
+interface SegmentViewMutations {
+  selectStewSegment: (nextSegmentKey: string) => void;
+  updateSegmentComponents: (
+    nextSegmentComponents: FetchSegmentComponentsResult
+  ) => void;
+  selectSegmentView: (nextSegmentViewKey: string) => void;
+  selectSegmentSortOption: (nextSegmentSortOptionKey: string) => void;
+  updateSegmentViewSearch: (nextViewSearchQuery: string) => void;
+  clearSegmentViewSearch: () => void;
+  gotoPreviousViewPage: () => void;
+  gotoNextViewPage: () => void;
+}
+
+function useSegmentViewMutations(
+  api: UseSegmentViewMutationsApi
+): UseSegmentViewMutationsResult {
+  const { stewConfig, setSegmentViewState } = api;
+  const segmentViewMutations = useMemo<SegmentViewMutations>(
+    () => ({
+      selectStewSegment: (nextSegmentKey) => {
         const defaultSegmentViewConfig =
           findMapItem({
             itemTargetValue: 0,
@@ -67,101 +129,94 @@ export function StewApp(props: StewAppProps) {
             itemSearchKey: "sortOptionIndex",
             someMap: stewConfig.stewSegments[nextSegmentKey].segmentSortOptions,
           }) ?? throwInvalidPathError("defaultSegmentSortOptionConfig");
-        setStewState({
-          segmentStatus: "loadingSegment",
+        setSegmentViewState({
           viewPageIndex: 0,
           viewSearchQuery: "",
-          segmentKey: nextSegmentKey,
+          segmentStatus: "loadingSegment",
           segmentViewKey: defaultSegmentViewConfig.viewKey,
           segmentSortOptionKey: defaultSegmentSortOptionConfig.sortOptionKey,
+          segmentKey: nextSegmentKey,
         });
-      }}
-      selectSegmentView={(nextSegmentViewKey) => {
-        setStewState((currentStewState) => ({
-          ...currentStewState,
+      },
+      updateSegmentComponents: ([
+        nextSegmentDataset,
+        nextSegmentModule,
+        nextSegmentViewsMap,
+        nextSegmentCss,
+      ]) => {
+        setSegmentViewState((currentSegmentViewState) => ({
+          ...currentSegmentViewState,
+          segmentStatus: "segmentLoaded",
+          segmentDataset: nextSegmentDataset,
+          segmentModule: nextSegmentModule,
+          segmentViewsMap: nextSegmentViewsMap,
+          segmentCss: nextSegmentCss,
+        }));
+      },
+      selectSegmentView: (nextSegmentViewKey) => {
+        setSegmentViewState((currentSegmentViewState) => ({
+          ...currentSegmentViewState,
           viewPageIndex: 0,
           segmentViewKey: nextSegmentViewKey,
         }));
-      }}
-      selectSegmentSortOption={(nextSegmentSortOptionKey) => {
-        setStewState((currentStewState) => ({
-          ...currentStewState,
+      },
+      selectSegmentSortOption: (nextSegmentSortOptionKey) => {
+        setSegmentViewState((currentSegmentViewState) => ({
+          ...currentSegmentViewState,
           viewPageIndex: 0,
           segmentSortOptionKey: nextSegmentSortOptionKey,
         }));
-      }}
-      updateSegmentViewSearch={(nextViewSearchQuery) => {
-        setStewState((currentStewState) => ({
-          ...currentStewState,
+      },
+      updateSegmentViewSearch: (nextViewSearchQuery) => {
+        setSegmentViewState((currentSegmentViewState) => ({
+          ...currentSegmentViewState,
           viewPageIndex: 0,
           viewSearchQuery: nextViewSearchQuery,
         }));
-      }}
-      clearSegmentViewSearch={() => {
-        setStewState((currentStewState) => ({
-          ...currentStewState,
+      },
+      clearSegmentViewSearch: () => {
+        setSegmentViewState((currentSegmentViewState) => ({
+          ...currentSegmentViewState,
           viewPageIndex: 0,
           viewSearchQuery: "",
         }));
-      }}
-      gotoPreviousViewPage={() => {
-        setStewState((currentStewState) => ({
-          ...currentStewState,
-          viewPageIndex: currentStewState.viewPageIndex - 1,
+      },
+      gotoPreviousViewPage: () => {
+        setSegmentViewState((currentSegmentViewState) => ({
+          ...currentSegmentViewState,
+          viewPageIndex: currentSegmentViewState.viewPageIndex - 1,
         }));
-      }}
-      gotoNextViewPage={() => {
-        setStewState((currentStewState) => ({
-          ...currentStewState,
-          viewPageIndex: currentStewState.viewPageIndex + 1,
+      },
+      gotoNextViewPage: () => {
+        setSegmentViewState((currentSegmentViewState) => ({
+          ...currentSegmentViewState,
+          viewPageIndex: currentSegmentViewState.viewPageIndex - 1,
         }));
-      }}
-    />
+      },
+    }),
+    [stewConfig, setSegmentViewState]
   );
+  return {
+    segmentViewMutations,
+  };
 }
 
-interface UseStewStateApi
-  extends Pick<StewAppProps, "initialStewState" | "stewResourceMap"> {
-  updateSegmentComponents: (
-    nextSegmentComponents: FetchSegmentComponentsResult
-  ) => void;
+interface UseSegmentComponentsApi
+  extends Pick<UseSegmentViewApi, "stewResourceMap">,
+    Pick<SegmentViewMutations, "updateSegmentComponents"> {
+  segmentViewState: SegmentViewState;
 }
 
-interface UseStewStateResult {
-  stewState: StewState;
-  setStewState: StateUpdater<StewState>;
-}
-
-function useStewState(api: UseStewStateApi): UseStewStateResult {
-  const { initialStewState, stewResourceMap, updateSegmentComponents } = api;
+function useSegmentComponents(api: UseSegmentComponentsApi) {
+  const { segmentViewState, stewResourceMap, updateSegmentComponents } = api;
   const segmentSwitchCountRef = useRef(0);
-  const [stewState, setStewState] = useState<StewState>(initialStewState);
   useEffect(() => {
-    const nextUrlSearchParams = new URLSearchParams();
-    nextUrlSearchParams.set("sort", `${stewState.segmentSortOptionKey}`);
-    if (stewState.viewSearchQuery.length > 0) {
-      nextUrlSearchParams.set("search", stewState.viewSearchQuery);
-    }
-    window.history.replaceState(
-      null,
-      "noop",
-      `/${stewState.segmentKey}/${
-        stewState.segmentViewKey
-      }?${nextUrlSearchParams.toString()}`
-    );
-  }, [
-    stewState.segmentKey,
-    stewState.segmentViewKey,
-    stewState.segmentSortOptionKey,
-    stewState.viewSearchQuery,
-  ]);
-  useEffect(() => {
-    if (stewState.segmentStatus === "loadingSegment") {
+    if (segmentViewState.segmentStatus === "loadingSegment") {
       segmentSwitchCountRef.current += 1;
       const correspondingSwitchCount = segmentSwitchCountRef.current;
       fetchSegmentComponents({
         stewResourceMap,
-        someSegmentKey: stewState.segmentKey,
+        someSegmentKey: segmentViewState.segmentKey,
       }).then((nextSegmentComponents) => {
         // guard against updating stewState with stale data
         if (correspondingSwitchCount === segmentSwitchCountRef.current) {
@@ -169,37 +224,39 @@ function useStewState(api: UseStewStateApi): UseStewStateResult {
         }
       });
     }
-  }, [stewState.segmentKey]);
-  return { stewState, setStewState };
+  }, [segmentViewState.segmentKey]);
 }
 
-interface UseSegmentViewApi
-  extends Pick<StewAppProps, "stewConfig">,
-    Pick<UseStewStateResult, "stewState"> {
+interface UseSegmentViewDataApi extends Pick<UseSegmentViewApi, "stewConfig"> {
   viewPageItemSize: number;
+  segmentViewState: SegmentViewState;
 }
 
-interface UseSegmentViewResult {
-  segmentView: {
-    pagesCount: number;
-    pageItems: Array<BuildSegmentItem>;
-  };
+interface UseSegmentViewDataResult {
+  segmentViewData: SegmentViewData;
 }
 
-function useSegmentView(api: UseSegmentViewApi): UseSegmentViewResult {
-  const { stewState, stewConfig, viewPageItemSize } = api;
+interface SegmentViewData {
+  viewPagesCount: number;
+  viewPageItems: Array<BuildSegmentItem>;
+}
+
+function useSegmentViewData(
+  api: UseSegmentViewDataApi
+): UseSegmentViewDataResult {
+  const { segmentViewState, stewConfig, viewPageItemSize } = api;
   const { searchedAndSortedViewItems } = useMemo(
     () => ({
       searchedAndSortedViewItems:
-        stewState.segmentStatus === "segmentLoaded"
-          ? stewState.segmentViewsMap[stewState.segmentViewKey]
+        segmentViewState.segmentStatus === "segmentLoaded"
+          ? segmentViewState.segmentViewsMap[segmentViewState.segmentViewKey]
               .reduce<Array<BuildSegmentItem>>(
                 (searchedAndSortedViewItemsResult, someSegmentItemIndex) => {
                   const currentSegmentViewItem =
-                    stewState.segmentDataset[someSegmentItemIndex];
+                    segmentViewState.segmentDataset[someSegmentItemIndex];
                   if (
                     currentSegmentViewItem.__segment_item_search_space.includes(
-                      stewState.viewSearchQuery
+                      segmentViewState.viewSearchQuery
                     )
                   ) {
                     searchedAndSortedViewItemsResult.push(
@@ -211,26 +268,26 @@ function useSegmentView(api: UseSegmentViewApi): UseSegmentViewResult {
                 []
               )
               .sort(
-                stewState.segmentModule.segmentSortOptions[
-                  stewConfig.stewSegments[stewState.segmentKey]
-                    .segmentSortOptions[stewState.segmentSortOptionKey]
+                segmentViewState.segmentModule.segmentSortOptions[
+                  stewConfig.stewSegments[segmentViewState.segmentKey]
+                    .segmentSortOptions[segmentViewState.segmentSortOptionKey]
                     .sortOptionIndex
                 ].getSortOrder
               )
           : [],
     }),
     [
-      stewState.segmentKey,
-      stewState.segmentStatus,
-      stewState.segmentViewKey,
-      stewState.viewSearchQuery,
-      stewState.segmentSortOptionKey,
+      segmentViewState.segmentKey,
+      segmentViewState.segmentStatus,
+      segmentViewState.segmentViewKey,
+      segmentViewState.viewSearchQuery,
+      segmentViewState.segmentSortOptionKey,
     ]
   );
   const { viewPageItems, viewPagesCount } = useMemo(() => {
     const viewPagesCountResult =
       Math.ceil(searchedAndSortedViewItems.length / viewPageItemSize) || 1;
-    const pageIndexStart = viewPageItemSize * stewState.viewPageIndex;
+    const pageIndexStart = viewPageItemSize * segmentViewState.viewPageIndex;
     const viewPageItemsResult = searchedAndSortedViewItems.slice(
       pageIndexStart,
       pageIndexStart + viewPageItemSize
@@ -239,32 +296,60 @@ function useSegmentView(api: UseSegmentViewApi): UseSegmentViewResult {
       viewPagesCount: viewPagesCountResult,
       viewPageItems: viewPageItemsResult,
     };
-  }, [searchedAndSortedViewItems, stewState.viewPageIndex]);
+  }, [searchedAndSortedViewItems, segmentViewState.viewPageIndex]);
   return {
-    segmentView: {
-      pageItems: viewPageItems,
-      pagesCount: viewPagesCount,
+    segmentViewData: {
+      viewPageItems,
+      viewPagesCount,
     },
   };
 }
 
-interface SegmentViewPageProps
-  extends Pick<StewAppProps, "stewConfig">,
-    Pick<UseStewStateResult, "stewState">,
-    Pick<UseSegmentViewResult, "segmentView"> {
-  selectStewSegment: (nextSegmentKey: string) => void;
-  selectSegmentView: (nextSegmentViewKey: string) => void;
-  selectSegmentSortOption: (nextSegmentSortOptionKey: string) => void;
-  updateSegmentViewSearch: (nextViewSearchQuery: string) => void;
-  clearSegmentViewSearch: () => void;
-  gotoPreviousViewPage: () => void;
-  gotoNextViewPage: () => void;
+interface UseSegmentViewUrlApi {
+  segmentViewState: SegmentViewState;
 }
 
-function SegmentViewPage(props: SegmentViewPageProps) {
+function useSegmentViewUrl(api: UseSegmentViewUrlApi) {
+  const { segmentViewState } = api;
+  useEffect(() => {
+    const nextUrlSearchParams = new URLSearchParams();
+    nextUrlSearchParams.set("sort", `${segmentViewState.segmentSortOptionKey}`);
+    if (segmentViewState.viewSearchQuery.length > 0) {
+      nextUrlSearchParams.set("search", segmentViewState.viewSearchQuery);
+    }
+    window.history.replaceState(
+      null,
+      "noop",
+      `/${segmentViewState.segmentKey}/${
+        segmentViewState.segmentViewKey
+      }?${nextUrlSearchParams.toString()}`
+    );
+  }, [
+    segmentViewState.segmentKey,
+    segmentViewState.segmentViewKey,
+    segmentViewState.segmentSortOptionKey,
+    segmentViewState.viewSearchQuery,
+  ]);
+}
+
+interface SegmentViewDisplayProps
+  extends Pick<StewAppProps, "stewConfig">,
+    Pick<UseSegmentViewResult, "segmentViewState" | "segmentViewData">,
+    Pick<
+      SegmentViewMutations,
+      | "selectStewSegment"
+      | "selectSegmentView"
+      | "selectSegmentSortOption"
+      | "updateSegmentViewSearch"
+      | "clearSegmentViewSearch"
+      | "gotoPreviousViewPage"
+      | "gotoNextViewPage"
+    > {}
+
+function SegmentViewDisplay(props: SegmentViewDisplayProps) {
   const {
     stewConfig,
-    stewState,
+    segmentViewState,
     selectStewSegment,
     selectSegmentView,
     selectSegmentSortOption,
@@ -272,7 +357,7 @@ function SegmentViewPage(props: SegmentViewPageProps) {
     clearSegmentViewSearch,
     gotoPreviousViewPage,
     gotoNextViewPage,
-    segmentView,
+    segmentViewData,
   } = props;
   return (
     <div>
@@ -290,12 +375,14 @@ function SegmentViewPage(props: SegmentViewPageProps) {
                 cursor: "pointer",
                 fontWeight: 700,
                 textDecoration:
-                  stewState.segmentKey === someSegmentConfig.segmentKey
+                  segmentViewState.segmentKey === someSegmentConfig.segmentKey
                     ? "underline"
                     : "none",
               }}
               onClick={() => {
-                if (stewState.segmentKey !== someSegmentConfig.segmentKey) {
+                if (
+                  segmentViewState.segmentKey !== someSegmentConfig.segmentKey
+                ) {
                   selectStewSegment(someSegmentConfig.segmentKey);
                 }
               }}
@@ -306,7 +393,7 @@ function SegmentViewPage(props: SegmentViewPageProps) {
       </div>
       <div style={{ display: "flex", flexDirection: "row" }}>
         {Object.values(
-          stewConfig.stewSegments[stewState.segmentKey].segmentViews
+          stewConfig.stewSegments[segmentViewState.segmentKey].segmentViews
         )
           .sort((viewA, viewB) => viewA.viewIndex - viewB.viewIndex)
           .map((someViewConfig) => (
@@ -317,12 +404,14 @@ function SegmentViewPage(props: SegmentViewPageProps) {
                 cursor: "pointer",
                 fontWeight: 700,
                 textDecoration:
-                  stewState.segmentViewKey === someViewConfig.viewKey
+                  segmentViewState.segmentViewKey === someViewConfig.viewKey
                     ? "underline"
                     : "none",
               }}
               onClick={() => {
-                if (stewState.segmentViewKey !== someViewConfig.viewKey) {
+                if (
+                  segmentViewState.segmentViewKey !== someViewConfig.viewKey
+                ) {
                   selectSegmentView(someViewConfig.viewKey);
                 }
               }}
@@ -333,7 +422,8 @@ function SegmentViewPage(props: SegmentViewPageProps) {
       </div>
       <div style={{ display: "flex", flexDirection: "row" }}>
         {Object.values(
-          stewConfig.stewSegments[stewState.segmentKey].segmentSortOptions
+          stewConfig.stewSegments[segmentViewState.segmentKey]
+            .segmentSortOptions
         )
           .sort(
             (sortOptionA, sortOptionB) =>
@@ -347,14 +437,14 @@ function SegmentViewPage(props: SegmentViewPageProps) {
                 cursor: "pointer",
                 fontWeight: 700,
                 textDecoration:
-                  stewState.segmentSortOptionKey ===
+                  segmentViewState.segmentSortOptionKey ===
                   someSortOptionConfig.sortOptionKey
                     ? "underline"
                     : "none",
               }}
               onClick={() => {
                 if (
-                  stewState.segmentSortOptionKey !==
+                  segmentViewState.segmentSortOptionKey !==
                   someSortOptionConfig.sortOptionKey
                 ) {
                   selectSegmentSortOption(someSortOptionConfig.sortOptionKey);
@@ -367,7 +457,7 @@ function SegmentViewPage(props: SegmentViewPageProps) {
       </div>
       <div style={{ display: "flex", flexDirection: "row", padding: 8 }}>
         <input
-          value={stewState.viewSearchQuery}
+          value={segmentViewState.viewSearchQuery}
           onInput={(someInputEvent) => {
             updateSegmentViewSearch(someInputEvent.currentTarget.value);
           }}
@@ -394,7 +484,7 @@ function SegmentViewPage(props: SegmentViewPageProps) {
             fontWeight: 700,
           }}
           onClick={() => {
-            if (stewState.viewPageIndex > 0) {
+            if (segmentViewState.viewPageIndex > 0) {
               gotoPreviousViewPage();
             }
           }}
@@ -409,7 +499,10 @@ function SegmentViewPage(props: SegmentViewPageProps) {
             fontWeight: 700,
           }}
           onClick={() => {
-            if (stewState.viewPageIndex < segmentView.pagesCount - 1) {
+            if (
+              segmentViewState.viewPageIndex <
+              segmentViewData.viewPagesCount - 1
+            ) {
               gotoNextViewPage();
             }
           }}
@@ -424,9 +517,11 @@ function SegmentViewPage(props: SegmentViewPageProps) {
             fontWeight: 700,
             fontStyle: "italic",
           }}
-        >{`${stewState.viewPageIndex + 1} / ${segmentView.pagesCount}`}</div>
+        >{`${segmentViewState.viewPageIndex + 1} / ${
+          segmentViewData.viewPagesCount
+        }`}</div>
       </div>
-      {stewState.segmentStatus === "segmentLoaded" ? (
+      {segmentViewState.segmentStatus === "segmentLoaded" ? (
         <Fragment>
           <div
             style={{
@@ -436,15 +531,15 @@ function SegmentViewPage(props: SegmentViewPageProps) {
               paddingTop: 12,
             }}
           >
-            {segmentView.pageItems.map((someViewItem) => (
+            {segmentViewData.viewPageItems.map((someViewItem) => (
               <div style={{ paddingBottom: 8 }}>
-                <stewState.segmentModule.SegmentItemDisplay
+                <segmentViewState.segmentModule.SegmentItemDisplay
                   someSegmentItem={someViewItem}
                 />
               </div>
             ))}
           </div>
-          <style>{stewState.segmentCss}</style>
+          <style>{segmentViewState.segmentCss}</style>
         </Fragment>
       ) : null}
     </div>

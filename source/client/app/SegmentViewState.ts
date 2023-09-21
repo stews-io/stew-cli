@@ -5,12 +5,13 @@ import {
 import { SegmentModule } from "../../../shared/types/SegmentModule.ts";
 import { SegmentViewsMap } from "../../../shared/types/SegmentViewsMap.ts";
 
-export type StewState =
+export type SegmentViewState =
   | SegmentLoadedStewState
   | LoadingSegmentStewState
   | ErrorLoadingSegmentStewState;
 
-export interface SegmentLoadedStewState extends StewStateBase<"segmentLoaded"> {
+export interface SegmentLoadedStewState
+  extends SegmentViewStateBase<"segmentLoaded"> {
   segmentDataset: SegmentDataset<BuildSegmentItem>;
   segmentModule: SegmentModule<BuildSegmentItem>;
   segmentViewsMap: SegmentViewsMap;
@@ -18,12 +19,12 @@ export interface SegmentLoadedStewState extends StewStateBase<"segmentLoaded"> {
 }
 
 export interface LoadingSegmentStewState
-  extends StewStateBase<"loadingSegment"> {}
+  extends SegmentViewStateBase<"loadingSegment"> {}
 
 export interface ErrorLoadingSegmentStewState
-  extends StewStateBase<"errorLoadingSegment"> {}
+  extends SegmentViewStateBase<"errorLoadingSegment"> {}
 
-interface StewStateBase<SegmentStatus extends string> {
+interface SegmentViewStateBase<SegmentStatus extends string> {
   segmentStatus: SegmentStatus;
   segmentKey: string;
   segmentSortOptionKey: string;

@@ -5,8 +5,8 @@ import {
 import { throwInvalidPathError } from "../../../shared/general/throwInvalidPathError.ts";
 import { BuildStewConfig } from "../../../shared/types/StewConfig.ts";
 import { getStewResourceMap } from "../../shared/general/getStewResourceMap.ts";
+import { SegmentViewState } from "./SegmentViewState.ts";
 import { StewApp } from "./StewApp.tsx";
-import { StewState } from "./StewState.ts";
 import { fetchSegmentComponents } from "./fetchSegmentComponents.ts";
 import { findMapItem } from "./findMapItem.ts";
 
@@ -14,13 +14,13 @@ import { findMapItem } from "./findMapItem.ts";
 loadStewApp();
 
 async function loadStewApp() {
-  const { stewConfig, stewResourceMap, initialStewState } =
+  const { stewConfig, stewResourceMap, initialSegmentViewState } =
     await loadStewResources();
   preactRender(
     <StewApp
       stewConfig={stewConfig}
       stewResourceMap={stewResourceMap}
-      initialStewState={initialStewState}
+      initialSegmentViewState={initialSegmentViewState}
     />,
     document.getElementById("appContainer") ??
       throwInvalidPathError("hydrate.appContainer")
@@ -93,7 +93,7 @@ async function loadStewResources() {
     stewResourceMap,
     stewConfig,
     // what if errorLoadingSegment => currently splash page just hangs without notifying user
-    initialStewState: {
+    initialSegmentViewState: {
       viewPageIndex: 0,
       segmentStatus: "segmentLoaded",
       segmentDataset: initialSegmentDataset,
@@ -104,6 +104,6 @@ async function loadStewResources() {
       segmentViewKey: initialSegmentViewConfig.viewKey,
       segmentSortOptionKey: initialSegmentSortOptionConfig.sortOptionKey,
       viewSearchQuery: initialSearchParams.get("search") ?? "",
-    } satisfies StewState,
+    } satisfies SegmentViewState,
   };
 }
