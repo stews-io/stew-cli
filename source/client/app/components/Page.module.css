@@ -1,0 +1,13 @@
+.pageContainer {
+  composes: itemContainer from global;
+}
+
+.pageContentContainer {
+  composes: columnContainer from global;
+  max-width: 512px;
+  flex-basis: 100%;
+}
+
+.pageAccessibilityHeader {
+  display: none;
+}

@@ -14,12 +14,13 @@ import { findMapItem } from "./general/findMapItem.ts";
 loadStewApp();
 
 async function loadStewApp() {
-  const { stewConfig, stewResourceMap, initialSegmentViewState } =
+  const { stewConfig, stewResourceMap, stewAppCss, initialSegmentViewState } =
     await loadStewResources();
   preactRender(
     <StewApp
       stewConfig={stewConfig}
       stewResourceMap={stewResourceMap}
+      stewAppCss={stewAppCss}
       initialSegmentViewState={initialSegmentViewState}
     />,
     document.getElementById("appContainer") ??
@@ -80,6 +81,9 @@ async function loadStewResources() {
       someMap: initialSegmentConfig.segmentSortOptions,
     }) ??
     throwInvalidPathError("initialSegmentSortOptionConfig");
+  const fetchStewAppCss = fetch(`/app.${stewConfig.stewBuildId}.css`).then(
+    (getStewAppCssResponse) => getStewAppCssResponse.text()
+  );
   const [
     [
       initialSegmentDataset,
@@ -87,13 +91,16 @@ async function loadStewResources() {
       initialSegmentViewsMap,
       initialSegmentCss,
     ],
+    stewAppCss,
   ] = await Promise.all([
     fetchInitialSegmentComponentsResult,
+    fetchStewAppCss,
     minimumSplashDisplayPromise,
   ]);
   return {
     stewResourceMap,
     stewConfig,
+    stewAppCss,
     // what if errorLoadingSegment => currently splash page just hangs without notifying user
     initialSegmentViewState: {
       viewPageIndex: 0,

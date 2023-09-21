@@ -1,0 +1,24 @@
+import { ComponentChildren } from "../../../../shared/deps/preact/mod.ts";
+// @deno-types="CssModule"
+import cssModule from "./Page.module.css";
+
+export interface PageProps {
+  pageAriaHeader: string;
+  children: ComponentChildren;
+}
+
+export function Page(props: PageProps) {
+  const { pageAriaHeader, children } = props;
+  return (
+    <div className={cssModule.pageContainer}>
+      <h1 style={{ display: "none" }}>{pageAriaHeader}</h1>
+      <div
+        id={"pageContentContainer"}
+        role={"main"}
+        className={cssModule.pageContentContainer}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
