@@ -1,3 +1,4 @@
+import { useMemo } from "../../../../../shared/deps/preact/hooks.ts";
 import { throwInvalidPathError } from "../../../../../shared/general/throwInvalidPathError.ts";
 import { Bopper } from "../../components/Bopper/Bopper.tsx";
 import {
@@ -98,6 +99,13 @@ function StewInfoPopoverContent(props: StewInfoPopoverContentProps) {
     initialFocusElementRef,
     popoverNavigationItemBlurHandler,
   } = props;
+  const { sortedSegmentOptions } = useMemo(() => {
+    return {
+      sortedSegmentOptions: Object.values(stewConfig.stewSegments).sort(
+        (configA, configB) => configA.segmentIndex - configB.segmentIndex
+      ),
+    };
+  }, [stewConfig]);
   return (
     <div className={cssModule.contentContainer}>
       <div className={cssModule.contentHeader}>
@@ -152,46 +160,42 @@ function StewInfoPopoverContent(props: StewInfoPopoverContentProps) {
         {stewConfig.stewInfo.stewMessage}
       </div>
       <div className={cssModule.segmentLinks}>
-        {Object.values(stewConfig.stewSegments)
-          .sort(
-            (configA, configB) => configA.segmentIndex - configB.segmentIndex
-          )
-          .map((someSegmentConfig) => (
-            <div
-              key={someSegmentConfig.segmentKey}
-              className={cssModule.segmentLinkContainer}
+        {sortedSegmentOptions.map((someSegmentConfig) => (
+          <div
+            key={someSegmentConfig.segmentKey}
+            className={cssModule.segmentLinkContainer}
+          >
+            <Button
+              ariaLabel={`view ${someSegmentConfig.segmentLabel} segment`}
+              ariaDescription={`a button that navigates to the ${someSegmentConfig.segmentLabel} segment`}
+              className={getCssClass(cssModule.segmentLinkButton, [
+                cssModule.activeSegment,
+                someSegmentConfig.segmentKey === stewSegmentState.segmentKey,
+              ])}
+              onBlur={popoverNavigationItemBlurHandler}
+              onSelect={() => {
+                selectStewSegment(someSegmentConfig.segmentKey);
+                anchorElementRef.current instanceof HTMLDivElement
+                  ? anchorElementRef.current.focus()
+                  : throwInvalidPathError(
+                      "StewInfoPopoverContent.CloseButton.onSelect"
+                    );
+              }}
+              onClick={() => {
+                anchorElementRef.current instanceof HTMLDivElement
+                  ? anchorElementRef.current.setAttribute(
+                      "data-pointer-focus",
+                      "true"
+                    )
+                  : throwInvalidPathError(
+                      "StewInfoPopoverContent.CloseButton.onClick"
+                    );
+              }}
             >
-              <Button
-                ariaLabel={`view ${someSegmentConfig.segmentLabel} segment`}
-                ariaDescription={`a button that navigates to the ${someSegmentConfig.segmentLabel} segment`}
-                className={getCssClass(cssModule.segmentLinkButton, [
-                  cssModule.activeSegment,
-                  someSegmentConfig.segmentKey === stewSegmentState.segmentKey,
-                ])}
-                onBlur={popoverNavigationItemBlurHandler}
-                onSelect={() => {
-                  selectStewSegment(someSegmentConfig.segmentKey);
-                  anchorElementRef.current instanceof HTMLDivElement
-                    ? anchorElementRef.current.focus()
-                    : throwInvalidPathError(
-                        "StewInfoPopoverContent.CloseButton.onSelect"
-                      );
-                }}
-                onClick={() => {
-                  anchorElementRef.current instanceof HTMLDivElement
-                    ? anchorElementRef.current.setAttribute(
-                        "data-pointer-focus",
-                        "true"
-                      )
-                    : throwInvalidPathError(
-                        "StewInfoPopoverContent.CloseButton.onClick"
-                      );
-                }}
-              >
-                {someSegmentConfig.segmentLabel}
-              </Button>
-            </div>
-          ))}
+              {someSegmentConfig.segmentLabel}
+            </Button>
+          </div>
+        ))}
       </div>
       <div className={cssModule.contentNavigationFooter}>
         {stewConfig.stewInfo.stewExternalLinks.map(

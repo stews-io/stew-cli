@@ -1,3 +1,4 @@
+import { useMemo } from "../../../../../shared/deps/preact/hooks.ts";
 import { ComponentProps } from "../../../../../shared/deps/preact/mod.ts";
 import { CustomAnchorButtonProps } from "../../components/Button/AnchorButton.tsx";
 import {
@@ -17,6 +18,15 @@ export interface ViewSortSelectProps
 
 export function ViewSortSelect(props: ViewSortSelectProps) {
   const { stewConfig, stewSegmentState, selectSegmentSortOption } = props;
+  const { sortedSegmentSortOptions } = useMemo(() => {
+    return {
+      sortedSegmentSortOptions: Object.values(
+        stewConfig.stewSegments[stewSegmentState.segmentKey].segmentSortOptions
+      ).sort(
+        (configA, configB) => configA.sortOptionIndex - configB.sortOptionIndex
+      ),
+    };
+  }, [stewConfig, stewSegmentState]);
   return (
     <SelectBase
       popoverAriaRole={"listbox"}
@@ -28,11 +38,7 @@ export function ViewSortSelect(props: ViewSortSelectProps) {
       anchorBorderClassName={cssModule.viewSortSelectAnchorBorder}
       fontSizeClassName={cssModule.viewSortSelectFontSize}
       selectIconClassName={cssModule.viewSortSelectIcon}
-      optionList={Object.values(
-        stewConfig.stewSegments[stewSegmentState.segmentKey].segmentSortOptions
-      ).sort(
-        (configA, configB) => configA.sortOptionIndex - configB.sortOptionIndex
-      )}
+      optionList={sortedSegmentSortOptions}
       selectedOption={
         stewConfig.stewSegments[stewSegmentState.segmentKey].segmentSortOptions[
           stewSegmentState.segmentSortOptionKey
