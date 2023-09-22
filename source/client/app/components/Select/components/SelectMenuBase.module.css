@@ -1,0 +1,91 @@
+:root {
+  --select-menu-option-label-padding-inline: 0.2em;
+}
+
+.menuContainer {
+  composes: column-container from global;
+  padding-block-start: var(--theme-spacer);
+  padding-block-end: calc(5 / 4 * var(--theme-spacer));
+  min-width: 128px;
+}
+
+.optionList {
+  composes: column-container from global;
+  max-height: 248px;
+  overflow-y: scroll;
+}
+
+.optionItem {
+  composes: row-container from global;
+  align-items: center;
+  padding-inline: var(--theme-spacer);
+  cursor: pointer;
+
+  &:focus {
+    /* composes: theme-focus-without-outline; */
+    /* "composes" only works inside single class selectors */
+    outline: none;
+    box-shadow: none;
+    border-radius: 0;
+
+    &:not([data-pointer-focus]) .optionLabel {
+      /* composes: theme-focus-outline; */
+      /* "composes" only works inside single class selectors */
+      outline: var(--theme-outline);
+      outline-offset: var(--theme-outline-offset);
+      box-shadow: var(--theme-box-shadow-outline);
+      border-radius: var(--theme-outline-radius);
+    }
+  }
+
+  &:not(:first-child) {
+    margin-top: calc(3 / 4 * var(--theme-spacer));
+  }
+
+  &.latestFocusedOption:not([data-pointer-focus="touch"]) {
+    background-color: var(--theme-text-background-color);
+  }
+
+  &.selectedOption {
+    .optionSelectedIcon {
+      visibility: visible;
+    }
+
+    .optionLabel {
+      font-style: italic;
+    }
+  }
+}
+
+.optionSelectedIcon {
+  flex-shrink: 0;
+  width: 0.85em;
+  height: 0.85em;
+  padding-inline-end: calc(
+    var(--theme-spacer) - var(--theme-outline-width) -
+      var(--select-menu-option-label-padding-inline)
+  );
+  visibility: hidden;
+  stroke: black;
+  stroke-width: 0.75;
+}
+
+.optionLabelContainer {
+  composes: row-container from global;
+  padding: var(--theme-outline-width);
+  overflow: hidden;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.optionLabel {
+  composes: text-ellipsis from global;
+  font-weight: 700;
+  padding-inline: var(--select-menu-option-label-padding-inline);
+}
+
+.optionActionItemContainer {
+  padding-inline-start: calc(
+    3 * var(--theme-spacer) - var(--theme-outline-width)
+  );
+}

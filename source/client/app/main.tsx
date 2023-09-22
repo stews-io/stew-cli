@@ -84,6 +84,25 @@ async function loadStewResources() {
   const fetchStewAppCss = fetch(`/app.${stewConfig.stewBuildId}.css`).then(
     (getStewAppCssResponse) => getStewAppCssResponse.text()
   );
+  const regularRedHatMonoFontFace = new FontFace(
+    "Red Hat Mono",
+    "url(/assets/fonts/RedHatMonoVF.woff2)",
+    {
+      weight: "200 900",
+    }
+  );
+  const italicRedHatMonoFontFace = new FontFace(
+    "Red Hat Mono",
+    "url(/assets/fonts/RedHatMonoVF-Italic.woff2)",
+    {
+      style: "italic",
+      weight: "200 900",
+    }
+  );
+  (document.fonts as any).add(regularRedHatMonoFontFace);
+  (document.fonts as any).add(italicRedHatMonoFontFace);
+  regularRedHatMonoFontFace.load();
+  italicRedHatMonoFontFace.load();
   const [
     [
       initialSegmentDataset,
@@ -95,6 +114,7 @@ async function loadStewResources() {
   ] = await Promise.all([
     fetchInitialSegmentComponentsResult,
     fetchStewAppCss,
+    document.fonts.ready,
     minimumSplashDisplayPromise,
   ]);
   return {

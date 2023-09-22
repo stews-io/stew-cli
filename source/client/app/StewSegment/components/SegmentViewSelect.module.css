@@ -1,0 +1,11 @@
+.viewSelectAnchorBorder {
+  border-bottom: var(--theme-border);
+}
+
+.viewSelectFontSize {
+  font-size: 24px;
+}
+
+.viewAccessibilityHeader {
+  display: none;
+}

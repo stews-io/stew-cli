@@ -1,0 +1,12 @@
+.popoverContainer {
+  composes: theme-border from global;
+  z-index: 1;
+  overflow: hidden;
+  touch-action: none;
+  background-color: var(--theme-background-color);
+}
+
+.preventUnderscroll {
+  -webkit-overflow-scrolling: none;
+  overflow: hidden;
+}

@@ -1,9 +1,9 @@
 .pageContainer {
-  composes: itemContainer from global;
+  composes: item-container from global;
 }
 
 .pageContentContainer {
-  composes: columnContainer from global;
+  composes: column-container from global;
   max-width: 512px;
   flex-basis: 100%;
 }

@@ -1,0 +1,24 @@
+.buttonBase {
+  composes: item-container from global;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus {
+    /* composes: theme-focus-outline; */
+    /* "composes" only works inside single class selectors */
+    outline: var(--theme-outline);
+    outline-offset: var(--theme-outline-offset);
+    box-shadow: var(--theme-box-shadow-outline);
+    border-radius: var(--theme-outline-radius);
+
+    &[data-pointer-focus] {
+      /* composes: theme-focus-without-outline; */
+      /* "composes" only works inside single class selectors */
+      outline: none;
+      box-shadow: none;
+      border-radius: 0;
+    }
+  }
+}
