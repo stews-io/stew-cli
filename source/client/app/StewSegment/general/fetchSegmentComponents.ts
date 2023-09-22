@@ -1,10 +1,10 @@
 import {
   BuildSegmentItem,
   SegmentDataset,
-} from "../../../../shared/types/SegmentDataset.ts";
-import { SegmentModule } from "../../../../shared/types/SegmentModule.ts";
-import { SegmentViewsMap } from "../../../../shared/types/SegmentViewsMap.ts";
-import { StewResourceMap } from "../../../shared/types/StewResourceMap.ts";
+} from "../../../../../shared/types/SegmentDataset.ts";
+import { SegmentModule } from "../../../../../shared/types/SegmentModule.ts";
+import { SegmentViewsMap } from "../../../../../shared/types/SegmentViewsMap.ts";
+import { StewResourceMap } from "../../../../shared/types/StewResourceMap.ts";
 
 export interface FetchSegmentComponentsApi {
   stewResourceMap: StewResourceMap;

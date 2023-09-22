@@ -5,7 +5,7 @@ import {
   SelectBaseConfigProps,
 } from "../../components/Select/SelectBase.tsx";
 import { SelectMenuBase } from "../../components/Select/components/SelectMenuBase.tsx";
-import { StewSegmentDisplayProps } from "../StewSegment.tsx";
+import { StewSegmentDisplayProps } from "./StewSegmentDisplay.tsx";
 // @deno-types="CssModule"
 import cssModule from "./ViewSortSelect.module.scss";
 

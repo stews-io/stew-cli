@@ -3,7 +3,7 @@ import { Fragment } from "../../../shared/deps/preact/mod.ts";
 import { BuildStewConfig } from "../../../shared/types/StewConfig.ts";
 import { StewResourceMap } from "../../shared/types/StewResourceMap.ts";
 import { StewSegment } from "./StewSegment/StewSegment.tsx";
-import { StewSegmentState } from "./StewSegment/StewSegmentState.ts";
+import { StewSegmentState } from "./StewSegment/types/StewSegmentState.ts";
 
 export interface StewAppProps {
   stewConfig: BuildStewConfig;

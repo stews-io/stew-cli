@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "../../../../../shared/deps/preact/hooks.ts";
 import { throwInvalidPathError } from "../../../../../shared/general/throwInvalidPathError.ts";
 import { Button } from "../../components/Button/Button.tsx";
-import { StewSegmentDisplayProps } from "../StewSegment.tsx";
+import { StewSegmentDisplayProps } from "./StewSegmentDisplay.tsx";
 // @deno-types="CssModule"
 import cssModule from "./ViewSearchInput.module.scss";
 

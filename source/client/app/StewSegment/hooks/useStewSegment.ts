@@ -4,20 +4,20 @@ import {
   useMemo,
   useRef,
   useState,
-} from "../../../../shared/deps/preact/hooks.ts";
-import { throwInvalidPathError } from "../../../../shared/general/throwInvalidPathError.ts";
-import { BuildSegmentItem } from "../../../../shared/types/SegmentDataset.ts";
-import { StewAppProps } from "../StewApp.tsx";
-import { findMapItem } from "../general/findMapItem.ts";
-import { StewSegmentState } from "./StewSegmentState.ts";
+} from "../../../../../shared/deps/preact/hooks.ts";
+import { throwInvalidPathError } from "../../../../../shared/general/throwInvalidPathError.ts";
+import { BuildSegmentItem } from "../../../../../shared/types/SegmentDataset.ts";
+import { findMapItem } from "../../general/findMapItem.ts";
+import { StewSegmentState } from "../types/StewSegmentState.ts";
 import {
   FetchSegmentComponentsResult,
   fetchSegmentComponents,
-} from "./fetchSegmentComponents.ts";
+} from "../general/fetchSegmentComponents.ts";
+import { StewSegmentProps } from "../StewSegment.tsx";
 
 export interface UseStewSegmentApi
   extends Pick<
-    StewAppProps,
+    StewSegmentProps,
     "stewConfig" | "stewResourceMap" | "initialSegmentViewState"
   > {}
 

@@ -8,7 +8,7 @@ import { Button } from "../../components/Button/Button.tsx";
 import { LinkButton } from "../../components/Button/LinkButton.tsx";
 import { CorePopoverContentProps } from "../../components/Popover/Popover.tsx";
 import { getCssClass } from "../../general/getCssClass.ts";
-import { StewSegmentDisplayProps } from "../StewSegment.tsx";
+import { StewSegmentDisplayProps } from "./StewSegmentDisplay.tsx";
 // @deno-types="CssModule"
 import cssModule from "./StewInfoBopper.module.scss";
 

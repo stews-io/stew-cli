@@ -5,9 +5,8 @@ import {
 import { throwInvalidPathError } from "../../../shared/general/throwInvalidPathError.ts";
 import { BuildStewConfig } from "../../../shared/types/StewConfig.ts";
 import { getStewResourceMap } from "../../shared/general/getStewResourceMap.ts";
-import { StewApp } from "./StewApp.tsx";
-import { StewSegmentState } from "./StewSegment/StewSegmentState.ts";
-import { fetchSegmentComponents } from "./StewSegment/fetchSegmentComponents.ts";
+import { StewApp, StewAppProps } from "./StewApp.tsx";
+import { fetchSegmentComponents } from "./StewSegment/general/fetchSegmentComponents.ts";
 import { findMapItem } from "./general/findMapItem.ts";
 
 (window as unknown as any).h = preactH;
@@ -30,7 +29,7 @@ async function loadStewApp() {
   console.info(stewConfig);
 }
 
-async function loadStewResources() {
+async function loadStewResources(): Promise<StewAppProps> {
   // display splash page for minimum amount of time
   const minimumSplashDisplayPromise = new Promise<void>((resolve) => {
     setTimeout(() => {
@@ -133,6 +132,6 @@ async function loadStewResources() {
       segmentViewKey: initialSegmentViewConfig.viewKey,
       segmentSortOptionKey: initialSegmentSortOptionConfig.sortOptionKey,
       viewSearchQuery: initialSearchParams.get("search") ?? "",
-    } satisfies StewSegmentState,
+    },
   };
 }
