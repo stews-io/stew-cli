@@ -1,7 +1,10 @@
+@import "../shared/styles/theme.scss";
+
 .splashPage {
-  composes: item-container from global;
+  @extend .itemContainer;
   /* https://github.com/tailwindlabs/tailwindcss/discussions/4515#discussioncomment-2112460 */
   /* equivalent to 100dvh in major browsers */
+  width: 100%;
   min-height: calc(
     100vh - env(safe-area-inset-bottom, 0) - env(safe-area-inset-top, 0)
   );
@@ -16,7 +19,7 @@
 }
 
 .splashContent {
-  composes: item-container from global;
+  @extend .itemContainer;
   flex-grow: 1;
   max-width: 512px;
   align-self: stretch;

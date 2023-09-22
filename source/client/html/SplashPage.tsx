@@ -1,5 +1,5 @@
 // @deno-types="CssModule"
-import cssModule from "./SplashPage.module.css";
+import cssModule from "./SplashPage.module.scss";
 
 export interface SplashPageProps {}
 

@@ -1,7 +1,7 @@
 import { SegmentItemDisplayProps } from "../../shared/types/SegmentModule.ts";
 import { MusicItem } from "./MusicItem.ts";
 // @deno-types="CssModule"
-import cssModule from "./MusicItemDisplay.module.css";
+import cssModule from "./MusicItemDisplay.module.scss";
 
 export interface MusicItemDisplayProps
   extends SegmentItemDisplayProps<MusicItem> {}

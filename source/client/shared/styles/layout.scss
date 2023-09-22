@@ -1,4 +1,4 @@
-.flex-container {
+.flexContainer {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -6,34 +6,30 @@
   align-items: stretch;
 }
 
-.flex-child {
+.flexChild {
   flex-grow: 0;
   flex-shrink: 1;
   flex-basis: auto;
 }
 
-.item-container {
-  composes: flex-container;
+.itemContainer {
+  @extend .flexContainer;
   justify-content: center;
   align-items: center;
 }
 
-.row-container {
-  composes: flex-container;
+.rowContainer {
+  @extend .flexContainer;
   flex-direction: row;
 }
 
-.column-container {
-  composes: flex-container;
+.columnContainer {
+  @extend .flexContainer;
   flex-direction: column;
 }
 
-.text-container {
+.textEllipsis {
   display: block;
-}
-
-.text-ellipsis {
-  composes: text-container;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

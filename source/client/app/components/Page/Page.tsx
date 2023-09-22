@@ -1,6 +1,6 @@
 import { ComponentChildren } from "../../../../../shared/deps/preact/mod.ts";
 // @deno-types="CssModule"
-import cssModule from "./Page.module.css";
+import cssModule from "./Page.module.scss";
 
 export interface PageProps {
   pageAriaHeader: string;

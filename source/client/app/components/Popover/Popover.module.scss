@@ -1,9 +1,11 @@
+@import "../../../shared/styles/theme.scss";
+
 .popoverContainer {
-  composes: theme-border from global;
+  @extend .themeBorder;
   z-index: 1;
   overflow: hidden;
   touch-action: none;
-  background-color: var(--theme-background-color);
+  background-color: $themeBackgroundColor;
 }
 
 .preventUnderscroll {

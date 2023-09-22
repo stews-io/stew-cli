@@ -5,9 +5,9 @@ import {
   useStewSegment,
 } from "./useSegmentView.ts";
 import { Page } from "../components/Page/Page.tsx";
-// @deno-types="CssModule"
-import cssModule from "./StewSegment.module.css";
 import { SegmentViewSelect } from "./components/SegmentViewSelect.tsx";
+// @deno-types="CssModule"
+import cssModule from "./StewSegment.module.scss";
 
 export interface StewSegmentProps
   extends Pick<

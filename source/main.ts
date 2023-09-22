@@ -103,8 +103,8 @@ async function loadStewSourceConfig(
   const { stewSourceConfigPath } = api;
   const sourceConfigBundleResult = await bundleModule({
     moduleEntryPath: stewSourceConfigPath,
-    minifyBundle: true,
     tsConfig: {},
+    additionalEsbuildPlugins: [],
   });
   const sourceConfigIifeScript = sourceConfigBundleResult.outputFiles[0].text;
   const stewSourceConfigResult: unknown = await loadModuleBundle({

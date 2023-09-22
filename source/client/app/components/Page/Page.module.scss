@@ -1,9 +1,12 @@
+@import "../../../shared/styles/theme.scss";
+
 .pageContainer {
-  composes: item-container from global;
+  @extend .itemContainer;
+  width: 100%;
 }
 
 .pageContentContainer {
-  composes: column-container from global;
+  @extend .columnContainer;
   max-width: 512px;
   flex-basis: 100%;
 }

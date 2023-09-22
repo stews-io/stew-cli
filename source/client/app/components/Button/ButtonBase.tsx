@@ -7,7 +7,7 @@ import {
 import { getCssClass } from "../../general/getCssClass.ts";
 import { SimpleComponentProps } from "../../general/types.ts";
 // @deno-types="CssModule"
-import cssModule from "./ButtonBase.module.css";
+import cssModule from "./ButtonBase.module.scss";
 
 export interface ButtonBaseProps<
   AriaOrnaments extends CoreAriaOrnaments<string>

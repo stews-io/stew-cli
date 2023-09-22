@@ -11,7 +11,7 @@ import {
 } from "../SelectBase.tsx";
 import { SelectOptionLabel } from "./SelectOptionLabel.tsx";
 // @deno-types="CssModule"
-import cssModule from "./SelectButton.module.css";
+import cssModule from "./SelectButton.module.scss";
 
 export interface SelectButtonProps<
   MenuOption extends object,

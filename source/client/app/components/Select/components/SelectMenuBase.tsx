@@ -14,7 +14,7 @@ import {
 } from "../hooks/useSelectMenuNavigation.ts";
 import { SelectOptionLabel } from "./SelectOptionLabel.tsx";
 // @deno-types="CssModule"
-import cssModule from "./SelectMenuBase.module.css";
+import cssModule from "./SelectMenuBase.module.scss";
 
 interface SelectMenuBaseProps<
   MenuOption extends object,

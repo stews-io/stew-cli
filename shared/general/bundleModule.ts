@@ -1,8 +1,6 @@
 import { esbuildDenoAdapterPlugins } from "../deps/esbuild/deno-adapter-plugin.ts";
+import { esbuildSassAdapterPlugins } from "../deps/esbuild/esbuild-sass-plugin.ts";
 import { Esbuild, EsbuildPlugin, TsconfigRaw } from "../deps/esbuild/mod.ts";
-import { postcssMinifyPlugin } from "../deps/postcss/minify-plugin.ts";
-import { PostcssPlugin, postcssProcessor } from "../deps/postcss/mod.ts";
-import { postcssModulesPlugin } from "../deps/postcss/modules-plugin.ts";
 import { resolvePath } from "../deps/std/path.ts";
 
 export interface BundlePreactModuleApi
@@ -12,7 +10,7 @@ export async function bundlePreactModule(api: BundlePreactModuleApi) {
   const { moduleEntryPath } = api;
   const bundlePreactModuleResult = await bundleModule({
     moduleEntryPath,
-    minifyBundle: false,
+    additionalEsbuildPlugins: esbuildSassAdapterPlugins(),
     tsConfig: {
       compilerOptions: {
         jsxFactory: "h",
@@ -20,59 +18,33 @@ export async function bundlePreactModule(api: BundlePreactModuleApi) {
       },
     },
   });
-  let cssExportMapResult: Record<string, string> = {};
-  const unminifiedCssBundle = bundlePreactModuleResult.outputFiles[1]
-    ? bundlePreactModuleResult.outputFiles[1].text
-    : "";
-  const minifiedCssResult = await postcssProcessor([
-    postcssModulesPlugin({
-      generateScopedName: `[hash:base64:7]`,
-      getJSON: (cssFilename, nextCssExportMapResult) => {
-        cssExportMapResult = nextCssExportMapResult;
-      },
-    }) as PostcssPlugin,
-    postcssMinifyPlugin(),
-  ]).process(unminifiedCssBundle);
-  const modifiedCssImportsBundleScript =
-    bundlePreactModuleResult.outputFiles[0].text.replaceAll(
-      /\s+\/\/.+\.module.css\n\s+var\s.+_default\s\=\s{\n(.+\n)+/g,
-      (cssImportString) =>
-        Object.keys(cssExportMapResult).reduce(
-          (modifiedCssImportStringResult, someStaleImportKey) =>
-            modifiedCssImportStringResult.replaceAll(
-              someStaleImportKey,
-              cssExportMapResult[someStaleImportKey]
-            ),
-          cssImportString
-        )
-    );
-  const minifyHtmlBundleResult = await Esbuild.runTransform(
-    modifiedCssImportsBundleScript,
-    {
-      minify: true,
-    }
-  );
-  return [minifyHtmlBundleResult.code, minifiedCssResult.css];
+  return [
+    bundlePreactModuleResult.outputFiles[0].text,
+    bundlePreactModuleResult.outputFiles[1]
+      ? bundlePreactModuleResult.outputFiles[1].text
+      : "",
+  ];
 }
 
 export interface BundleModuleApi {
   moduleEntryPath: string;
-  minifyBundle: boolean;
   tsConfig: TsconfigRaw;
+  additionalEsbuildPlugins: Array<EsbuildPlugin>;
 }
 
-export async function bundleModule(api: BundleModuleApi) {
-  const { minifyBundle, moduleEntryPath, tsConfig } = api;
-  return await Esbuild.runBuild({
+export function bundleModule(api: BundleModuleApi) {
+  const { moduleEntryPath, additionalEsbuildPlugins, tsConfig } = api;
+  return Esbuild.runBuild({
     platform: "browser",
     format: "iife",
     globalName: "__moduleIifeResult",
     outdir: "out",
     bundle: true,
     write: false,
-    minify: minifyBundle,
+    minify: true,
     entryPoints: [moduleEntryPath],
     plugins: [
+      ...additionalEsbuildPlugins,
       ...(esbuildDenoAdapterPlugins({
         loader: "portable",
         configPath: resolvePath(`${Deno.cwd()}/deno.json`),

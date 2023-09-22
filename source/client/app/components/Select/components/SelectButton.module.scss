@@ -1,5 +1,8 @@
+// @use "sass:math";
+@import "../../../../shared/styles/theme.scss";
+
 .buttonContainer {
-  composes: column-container from global;
+  @extend .columnContainer;
   width: 0;
   flex-grow: 1;
   max-width: fit-content;
@@ -7,20 +10,20 @@
 }
 
 .selectButton {
-  composes: row-container from global;
+  @extend .rowContainer;
   align-items: center;
-  padding-inline: calc(1 / 2 * var(--theme-spacer));
+  padding-inline: calc(1 / 2) * $themeSpacer;
 }
 
 .buttonLabel {
-  composes: text-ellipsis from global;
-  padding-inline-end: calc(5 / 4 * var(--theme-spacer));
+  @extend .textEllipsis;
+  padding-inline-end: calc(5 / 4) * $themeSpacer;
   font-weight: 700;
   font-style: italic;
 }
 
 .iconContainer {
-  composes: item-container from global;
+  @extend .itemContainer;
   padding-top: 0.01em;
 }
 

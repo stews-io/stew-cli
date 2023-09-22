@@ -12,7 +12,7 @@ import {
 } from "../../../../../shared/deps/preact/mod.ts";
 import { throwInvalidPathError } from "../../../../../shared/general/throwInvalidPathError.ts";
 // @deno-types="CssModule"
-import cssModule from "./Popover.module.css";
+import cssModule from "./Popover.module.scss";
 
 export interface PopoverProps<CustomPopoverContentProps>
   extends PopoverDataProps,

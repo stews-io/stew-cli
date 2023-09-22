@@ -1,7 +1,0 @@
-.fooClass {
-  composes: shared-thing from "../theme.module.css";
-}
-
-.bazClass {
-  color: purple;
-}
