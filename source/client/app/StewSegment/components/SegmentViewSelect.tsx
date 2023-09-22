@@ -8,12 +8,11 @@ import { CustomAnchorButtonProps } from "../../components/Button/AnchorButton.ts
 import {
   SelectBase,
   SelectBaseConfigProps,
-  SelectBaseDataProps,
 } from "../../components/Select/SelectBase.tsx";
 import { SelectMenuBase } from "../../components/Select/components/SelectMenuBase.tsx";
 import { StewSegmentDisplayProps } from "../StewSegment.tsx";
 // @deno-types="CssModule"
-import cssModule from "./SegmentViewSelect.module.css";
+import cssModule from "./SegmentViewSelect.module.scss";
 
 export interface SegmentViewSelectProps
   extends Pick<

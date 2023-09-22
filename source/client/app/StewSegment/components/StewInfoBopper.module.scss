@@ -1,0 +1,117 @@
+@import "../../../shared/styles/theme.scss";
+
+.stewInfoIcon {
+  width: 33px;
+  height: 33px;
+}
+
+.iconOutlineCircle {
+  fill: transparent;
+  stroke: black;
+  stroke-width: 1.75;
+}
+
+.contentContainer {
+  @extend .columnContainer;
+  overflow: hidden;
+  padding-inline-start: $themeSpacer;
+  padding-inline-end: calc(3 / 4) * $themeSpacer;
+  padding-block-start: calc(3 / 8) * $themeSpacer;
+  padding-block-end: calc(9 / 8) * $themeSpacer;
+}
+
+.contentHeader {
+  @extend .rowContainer;
+  align-items: center;
+}
+
+.stewNameText {
+  @extend .textEllipsis;
+  flex-grow: 1;
+  padding-inline-end: 3 * $themeSpacer;
+  font-weight: 700;
+  font-size: 23px;
+}
+
+.closeButtonContainer {
+  @extend .itemContainer;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton {
+  @extend .itemContainer;
+  padding: 0rem;
+}
+
+.closeIcon {
+  width: 22.5px;
+  height: 22.5px;
+}
+
+.closeIconOutlineCircle {
+  fill: transparent;
+  stroke: black;
+  stroke-width: 1.5;
+}
+
+.stewTaglineText {
+  @extend .textEllipsis;
+  padding-block-start: calc(1 / 8) * $themeSpacer;
+  padding-inline-end: 6 * $themeSpacer;
+  font-size: 14px;
+}
+
+.stewMessageText {
+  padding-block-start: calc(3 / 4) * $themeSpacer;
+  padding-block-end: calc(1 / 4) * $themeSpacer;
+  padding-inline-end: 6 * $themeSpacer;
+  font-size: 14px;
+  font-weight: 700;
+  font-style: italic;
+  hyphens: auto;
+}
+
+.segmentLinks {
+  @extend .rowContainer;
+  flex-wrap: wrap;
+}
+
+.segmentLinkContainer {
+  @extend .itemContainer;
+  padding-inline-end: 2 * $themeSpacer;
+  padding-block: calc(1 / 2) * $themeSpacer;
+}
+
+.segmentLinkButton {
+  color: $themeButtonTextColor;
+  font-weight: 700;
+
+  &.activeSegment {
+    font-style: italic;
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    text-decoration-skip-ink: none;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 1.5px;
+  }
+}
+
+.contentNavigationFooter {
+  @extend .rowContainer;
+}
+
+.externalLinkContainer {
+  @extend .itemContainer;
+  padding-inline-end: calc(3 / 2) * $themeSpacer;
+  padding-block-start: calc(3 / 2) * $themeSpacer;
+}
+
+.externalLinkButton {
+  padding: calc(1 / 16) * $themeSpacer;
+}
+
+.curatorLinkIcon {
+  width: 20px;
+  height: 20px;
+}

@@ -6,6 +6,7 @@ import {
 } from "./useSegmentView.ts";
 import { Page } from "../components/Page/Page.tsx";
 import { SegmentViewSelect } from "./components/SegmentViewSelect.tsx";
+import { StewInfoBopper } from "./components/StewInfoBopper.tsx";
 // @deno-types="CssModule"
 import cssModule from "./StewSegment.module.scss";
 
@@ -79,6 +80,13 @@ function StewSegmentDisplay(props: StewSegmentDisplayProps) {
               stewConfig={stewConfig}
               stewSegmentState={stewSegmentState}
               selectSegmentView={selectSegmentView}
+            />
+          </div>
+          <div className={cssModule.infoBopperContainer}>
+            <StewInfoBopper
+              stewConfig={stewConfig}
+              stewSegmentState={stewSegmentState}
+              selectStewSegment={selectStewSegment}
             />
           </div>
         </div>

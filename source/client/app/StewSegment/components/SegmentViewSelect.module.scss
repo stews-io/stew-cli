@@ -1,5 +1,7 @@
+@import "../../../shared/styles/theme.scss";
+
 .viewSelectAnchorBorder {
-  border-bottom: var(--theme-border);
+  border-bottom: $themeBorder;
 }
 
 .viewSelectFontSize {
