@@ -10,6 +10,7 @@ import { StewInfoBopper } from "./components/StewInfoBopper.tsx";
 // @deno-types="CssModule"
 import cssModule from "./StewSegment.module.scss";
 import { ViewSortSelect } from "./components/ViewSortSelect.tsx";
+import { ViewSearchInput } from "./components/ViewSearchInput.tsx";
 
 export interface StewSegmentProps
   extends Pick<
@@ -98,6 +99,14 @@ function StewSegmentDisplay(props: StewSegmentDisplayProps) {
             stewConfig={stewConfig}
             stewSegmentState={stewSegmentState}
             selectSegmentSortOption={selectSegmentSortOption}
+          />
+        </div>
+        <div className={cssModule.viewSearchInputContainer}>
+          <ViewSearchInput
+            stewConfig={stewConfig}
+            stewSegmentState={stewSegmentState}
+            updateSegmentViewSearch={updateSegmentViewSearch}
+            clearSegmentViewSearch={clearSegmentViewSearch}
           />
         </div>
       </div>
