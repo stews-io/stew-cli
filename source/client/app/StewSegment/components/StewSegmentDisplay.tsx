@@ -4,6 +4,7 @@ import {
   StewSegmentMutations,
   UseStewSegmentResult,
 } from "../hooks/useStewSegment.ts";
+import { useStickyPageHeaderWorkaround } from "../hooks/useStickyPageHeaderWorkaround.ts";
 import { SegmentViewSelect } from "./SegmentViewSelect.tsx";
 import { StewInfoBopper } from "./StewInfoBopper.tsx";
 import { ViewSearchInput } from "./ViewSearchInput.tsx";
@@ -38,13 +39,19 @@ export function StewSegmentDisplay(props: StewSegmentDisplayProps) {
     gotoNextViewPage,
     stewSegmentData,
   } = props;
+  const { pageHeaderContainerRef } = useStickyPageHeaderWorkaround({
+    stickyPageHeaderWorkaroundClassname: cssModule.stickyPageHeaderWorkaround,
+  });
   return (
     <Page
       pageAriaHeader={`${stewConfig.stewInfo.stewName}: ${
         stewConfig.stewSegments[stewSegmentState.segmentKey].segmentLabel
       } segment`}
     >
-      <div className={cssModule.pageHeaderContainer}>
+      <div
+        ref={pageHeaderContainerRef}
+        className={cssModule.pageHeaderContainer}
+      >
         <div className={cssModule.pageHeader}>
           <div className={cssModule.viewSelectContainer}>
             <SegmentViewSelect
