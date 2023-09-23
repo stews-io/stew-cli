@@ -1,4 +1,3 @@
-import { JSX } from "../../../../../shared/deps/preact/mod.ts";
 import { Page } from "../../components/Page/Page.tsx";
 import { StewSegmentProps } from "../StewSegment.tsx";
 import { UseStewSegmentResult } from "../hooks/useStewSegment.ts";
@@ -8,16 +7,11 @@ import { StewInfoBopper } from "./StewInfoBopper.tsx";
 import { ViewSearchInput } from "./ViewSearchInput.tsx";
 import { ViewSortSelect } from "./ViewSortSelect.tsx";
 // @deno-types="CssModule"
-import cssModule from "./SegmentDisplay.module.scss";
+import cssModule from "./SegmentPage.module.scss";
 
-export interface SegmentDisplayProps<
-  DisplayExtensionProps extends JSX.IntrinsicAttributes
-> extends SegmentDisplayCoreDataProps,
-    SegmentDisplayConfigProps<DisplayExtensionProps> {}
-
-export interface SegmentDisplayCoreDataProps
+export interface SegmentPageProps
   extends Pick<StewSegmentProps, "stewConfig">,
-    Pick<UseStewSegmentResult, "stewSegmentState">,
+    Pick<UseStewSegmentResult, "stewSegmentState" | "stewSegmentData">,
     Pick<
       UseStewSegmentResult["stewSegmentMutations"],
       | "selectStewSegment"
@@ -27,16 +21,7 @@ export interface SegmentDisplayCoreDataProps
       | "clearSegmentViewSearch"
     > {}
 
-export interface SegmentDisplayConfigProps<
-  SegmentContentProps extends JSX.IntrinsicAttributes
-> {
-  segmentContentProps: SegmentContentProps;
-  SegmentContent: (props: SegmentContentProps) => JSX.Element;
-}
-
-export function SegmentDisplay<
-  DisplayContentProps extends JSX.IntrinsicAttributes
->(props: SegmentDisplayProps<DisplayContentProps>) {
+export function SegmentPage(props: SegmentPageProps) {
   const {
     stewConfig,
     stewSegmentState,
@@ -45,8 +30,7 @@ export function SegmentDisplay<
     selectSegmentSortOption,
     updateSegmentViewSearch,
     clearSegmentViewSearch,
-    SegmentContent,
-    segmentContentProps,
+    stewSegmentData,
   } = props;
   const { pageHeaderContainerRef } = useStickyPageHeaderWorkaround({
     stickyPageHeaderWorkaroundClassname: cssModule.stickyPageHeaderWorkaround,
@@ -95,7 +79,9 @@ export function SegmentDisplay<
           />
         </div>
       </div>
-      <SegmentContent {...segmentContentProps} />
+      <stewSegmentData.SegmentContent
+        {...stewSegmentData.segmentContentProps}
+      />
     </Page>
   );
 }

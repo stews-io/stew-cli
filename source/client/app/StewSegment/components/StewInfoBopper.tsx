@@ -9,13 +9,13 @@ import { Button } from "../../components/Button/Button.tsx";
 import { LinkButton } from "../../components/Button/LinkButton.tsx";
 import { CorePopoverContentProps } from "../../components/Popover/Popover.tsx";
 import { getCssClass } from "../../general/getCssClass.ts";
-import { SegmentDisplayCoreDataProps } from "./SegmentDisplay.tsx";
+import { SegmentPageProps } from "./SegmentPage.tsx";
 // @deno-types="CssModule"
 import cssModule from "./StewInfoBopper.module.scss";
 
 interface StewInfoBopperProps
   extends Pick<
-    SegmentDisplayCoreDataProps,
+    SegmentPageProps,
     "stewConfig" | "stewSegmentState" | "selectStewSegment"
   > {}
 

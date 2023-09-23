@@ -6,13 +6,13 @@ import {
   SelectBaseConfigProps,
 } from "../../components/Select/SelectBase.tsx";
 import { SelectMenuBase } from "../../components/Select/components/SelectMenuBase.tsx";
-import { SegmentDisplayCoreDataProps } from "./SegmentDisplay.tsx";
+import { SegmentPageProps } from "./SegmentPage.tsx";
 // @deno-types="CssModule"
 import cssModule from "./ViewSortSelect.module.scss";
 
 export interface ViewSortSelectProps
   extends Pick<
-    SegmentDisplayCoreDataProps,
+    SegmentPageProps,
     "stewConfig" | "stewSegmentState" | "selectSegmentSortOption"
   > {}
 
