@@ -15,9 +15,12 @@ export function StewSegment(props: StewSegmentProps) {
       stewConfig,
       stewResourceMap,
       initialSegmentViewState,
-      // not necessary in a mechanical sense, but improves mutation visbility
-      getUpdateSegmentComponents: ({ stewSegmentMutations }) =>
+      getUpdateSegmentComponentsMutation: ({ stewSegmentMutations }) =>
         stewSegmentMutations.updateSegmentComponents,
+      getViewPageSegmentContentMutationProps: ({ stewSegmentMutations }) => ({
+        gotoPreviousViewPage: stewSegmentMutations.gotoPreviousViewPage,
+        gotoNextViewPage: stewSegmentMutations.gotoNextViewPage,
+      }),
     });
   return (
     <SegmentPage

@@ -1,5 +1,11 @@
 @import "../../../shared/styles/theme.scss";
 
+.viewPageItemsContainer {
+  @extend .columnContainer;
+  padding: calc(3 / 2) * $themeSpacer;
+  padding-block-end: 0;
+}
+
 .messageContainer {
   @extend .itemContainer;
   padding: 4 * $themeSpacer;

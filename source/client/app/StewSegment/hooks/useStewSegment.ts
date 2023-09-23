@@ -5,16 +5,20 @@ import {
   useRef,
   useState,
 } from "../../../../../shared/deps/preact/hooks.ts";
-import { JSX } from "../../../../../shared/deps/preact/mod.ts";
+import { FunctionComponent } from "../../../../../shared/deps/preact/mod.ts";
 import { throwInvalidPathError } from "../../../../../shared/general/throwInvalidPathError.ts";
 import { BuildSegmentItem } from "../../../../../shared/types/SegmentDataset.ts";
 import { findMapItem } from "../../general/findMapItem.ts";
 import { StewSegmentProps } from "../StewSegment.tsx";
 import {
   EmptyViewSegmentContent,
+  EmptyViewSegmentContentProps,
   ErrorLoadingSegmentContent,
+  ErrorLoadingSegmentContentProps,
   LoadingSegmentContent,
-  ViewSegmentContent,
+  LoadingSegmentContentProps,
+  ViewPageSegmentContent,
+  ViewPageSegmentContentProps,
 } from "../components/SegmentContent.tsx";
 import {
   FetchSegmentComponentsResult,
@@ -28,17 +32,26 @@ export interface UseStewSegmentApi
     "stewConfig" | "stewResourceMap" | "initialSegmentViewState"
   > {
   // not necessary in a mechanical sense, but improves visibility of mutations
-  getUpdateSegmentComponents: (
-    api: GetUpdateSegmentComponentsApi
+  getUpdateSegmentComponentsMutation: (
+    api: GetUpdateSegmentComponentsMutationApi
   ) => StewSegmentMutations["updateSegmentComponents"];
+  getViewPageSegmentContentMutationProps: (
+    api: GetViewPageSegmentContentMutationPropsApi
+  ) => Pick<
+    ViewPageSegmentContentProps,
+    "gotoPreviousViewPage" | "gotoNextViewPage"
+  >;
 }
 
-interface GetUpdateSegmentComponentsApi
+interface GetUpdateSegmentComponentsMutationApi
   extends Pick<UseStewSegmentMutationsResult, "stewSegmentMutations"> {}
+
+interface GetViewPageSegmentContentMutationPropsApi
+  extends Pick<UseStewSegmentDataApi, "stewSegmentMutations"> {}
 
 export interface UseStewSegmentResult
   extends Pick<UseStewSegmentMutationsResult, "stewSegmentMutations">,
-    Pick<UseStewSegmentDataResult<JSX.IntrinsicAttributes>, "stewSegmentData"> {
+    Pick<UseStewSegmentDataResult, "stewSegmentData"> {
   stewSegmentState: StewSegmentState;
 }
 
@@ -47,7 +60,8 @@ export function useStewSegment(api: UseStewSegmentApi): UseStewSegmentResult {
     initialSegmentViewState,
     stewConfig,
     stewResourceMap,
-    getUpdateSegmentComponents,
+    getViewPageSegmentContentMutationProps,
+    getUpdateSegmentComponentsMutation,
   } = api;
   const [stewSegmentState, setSegmentViewState] = useState<StewSegmentState>(
     initialSegmentViewState
@@ -58,13 +72,15 @@ export function useStewSegment(api: UseStewSegmentApi): UseStewSegmentResult {
   });
   const { stewSegmentData } = useStewSegmentData({
     stewConfig,
+    getViewPageSegmentContentMutationProps,
     stewSegmentState,
+    stewSegmentMutations,
     viewPageItemSize: 6,
   });
   useStewSegmentComponents({
     stewResourceMap,
     stewSegmentState,
-    updateSegmentComponents: getUpdateSegmentComponents({
+    updateSegmentComponents: getUpdateSegmentComponentsMutation({
       stewSegmentMutations,
     }),
   });
@@ -217,26 +233,68 @@ function useStewSegmentComponents(api: UseStewSegmentComponentsApi) {
   }, [stewSegmentState.segmentKey]);
 }
 
-interface UseStewSegmentDataApi extends Pick<UseStewSegmentApi, "stewConfig"> {
+interface UseStewSegmentDataApi
+  extends Pick<
+      UseStewSegmentApi,
+      "stewConfig" | "getViewPageSegmentContentMutationProps"
+    >,
+    Pick<UseStewSegmentMutationsResult, "stewSegmentMutations"> {
   viewPageItemSize: number;
   stewSegmentState: StewSegmentState;
 }
 
-interface UseStewSegmentDataResult<
-  SegmentContentProps extends JSX.IntrinsicAttributes
-> {
-  stewSegmentData: StewSegmentData<SegmentContentProps>;
+interface UseStewSegmentDataResult {
+  stewSegmentData: StewSegmentData;
 }
 
-interface StewSegmentData<SegmentContentProps extends JSX.IntrinsicAttributes> {
+type StewSegmentData =
+  | ViewPageSegmentContentData
+  | EmptyViewSegmentContentData
+  | LoadingSegmentContentData
+  | ErrorLoadingSegmentContentData;
+
+interface ViewPageSegmentContentData
+  extends StewSegmentDataBase<
+    ViewPageSegmentContentProps,
+    typeof ViewPageSegmentContent
+  > {}
+
+interface EmptyViewSegmentContentData
+  extends StewSegmentDataBase<
+    EmptyViewSegmentContentProps,
+    typeof EmptyViewSegmentContent
+  > {}
+
+interface LoadingSegmentContentData
+  extends StewSegmentDataBase<
+    LoadingSegmentContentProps,
+    typeof LoadingSegmentContent
+  > {}
+
+interface ErrorLoadingSegmentContentData
+  extends StewSegmentDataBase<
+    ErrorLoadingSegmentContentProps,
+    typeof ErrorLoadingSegmentContent
+  > {}
+
+interface StewSegmentDataBase<
+  SegmentContentProps,
+  SegmentContentComponent extends FunctionComponent<SegmentContentProps>
+> {
   segmentContentProps: SegmentContentProps;
-  SegmentContent: (props: SegmentContentProps) => JSX.Element;
+  SegmentContent: SegmentContentComponent;
 }
 
 function useStewSegmentData(
   api: UseStewSegmentDataApi
-): UseStewSegmentDataResult<JSX.IntrinsicAttributes> {
-  const { stewSegmentState, stewConfig, viewPageItemSize } = api;
+): UseStewSegmentDataResult {
+  const {
+    stewSegmentState,
+    stewConfig,
+    viewPageItemSize,
+    stewSegmentMutations,
+    getViewPageSegmentContentMutationProps,
+  } = api;
   const { searchedAndSortedViewItems } = useMemo(
     () => ({
       searchedAndSortedViewItems:
@@ -289,40 +347,43 @@ function useStewSegmentData(
       viewPageItems: viewPageItemsResult,
     };
   }, [searchedAndSortedViewItems, stewSegmentState.viewPageIndex]);
-  const { SegmentContent } = useMemo(() => {
-    if (
+  const { stewSegmentData } = useMemo(() => {
+    const stewSegmentDataResult =
       stewSegmentState.segmentStatus === "segmentLoaded" &&
       viewPageItems.length === 0
-    ) {
-      return {
-        SegmentContent: EmptyViewSegmentContent,
-      };
-    } else if (stewSegmentState.segmentStatus === "segmentLoaded") {
-      return {
-        SegmentContent: ViewSegmentContent,
-      };
-    } else if (stewSegmentState.segmentStatus === "loadingSegment") {
-      return {
-        SegmentContent: LoadingSegmentContent,
-      };
-    } else if (stewSegmentState.segmentStatus === "errorLoadingSegment") {
-      return {
-        SegmentContent: ErrorLoadingSegmentContent,
-      };
-    } else {
-      throwInvalidPathError("useStewSegmentData.SegmentContent");
-    }
-  }, [stewSegmentState, viewPageItems]);
-  const { segmentContentProps } = useMemo(() => {
+        ? {
+            SegmentContent: EmptyViewSegmentContent,
+            segmentContentProps: {},
+          }
+        : stewSegmentState.segmentStatus === "segmentLoaded"
+        ? {
+            SegmentContent: ViewPageSegmentContent,
+            segmentContentProps: {
+              stewSegmentState,
+              viewPageItems,
+              viewPagesCount,
+              ...getViewPageSegmentContentMutationProps({
+                stewSegmentMutations,
+              }),
+            },
+          }
+        : stewSegmentState.segmentStatus === "loadingSegment"
+        ? {
+            SegmentContent: LoadingSegmentContent,
+            segmentContentProps: {},
+          }
+        : stewSegmentState.segmentStatus === "errorLoadingSegment"
+        ? {
+            SegmentContent: ErrorLoadingSegmentContent,
+            segmentContentProps: {},
+          }
+        : throwInvalidPathError("useStewSegmentData.stewSegmentData");
     return {
-      segmentContentProps: {},
+      stewSegmentData: stewSegmentDataResult,
     };
-  }, []);
+  }, [stewSegmentState, viewPageItems, viewPagesCount]);
   return {
-    stewSegmentData: {
-      SegmentContent,
-      segmentContentProps,
-    },
+    stewSegmentData,
   };
 }
 
