@@ -1,0 +1,13 @@
+@import "../../../shared/styles/theme.scss";
+
+.messageContainer {
+  @extend .itemContainer;
+  padding: 4 * $themeSpacer;
+}
+
+.messageText {
+  font-size: 18px;
+  font-weight: 700;
+  font-style: italic;
+  color: $themeDisabledColor;
+}

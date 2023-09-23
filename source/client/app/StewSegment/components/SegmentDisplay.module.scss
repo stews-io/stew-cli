@@ -57,11 +57,11 @@
   padding-top: $themeSpacer;
 }
 
-.viewPageItemsContainer {
-  @extend .columnContainer;
-  padding: calc(3 / 2) * $themeSpacer;
-  padding-block-end: 0;
-}
+// .viewPageItemsContainer {
+//   @extend .columnContainer;
+//   padding: calc(3 / 2) * $themeSpacer;
+//   padding-block-end: 0;
+// }
 
 .generalFooterContainer {
   @extend .itemContainer;

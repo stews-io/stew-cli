@@ -2,9 +2,9 @@
 
 .splashPage {
   @extend .itemContainer;
+  width: 100%;
   /* https://github.com/tailwindlabs/tailwindcss/discussions/4515#discussioncomment-2112460 */
   /* equivalent to 100dvh in major browsers */
-  width: 100%;
   min-height: calc(
     100vh - env(safe-area-inset-bottom, 0) - env(safe-area-inset-top, 0)
   );
