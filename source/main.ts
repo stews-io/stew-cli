@@ -1,5 +1,6 @@
 import { Esbuild } from "../shared/deps/esbuild/mod.ts";
 import { FunctionComponent, h as preactH } from "../shared/deps/preact/mod.ts";
+import { resolvePath } from "../shared/deps/std/path.ts";
 import {
   bundleModule,
   bundlePreactModule,
@@ -84,10 +85,15 @@ async function buildStewApp(api: BuildStewAppApi) {
     stewBuildId,
     loadedSegmentModules,
   });
-  await fetchBundledAssetsAndWriteCoreBuildFiles({
-    buildDirectoryMap,
-    stewBuildConfig,
-  });
+  await Promise.all([
+    fetchBundledAssetsAndWriteCoreBuildFiles({
+      buildDirectoryMap,
+      stewBuildConfig,
+    }),
+    fetchAndWriteSecondaryAssetFiles({
+      buildDirectoryMap,
+    }),
+  ]);
 }
 
 interface LoadStewSourceConfigApi
@@ -386,5 +392,84 @@ function fetchBundleAsset(api: FetchBundleAssetApi) {
   const { bundledAssetUrl } = api;
   return fetch(bundledAssetUrl).then((getBundleAssetResponse) =>
     getBundleAssetResponse.text()
+  );
+}
+
+interface FetchAndWriteSecondaryAssetFilesApi
+  extends Pick<ReturnType<typeof setupBuildDirectories>, "buildDirectoryMap"> {}
+
+function fetchAndWriteSecondaryAssetFiles(
+  api: FetchAndWriteSecondaryAssetFilesApi
+) {
+  const { buildDirectoryMap } = api;
+  Deno.mkdirSync(buildDirectoryMap.stewAssetsDirectoryPath);
+  const repoRootDirectoryPath = joinPaths(
+    getDirectoryPath(import.meta.url),
+    "../"
+  );
+  return Promise.all([
+    fetchSecondaryAsset({
+      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/favicon.ico`,
+    }).then((faviconIcoBlob) => {
+      Deno.writeFile(buildDirectoryMap.faviconIco, faviconIcoBlob.stream());
+    }),
+    fetchSecondaryAsset({
+      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/favicon.svg`,
+    }).then((faviconSvgBlob) => {
+      Deno.writeFile(buildDirectoryMap.faviconSvg, faviconSvgBlob.stream());
+    }),
+    fetchSecondaryAsset({
+      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/icon-192x192.png`,
+    }).then((smallIconPngBlob) => {
+      Deno.writeFile(buildDirectoryMap.smallIconPng, smallIconPngBlob.stream());
+    }),
+    fetchSecondaryAsset({
+      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/icon-384x384.png`,
+    }).then((mediumIconPngBlob) => {
+      Deno.writeFile(
+        buildDirectoryMap.mediumIconPng,
+        mediumIconPngBlob.stream()
+      );
+    }),
+    fetchSecondaryAsset({
+      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/icon-512x512.png`,
+    }).then((largeIconPngBlob) => {
+      Deno.writeFile(buildDirectoryMap.largeIconPng, largeIconPngBlob.stream());
+    }),
+    fetchSecondaryAsset({
+      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/icon-2048x2048.png`,
+    }).then((extraLargeIconPngBlob) => {
+      Deno.writeFile(
+        buildDirectoryMap.extraLargeIconPng,
+        extraLargeIconPngBlob.stream()
+      );
+    }),
+    fetchSecondaryAsset({
+      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/fonts/RedHatMonoVF.woff2`,
+    }).then((normalFontWoffBlob) => {
+      Deno.writeFile(
+        buildDirectoryMap.normalFontWoff,
+        normalFontWoffBlob.stream()
+      );
+    }),
+    fetchSecondaryAsset({
+      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/fonts/RedHatMonoVF-Italic.woff2`,
+    }).then((italicFontWoffBlob) => {
+      Deno.writeFile(
+        buildDirectoryMap.italicFontWoff,
+        italicFontWoffBlob.stream()
+      );
+    }),
+  ]);
+}
+
+interface FetchSecondaryAssetApi {
+  secondaryAssetUrl: string;
+}
+
+function fetchSecondaryAsset(api: FetchSecondaryAssetApi) {
+  const { secondaryAssetUrl } = api;
+  return fetch(secondaryAssetUrl).then((getSecondaryAssetResponse) =>
+    getSecondaryAssetResponse.blob()
   );
 }

@@ -7,9 +7,9 @@ import {
 import { throwInvalidPathError } from "../../../../../shared/general/throwInvalidPathError.ts";
 import { StewSegmentMutations } from "../hooks/useStewSegment.ts";
 import { SegmentLoadedStewState } from "../types/StewSegmentState.ts";
+import { ViewPageNavigation } from "./ViewPageNavigation.tsx";
 // @deno-types="CssModule"
 import cssModule from "./SegmentContent.module.scss";
-import { ViewPageNavigation } from "./ViewPageNavigation.tsx";
 
 export interface ViewPageSegmentContentProps
   extends Pick<

@@ -85,14 +85,14 @@ async function loadStewResources(): Promise<StewAppProps> {
   );
   const regularRedHatMonoFontFace = new FontFace(
     "Red Hat Mono",
-    "url(/assets/fonts/RedHatMonoVF.woff2)",
+    "url(/assets/RedHatMonoVF.woff2)",
     {
       weight: "200 900",
     }
   );
   const italicRedHatMonoFontFace = new FontFace(
     "Red Hat Mono",
-    "url(/assets/fonts/RedHatMonoVF-Italic.woff2)",
+    "url(/assets/RedHatMonoVF-Italic.woff2)",
     {
       style: "italic",
       weight: "200 900",
