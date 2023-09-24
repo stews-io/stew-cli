@@ -1,16 +1,16 @@
-import { Fragment } from "stewcli_preact/jsx-runtime";
-import { BuildSegmentItem } from "../../../../../mod.ts";
 import {
   useLayoutEffect,
   useRef,
 } from "../../../../../shared/deps/preact/hooks.ts";
+import { Fragment } from "../../../../../shared/deps/preact/mod.ts";
 import { throwInvalidPathError } from "../../../../../shared/general/throwInvalidPathError.ts";
+import { BuildSegmentItem } from "../../../../../shared/types/SegmentDataset.ts";
+import { LinkButton } from "../../components/Button/LinkButton.tsx";
 import { StewSegmentMutations } from "../hooks/useStewSegment.ts";
 import { SegmentLoadedStewState } from "../types/StewSegmentState.ts";
 import { ViewPageNavigation } from "./ViewPageNavigation.tsx";
 // @deno-types="CssModule"
 import cssModule from "./SegmentContent.module.scss";
-import { LinkButton } from "../../components/Button/LinkButton.tsx";
 
 export interface ViewPageSegmentContentProps
   extends Pick<

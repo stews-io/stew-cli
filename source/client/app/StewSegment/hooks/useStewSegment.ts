@@ -5,18 +5,19 @@ import {
   useRef,
   useState,
 } from "../../../../../shared/deps/preact/hooks.ts";
-import { FunctionComponent } from "../../../../../shared/deps/preact/mod.ts";
+import {
+  ComponentProps,
+  FunctionComponent,
+  JSX,
+} from "../../../../../shared/deps/preact/mod.ts";
 import { throwInvalidPathError } from "../../../../../shared/general/throwInvalidPathError.ts";
 import { BuildSegmentItem } from "../../../../../shared/types/SegmentDataset.ts";
 import { findMapItem } from "../../general/findMapItem.ts";
 import { StewSegmentProps } from "../StewSegment.tsx";
 import {
   EmptyViewSegmentContent,
-  EmptyViewSegmentContentProps,
   ErrorLoadingSegmentContent,
-  ErrorLoadingSegmentContentProps,
   LoadingSegmentContent,
-  LoadingSegmentContentProps,
   ViewPageSegmentContent,
   ViewPageSegmentContentProps,
 } from "../components/SegmentContent.tsx";
@@ -244,45 +245,39 @@ interface UseStewSegmentDataApi
 }
 
 interface UseStewSegmentDataResult {
-  stewSegmentData: StewSegmentData;
+  stewSegmentData: StewSegmentData<FunctionComponent>;
 }
 
-type StewSegmentData =
+interface StewSegmentData<
+  SegmentContentComponent extends FunctionComponent<JSX.IntrinsicAttributes> = FunctionComponent<JSX.IntrinsicAttributes>
+> {
+  SegmentContent: SegmentContentComponent;
+  segmentContentProps: ComponentProps<SegmentContentComponent>;
+}
+
+type InternalStewSegmentData =
   | ViewPageSegmentContentData
   | EmptyViewSegmentContentData
   | LoadingSegmentContentData
   | ErrorLoadingSegmentContentData;
 
 interface ViewPageSegmentContentData
-  extends StewSegmentDataBase<
-    ViewPageSegmentContentProps,
-    typeof ViewPageSegmentContent
-  > {}
+  extends InternalStewSegmentDataBase<typeof ViewPageSegmentContent> {}
 
 interface EmptyViewSegmentContentData
-  extends StewSegmentDataBase<
-    EmptyViewSegmentContentProps,
-    typeof EmptyViewSegmentContent
-  > {}
+  extends InternalStewSegmentDataBase<typeof EmptyViewSegmentContent> {}
 
 interface LoadingSegmentContentData
-  extends StewSegmentDataBase<
-    LoadingSegmentContentProps,
-    typeof LoadingSegmentContent
-  > {}
+  extends InternalStewSegmentDataBase<typeof LoadingSegmentContent> {}
 
 interface ErrorLoadingSegmentContentData
-  extends StewSegmentDataBase<
-    ErrorLoadingSegmentContentProps,
-    typeof ErrorLoadingSegmentContent
-  > {}
+  extends InternalStewSegmentDataBase<typeof ErrorLoadingSegmentContent> {}
 
-interface StewSegmentDataBase<
-  SegmentContentProps,
-  SegmentContentComponent extends FunctionComponent<SegmentContentProps>
+interface InternalStewSegmentDataBase<
+  SegmentContentComponent extends FunctionComponent<any>
 > {
-  segmentContentProps: SegmentContentProps;
   SegmentContent: SegmentContentComponent;
+  segmentContentProps: ComponentProps<SegmentContentComponent>;
 }
 
 function useStewSegmentData(
@@ -348,7 +343,7 @@ function useStewSegmentData(
     };
   }, [searchedAndSortedViewItems, stewSegmentState.viewPageIndex]);
   const { stewSegmentData } = useMemo(() => {
-    const stewSegmentDataResult =
+    const stewSegmentDataResult: InternalStewSegmentData =
       stewSegmentState.segmentStatus === "segmentLoaded" &&
       viewPageItems.length === 0
         ? {
@@ -379,7 +374,7 @@ function useStewSegmentData(
           }
         : throwInvalidPathError("useStewSegmentData.stewSegmentData");
     return {
-      stewSegmentData: stewSegmentDataResult,
+      stewSegmentData: stewSegmentDataResult as StewSegmentData,
     };
   }, [stewSegmentState, viewPageItems, viewPagesCount]);
   return {
