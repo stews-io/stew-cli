@@ -12,7 +12,7 @@ export function InitialStewHtml(props: InitialStewHtmlProps) {
   return (
     <html lang={"en"}>
       <head>
-        <title>{`stew/${stewBuildConfig.stewInfo.stewName}`}</title>
+        <title>{`${stewBuildConfig.stewInfo.stewName}`}</title>
         <meta
           name={"description"}
           content={`${stewBuildConfig.stewInfo.stewName}: ${stewBuildConfig.stewInfo.stewMessage}`}
