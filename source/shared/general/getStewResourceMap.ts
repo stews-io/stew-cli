@@ -16,6 +16,8 @@ export function getStewResourceMap<StewBuildId extends string>(
     indexHtml: "/index.html",
     faviconIco: "/favicon.ico",
     faviconSvg: "/favicon.svg",
+    manifestJson: "/manifest.json",
+    robotsTxt: "/robots.txt",
     normalFontWoff: "/assets/RedHatMonoVF.woff2",
     italicFontWoff: "/assets/RedHatMonoVF-Italic.woff2",
     smallIconPng: "/assets/icon-192x192.png",

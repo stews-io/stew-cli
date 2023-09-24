@@ -1,6 +1,5 @@
 import { Esbuild } from "../shared/deps/esbuild/mod.ts";
 import { FunctionComponent, h as preactH } from "../shared/deps/preact/mod.ts";
-import { resolvePath } from "../shared/deps/std/path.ts";
 import {
   bundleModule,
   bundlePreactModule,
@@ -92,6 +91,7 @@ async function buildStewApp(api: BuildStewAppApi) {
     }),
     fetchAndWriteSecondaryAssetFiles({
       buildDirectoryMap,
+      stewBuildConfig,
     }),
   ]);
 }
@@ -262,7 +262,13 @@ interface GetStewBuildConfigApi
   loadedSegmentModules: Record<string, SegmentModule<SegmentItem>>;
 }
 
-function getStewBuildConfig(api: GetStewBuildConfigApi) {
+interface GetStewBuildConfigResult {
+  stewBuildConfig: BuildStewConfig;
+}
+
+function getStewBuildConfig(
+  api: GetStewBuildConfigApi
+): GetStewBuildConfigResult {
   const { stewBuildId, stewSourceConfig, loadedSegmentModules } = api;
   return {
     stewBuildConfig: {
@@ -307,7 +313,7 @@ function getStewBuildConfig(api: GetStewBuildConfigApi) {
         };
         return buildSegmentsResult;
       }, {}),
-    } satisfies BuildStewConfig,
+    },
   };
 }
 
@@ -396,71 +402,96 @@ function fetchBundleAsset(api: FetchBundleAssetApi) {
 }
 
 interface FetchAndWriteSecondaryAssetFilesApi
-  extends Pick<ReturnType<typeof setupBuildDirectories>, "buildDirectoryMap"> {}
+  extends Pick<ReturnType<typeof setupBuildDirectories>, "buildDirectoryMap">,
+    Pick<GetStewBuildConfigResult, "stewBuildConfig"> {}
 
 function fetchAndWriteSecondaryAssetFiles(
   api: FetchAndWriteSecondaryAssetFilesApi
 ) {
-  const { buildDirectoryMap } = api;
-  Deno.mkdirSync(buildDirectoryMap.stewAssetsDirectoryPath);
+  const { buildDirectoryMap, stewBuildConfig } = api;
+  Deno.writeTextFileSync(
+    buildDirectoryMap.manifestJson,
+    JSON.stringify({
+      name: `stews.io: ${stewBuildConfig.stewInfo.stewName}`,
+      short_name: stewBuildConfig.stewInfo.stewName,
+      start_url: "/",
+      display: "standalone",
+      orientation: "portrait",
+      background_color: "#FFFFFF",
+      theme_color: "#FFFFFF",
+      icons: [
+        {
+          src: "assets/icon-192x192.png",
+          type: "image/png",
+          sizes: "192x192",
+        },
+        {
+          src: "assets/icon-384x384.png",
+          type: "image/png",
+          sizes: "384x384",
+        },
+        {
+          src: "assets/icon-512x512.png",
+          type: "image/png",
+          sizes: "512x512",
+        },
+      ],
+    })
+  );
   const repoRootDirectoryPath = joinPaths(
     getDirectoryPath(import.meta.url),
     "../"
   );
-  return Promise.all([
-    fetchSecondaryAsset({
-      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/favicon.ico`,
-    }).then((faviconIcoBlob) => {
-      Deno.writeFile(buildDirectoryMap.faviconIco, faviconIcoBlob.stream());
-    }),
-    fetchSecondaryAsset({
-      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/favicon.svg`,
-    }).then((faviconSvgBlob) => {
-      Deno.writeFile(buildDirectoryMap.faviconSvg, faviconSvgBlob.stream());
-    }),
-    fetchSecondaryAsset({
-      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/icon-192x192.png`,
-    }).then((smallIconPngBlob) => {
-      Deno.writeFile(buildDirectoryMap.smallIconPng, smallIconPngBlob.stream());
-    }),
-    fetchSecondaryAsset({
-      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/icon-384x384.png`,
-    }).then((mediumIconPngBlob) => {
-      Deno.writeFile(
-        buildDirectoryMap.mediumIconPng,
-        mediumIconPngBlob.stream()
-      );
-    }),
-    fetchSecondaryAsset({
-      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/icon-512x512.png`,
-    }).then((largeIconPngBlob) => {
-      Deno.writeFile(buildDirectoryMap.largeIconPng, largeIconPngBlob.stream());
-    }),
-    fetchSecondaryAsset({
-      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/icon-2048x2048.png`,
-    }).then((extraLargeIconPngBlob) => {
-      Deno.writeFile(
-        buildDirectoryMap.extraLargeIconPng,
-        extraLargeIconPngBlob.stream()
-      );
-    }),
-    fetchSecondaryAsset({
-      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/fonts/RedHatMonoVF.woff2`,
-    }).then((normalFontWoffBlob) => {
-      Deno.writeFile(
-        buildDirectoryMap.normalFontWoff,
-        normalFontWoffBlob.stream()
-      );
-    }),
-    fetchSecondaryAsset({
-      secondaryAssetUrl: `${repoRootDirectoryPath}/assets/fonts/RedHatMonoVF-Italic.woff2`,
-    }).then((italicFontWoffBlob) => {
-      Deno.writeFile(
-        buildDirectoryMap.italicFontWoff,
-        italicFontWoffBlob.stream()
-      );
-    }),
-  ]);
+  Deno.mkdirSync(buildDirectoryMap.stewAssetsDirectoryPath);
+  return Promise.all(
+    [
+      {
+        terminalSecondaryAssetUrl: "/assets/robots.txt",
+        secondaryAssetBuildPath: buildDirectoryMap.robotsTxt,
+      },
+      {
+        terminalSecondaryAssetUrl: "/assets/favicon.ico",
+        secondaryAssetBuildPath: buildDirectoryMap.faviconIco,
+      },
+      {
+        terminalSecondaryAssetUrl: "/assets/favicon.svg",
+        secondaryAssetBuildPath: buildDirectoryMap.faviconSvg,
+      },
+      {
+        terminalSecondaryAssetUrl: "/assets/icon-192x192.png",
+        secondaryAssetBuildPath: buildDirectoryMap.smallIconPng,
+      },
+      {
+        terminalSecondaryAssetUrl: "/assets/icon-384x384.png",
+        secondaryAssetBuildPath: buildDirectoryMap.mediumIconPng,
+      },
+      {
+        terminalSecondaryAssetUrl: "/assets/icon-512x512.png",
+        secondaryAssetBuildPath: buildDirectoryMap.largeIconPng,
+      },
+      {
+        terminalSecondaryAssetUrl: "/assets/icon-2048x2048.png",
+        secondaryAssetBuildPath: buildDirectoryMap.extraLargeIconPng,
+      },
+      {
+        terminalSecondaryAssetUrl: "/assets/fonts/RedHatMonoVF.woff2",
+        secondaryAssetBuildPath: buildDirectoryMap.normalFontWoff,
+      },
+      {
+        terminalSecondaryAssetUrl: "/assets/fonts/RedHatMonoVF-Italic.woff2",
+        secondaryAssetBuildPath: buildDirectoryMap.italicFontWoff,
+      },
+    ].map((someSecondaryAssetConfig) =>
+      fetchSecondaryAsset({
+        secondaryAssetUrl: `${repoRootDirectoryPath}${someSecondaryAssetConfig.terminalSecondaryAssetUrl}`,
+      }).then((secondaryAssetBlob) => {
+        Deno.writeFile(
+          someSecondaryAssetConfig.secondaryAssetBuildPath,
+          secondaryAssetBlob.stream()
+        );
+      })
+    )
+  );
 }
 
 interface FetchSecondaryAssetApi {

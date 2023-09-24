@@ -13,7 +13,7 @@ async function handleRequest(someRequest: Request) {
     console.log(unmodifiedRequestPathname);
     const emptyPathRegexp = PathToRegexp.pathToRegexp("/");
     const segmentViewPathRegexp = PathToRegexp.pathToRegexp(
-      "/:segmentKey((?!stew_))((?!app.))((?!assets))(.*)"
+      "/:segmentKey((?!stew_))((?!app.))((?!assets))((?!favicon.))((?!manifest.))(.*)"
     );
     const rewriteRequestPathnameToIndexHtml =
       emptyPathRegexp.test(unmodifiedRequestPathname) ||

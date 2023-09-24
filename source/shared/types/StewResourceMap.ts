@@ -16,6 +16,8 @@ export interface StewResourceMap<
   // secondary
   faviconIco: "/favicon.ico";
   faviconSvg: "/favicon.svg";
+  manifestJson: "/manifest.json";
+  robotsTxt: "/robots.txt";
   stewAssetsDirectoryPath: StewAssetsDirectoryPath;
   normalFontWoff: `${StewAssetsDirectoryPath}/RedHatMonoVF.woff2`;
   italicFontWoff: `${StewAssetsDirectoryPath}/RedHatMonoVF-Italic.woff2`;
