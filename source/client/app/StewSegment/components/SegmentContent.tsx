@@ -10,6 +10,7 @@ import { SegmentLoadedStewState } from "../types/StewSegmentState.ts";
 import { ViewPageNavigation } from "./ViewPageNavigation.tsx";
 // @deno-types="CssModule"
 import cssModule from "./SegmentContent.module.scss";
+import { LinkButton } from "../../components/Button/LinkButton.tsx";
 
 export interface ViewPageSegmentContentProps
   extends Pick<
@@ -80,12 +81,20 @@ export function ViewPageSegmentContent(props: ViewPageSegmentContentProps) {
         ))}
       </div>
       <ViewPageNavigation
-        stewSegmentState={stewSegmentState}
-        viewPageItems={viewPageItems}
-        viewPagesCount={viewPagesCount}
-        gotoPreviousViewPage={gotoPreviousViewPage}
-        gotoNextViewPage={gotoNextViewPage}
+        displayViewPageIndex={stewSegmentState.viewPageIndex + 1}
+        displayViewPagesCount={viewPagesCount}
+        previousViewPageButtonEnabled={stewSegmentState.viewPageIndex > 0}
+        onSelectPreviousViewPage={() => {
+          gotoPreviousViewPage();
+        }}
+        nextViewPageButtonEnabled={
+          stewSegmentState.viewPageIndex < viewPagesCount - 1
+        }
+        onSelectNextViewPage={() => {
+          gotoNextViewPage();
+        }}
       />
+      <SegmentContentFooter />
     </Fragment>
   );
 }
@@ -93,7 +102,26 @@ export function ViewPageSegmentContent(props: ViewPageSegmentContentProps) {
 export interface EmptyViewSegmentContentProps {}
 
 export function EmptyViewSegmentContent(props: EmptyViewSegmentContentProps) {
-  return <SegmentMessage segmentMessage={"no items match"} />;
+  return (
+    <Fragment>
+      <SegmentMessage segmentMessage={"no items match"} />
+      <ViewPageNavigation
+        displayViewPageIndex={1}
+        displayViewPagesCount={1}
+        previousViewPageButtonEnabled={false}
+        nextViewPageButtonEnabled={false}
+        onSelectPreviousViewPage={() => {
+          throwInvalidPathError(
+            "EmptyViewSegmentContent.onSelectPreviousViewPage"
+          );
+        }}
+        onSelectNextViewPage={() => {
+          throwInvalidPathError("EmptyViewSegmentContent.onSelectNextViewPage");
+        }}
+      />
+      <SegmentContentFooter />
+    </Fragment>
+  );
 }
 
 export interface LoadingSegmentContentProps {}
@@ -107,7 +135,12 @@ export interface ErrorLoadingSegmentContentProps {}
 export function ErrorLoadingSegmentContent(
   props: ErrorLoadingSegmentContentProps
 ) {
-  return <SegmentMessage segmentMessage={"oops, something happened!!!"} />;
+  return (
+    <Fragment>
+      <SegmentMessage segmentMessage={"oops, something happened!!!"} />
+      <SegmentContentFooter />
+    </Fragment>
+  );
 }
 
 interface SegmentMessageProps {
@@ -119,6 +152,29 @@ function SegmentMessage(props: SegmentMessageProps) {
   return (
     <div className={cssModule.messageContainer}>
       <div className={cssModule.messageText}>{segmentMessage}</div>
+    </div>
+  );
+}
+
+interface SegmentContentFooterProps {}
+
+function SegmentContentFooter(props: SegmentContentFooterProps) {
+  const {} = props;
+  return (
+    <div className={cssModule.contentFooterContainer}>
+      <div className={cssModule.contentFooter}>
+        <LinkButton
+          className={cssModule.footerLinkButton}
+          ariaLabel={"go to the stews.io landing page"}
+          ariaDescription={
+            "a button that opens a new tab and navigates to stews.io"
+          }
+          href={"https://stews.io"}
+          target={"_blank"}
+        >
+          stews.io
+        </LinkButton>
+      </div>
     </div>
   );
 }

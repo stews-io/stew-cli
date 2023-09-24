@@ -4,28 +4,27 @@ import {
   CoreAriaOrnamentsData,
   useInteractiveAria,
 } from "../../hooks/useInteractiveAria.ts";
-import { ViewPageSegmentContentProps } from "./SegmentContent.tsx";
 // @deno-types="CssModule"
 import cssModule from "./ViewPageNavigation.module.scss";
 
-export interface ViewPageNavigationProps
-  extends Pick<
-    ViewPageSegmentContentProps,
-    | "stewSegmentState"
-    | "viewPageItems"
-    | "viewPagesCount"
-    | "gotoPreviousViewPage"
-    | "gotoNextViewPage"
-  > {}
+export interface ViewPageNavigationProps {
+  displayViewPageIndex: number;
+  displayViewPagesCount: number;
+  previousViewPageButtonEnabled: ViewPageButtonProps["buttonEnabled"];
+  nextViewPageButtonEnabled: ViewPageButtonProps["buttonEnabled"];
+  onSelectPreviousViewPage: ViewPageButtonProps["onSelect"];
+  onSelectNextViewPage: ViewPageButtonProps["onSelect"];
+}
 
 export function ViewPageNavigation(props: ViewPageNavigationProps) {
   const {
-    stewSegmentState,
-    viewPagesCount,
-    gotoPreviousViewPage,
-    gotoNextViewPage,
+    displayViewPageIndex,
+    displayViewPagesCount,
+    previousViewPageButtonEnabled,
+    onSelectPreviousViewPage,
+    nextViewPageButtonEnabled,
+    onSelectNextViewPage,
   } = props;
-  const displayViewPageIndex = stewSegmentState.viewPageIndex + 1;
   const { ariaElementRef } = useInteractiveAria({
     ariaOrnaments: {
       ariaRole: "meter",
@@ -33,7 +32,7 @@ export function ViewPageNavigation(props: ViewPageNavigationProps) {
       ariaDescription: "pagination meter for filtered and sorted view items",
       ariaValueMin: `${1}`,
       ariaValueNow: `${displayViewPageIndex}`,
-      ariaValueMax: `${viewPagesCount}`,
+      ariaValueMax: `${displayViewPagesCount}`,
     },
     setCustomAriaAttributes: (ariaElement, ariaOrnaments) => {
       ariaElement.setAttribute("aria-valuemin", ariaOrnaments.ariaValueMin);
@@ -49,14 +48,12 @@ export function ViewPageNavigation(props: ViewPageNavigationProps) {
         ariaDescription={
           "a button that displays the previous page of filtered and sorted view items"
         }
-        buttonEnabled={stewSegmentState.viewPageIndex > 0}
-        onSelect={() => {
-          gotoPreviousViewPage();
-        }}
+        buttonEnabled={previousViewPageButtonEnabled}
+        onSelect={onSelectPreviousViewPage}
       />
       <div className={cssModule.navigationMeterContainer} ref={ariaElementRef}>
         <div className={cssModule.navigationMeter}>
-          {`${displayViewPageIndex} / ${viewPagesCount}`}
+          {`${displayViewPageIndex} / ${displayViewPagesCount}`}
         </div>
       </div>
       <ViewPageButton
@@ -65,10 +62,8 @@ export function ViewPageNavigation(props: ViewPageNavigationProps) {
         ariaDescription={
           "a button that displays the next page of filtered and sorted view items"
         }
-        buttonEnabled={stewSegmentState.viewPageIndex < viewPagesCount - 1}
-        onSelect={() => {
-          gotoNextViewPage();
-        }}
+        buttonEnabled={nextViewPageButtonEnabled}
+        onSelect={onSelectNextViewPage}
       />
     </div>
   );

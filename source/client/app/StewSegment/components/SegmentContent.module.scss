@@ -17,3 +17,32 @@
   font-style: italic;
   color: $themeDisabledColor;
 }
+
+.contentFooterContainer {
+  @extend .itemContainer;
+  justify-content: flex-start;
+  padding-inline: $themeSpacer;
+  padding-block-start: 2 * $themeSpacer;
+  padding-block-end: calc(5 / 2) * $themeSpacer;
+}
+
+.contentFooter {
+  @extend .rowContainer;
+  flex-grow: 1;
+  align-items: baseline;
+  border-top: solid 0.5px $themeTextBackgroundColor;
+  border-radius: $themeBorderRadius;
+  padding-inline: 0.5 * $themeSpacer;
+  padding-block-start: 2 * $themeSpacer;
+}
+
+.footerLinkButtonContainer {
+  padding-inline-end: 3 * $themeSpacer;
+}
+
+.footerLinkButton {
+  color: $themeButtonTextColor;
+  font-weight: 600;
+  font-style: italic;
+  font-size: calc(11 / 12) * 1rem;
+}
