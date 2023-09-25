@@ -3,20 +3,15 @@ import { Zod } from "../deps/zod/mod.ts";
 export type SegmentDataset<SomeSegmentItem extends SegmentItem> =
   Array<SomeSegmentItem>;
 
-export function SegmentDatasetSchema<
-  SomeSegmentItem extends SourceSegmentItem,
-  SomeSegmentItemSchema extends Zod.ZodType<SomeSegmentItem>
->(
-  someSegmentItemSchema: SomeSegmentItemSchema
-): Zod.ZodType<SegmentDataset<SomeSegmentItem>> {
-  return Zod.array(someSegmentItemSchema);
+export function SegmentDatasetSchema() {
+  return Zod.array(SourceSegmentItemSchema());
 }
 
 export interface SegmentItem {
   itemId: number;
 }
 
-export interface SourceSegmentItem extends SegmentItem, JsonObject {}
+interface SourceSegmentItem extends SegmentItem, JsonObject {}
 
 export interface BuildSegmentItem extends SegmentItem {
   __segment_item_search_space: string;

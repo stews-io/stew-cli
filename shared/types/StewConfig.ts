@@ -2,8 +2,7 @@ import { Zod } from "../deps/zod/mod.ts";
 import {
   SegmentDataset,
   SegmentDatasetSchema,
-  SourceSegmentItem,
-  SourceSegmentItemSchema,
+  SegmentItem,
 } from "./SegmentDataset.ts";
 import { SegmentSortOption } from "./SegmentModule.ts";
 import { ArrayOfAtLeastOne, ArrayOfOneSchema } from "./general.ts";
@@ -18,20 +17,20 @@ export function SourceStewConfigSchema(): Zod.ZodType<SourceStewConfig> {
 export interface SourceSegmentConfig
   extends SegmentConfigBase<ArrayOfAtLeastOne<SourceSegmentViewConfig>> {
   segmentModulePath: string;
-  segmentDataset: SegmentDataset<SourceSegmentItem>;
+  segmentDataset: SegmentDataset<SegmentItem>;
 }
 
-function SourceSegmentConfigSchema(): Zod.ZodType<SourceSegmentConfig> {
+function SourceSegmentConfigSchema() {
   return SegmentConfigBaseSchema(
     ArrayOfOneSchema(SourceSegmentViewConfigSchema())
   ).extend({
     segmentModulePath: Zod.string(),
-    segmentDataset: SegmentDatasetSchema(SourceSegmentItemSchema()),
+    segmentDataset: SegmentDatasetSchema(),
   });
 }
 
 export interface SourceSegmentViewConfig extends SegmentViewConfigBase {
-  viewItemIds: Array<SourceSegmentItem["itemId"]>;
+  viewItemIds: Array<SegmentItem["itemId"]>;
 }
 
 function SourceSegmentViewConfigSchema(): Zod.ZodType<SourceSegmentViewConfig> {
@@ -68,7 +67,7 @@ function BuildSegmentConfigSchema(): Zod.ZodType<BuildSegmentConfig> {
 
 interface BuildSortOptionConfig
   extends Pick<
-    SegmentSortOption<SourceSegmentItem>,
+    SegmentSortOption<SegmentItem>,
     "sortOptionKey" | "sortOptionLabel"
   > {
   sortOptionIndex: number;

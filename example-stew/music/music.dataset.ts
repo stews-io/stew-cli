@@ -289,4 +289,25 @@ export default [
       }),
     ],
   },
+  {
+    itemId: 11,
+    musicType: "source",
+    sourceType: "mix",
+    musicThumbnailHref:
+      "https://is4-ssl.mzstatic.com/image/thumb/Features125/v4/f4/6b/a9/f46ba999-c102-ea24-7efa-a8e48b43bebd/mza_4437830076440205700.jpg/600x600bb.webp",
+    musicYear: 2021,
+    musicTitle: "WhoMadeWho",
+    musicArtist: ["WhoMadeWho live at Abu Simbel"],
+    recordingContext: ["live"],
+    musicTags: ["electronic"],
+    externalLinks: [
+      getYoutubeLinkData({
+        youtubeHref: "https://youtu.be/BDwAlto-NKU",
+      }),
+      getAppleLinkData({
+        appleHref:
+          "https://music.apple.com/us/album/cercle-whomadewho-in-abu-simbel-egypt-live/1585737974",
+      }),
+    ],
+  },
 ] satisfies SegmentDataset<MusicItem>;
