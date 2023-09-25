@@ -10,8 +10,8 @@ Esbuild.close();
 async function writeLibraryPackageBundle() {
   const libraryPackageBundleResult = await Esbuild.runBuild({
     platform: "browser",
-    format: "iife",
-    globalName: "__moduleIifeResult",
+    format: "esm",
+    // globalName: "__moduleIifeResult",
     outdir: "out",
     bundle: true,
     write: false,

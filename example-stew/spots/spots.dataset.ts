@@ -1,4 +1,4 @@
-import { SegmentDataset } from "../../mod.ts";
+import { SegmentDataset } from "../../mod.js";
 import { SpotItem } from "./SpotItem.ts";
 
 export default [

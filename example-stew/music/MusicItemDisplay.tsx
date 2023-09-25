@@ -1,7 +1,7 @@
 import {
   MultiLinkImageItemDisplay,
   SegmentItemDisplayProps,
-} from "../../mod.ts";
+} from "../../mod.js";
 import { MusicItem } from "./MusicItem.ts";
 
 export interface MusicItemDisplayProps

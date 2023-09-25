@@ -1,4 +1,4 @@
-import { SegmentModule } from "../../mod.ts";
+import { SegmentModule } from "../../mod.js";
 import { MusicItem } from "./MusicItem.ts";
 import { MusicItemDisplay } from "./MusicItemDisplay.tsx";
 

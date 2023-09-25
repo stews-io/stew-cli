@@ -1,4 +1,4 @@
-import { SegmentDataset } from "../../mod.ts";
+import { SegmentDataset } from "../../mod.js";
 import { MusicItem } from "./MusicItem.ts";
 import {
   getAppleLinkData,

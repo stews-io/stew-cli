@@ -1,4 +1,4 @@
-import { SegmentItem } from "../../mod.ts";
+import { SegmentItem } from "../../mod.js";
 import { ArrayOfAtLeastOne } from "../../shared/types/general.ts";
 
 export type MusicItem = ClippedMusicItem | WholeMusicItem;

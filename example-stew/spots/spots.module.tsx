@@ -1,4 +1,4 @@
-import { SegmentModule } from "../../mod.ts";
+import { SegmentModule } from "../../mod.js";
 import { SpotItem } from "./SpotItem.ts";
 
 export default {
