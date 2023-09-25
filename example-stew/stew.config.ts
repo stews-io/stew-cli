@@ -10,7 +10,16 @@ function getHelloStewConfig(): SourceStewConfig {
       stewName: "hello-stew",
       stewTagline: "just stewin",
       stewMessage: "an assortment of awesome stuff",
-      stewExternalLinks: [],
+      stewExternalLinks: [
+        {
+          linkLabel: "website",
+          linkHref: "https://clumsycomputer.com",
+        },
+        {
+          linkLabel: "github",
+          linkHref: "https://github.com/stews-io",
+        },
+      ],
     },
     stewSegments: [
       {
