@@ -174,7 +174,11 @@ function StewInfoPopoverContent(props: StewInfoPopoverContentProps) {
               ])}
               onBlur={popoverNavigationItemBlurHandler}
               onSelect={() => {
-                selectStewSegment(someSegmentConfig.segmentKey);
+                if (
+                  someSegmentConfig.segmentKey !== stewSegmentState.segmentKey
+                ) {
+                  selectStewSegment(someSegmentConfig.segmentKey);
+                }
                 anchorElementRef.current instanceof HTMLDivElement
                   ? anchorElementRef.current.focus()
                   : throwInvalidPathError(
