@@ -226,7 +226,7 @@ interface ExternalLinkIconProps {
 function ExternalLinkIcon(props: ExternalLinkIconProps) {
   const { someExternalLink } = props;
   const externalLinkUrl = new URL(someExternalLink.linkHref);
-  if (externalLinkUrl.host === "github") {
+  if (externalLinkUrl.host === "github.com") {
     return (
       <svg className={cssModule.curatorLinkIcon} viewBox={"8 8 496 496"}>
         <path
@@ -236,7 +236,7 @@ function ExternalLinkIcon(props: ExternalLinkIconProps) {
         />
       </svg>
     );
-  } else if (externalLinkUrl.host === "twitter") {
+  } else if (externalLinkUrl.host === "twitter.com") {
     return (
       <svg className={cssModule.curatorLinkIcon} viewBox={"-4 -8 532 532"}>
         <path
@@ -246,7 +246,7 @@ function ExternalLinkIcon(props: ExternalLinkIconProps) {
         />
       </svg>
     );
-  } else if (externalLinkUrl.host === "instagram") {
+  } else if (externalLinkUrl.host === "instagram.com") {
     return (
       <svg className={cssModule.curatorLinkIcon} viewBox={"0 0 512 512"}>
         <path
