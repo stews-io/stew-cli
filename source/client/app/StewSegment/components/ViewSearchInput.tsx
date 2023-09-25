@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "../../../../../shared/deps/preact/hooks.ts";
+import { useMemo, useRef } from "preact/hooks";
 import { throwInvalidPathError } from "../../../../../shared/general/throwInvalidPathError.ts";
 import { Button } from "../../components/Button/Button.tsx";
 import { SegmentPageProps } from "./SegmentPage.tsx";

@@ -2,6 +2,7 @@ import { esbuildDenoAdapterPlugins } from "../deps/esbuild/deno-adapter-plugin.t
 import { esbuildSassAdapterPlugins } from "../deps/esbuild/esbuild-sass-plugin.ts";
 import { Esbuild, EsbuildPlugin, TsconfigRaw } from "../deps/esbuild/mod.ts";
 import { resolvePath } from "../deps/std/path.ts";
+import * as PreactHooks from "../deps/preact/hooks.ts";
 
 export interface BundlePreactModuleApi
   extends Pick<BundleModuleApi, "moduleEntryPath"> {}
@@ -10,7 +11,36 @@ export async function bundlePreactModule(api: BundlePreactModuleApi) {
   const { moduleEntryPath } = api;
   const bundlePreactModuleResult = await bundleModule({
     moduleEntryPath,
-    additionalEsbuildPlugins: esbuildSassAdapterPlugins(),
+    additionalEsbuildPlugins: [
+      ...esbuildSassAdapterPlugins(),
+      {
+        name: "global-preact-hooks-plugin",
+        setup(buildContext) {
+          const globalHookModuleDeclarations = Object.keys(PreactHooks)
+            .map(
+              (somePreactHookKey) =>
+                `const ${somePreactHookKey} = (...args) => globalThis.PreactHooks.${somePreactHookKey}(...args)`
+            )
+            .join("\n");
+          const globalHookModuleExports = Object.keys(PreactHooks).join(",");
+          const globalHookModuleScript = `${globalHookModuleDeclarations}\nexport {${globalHookModuleExports}}`;
+          buildContext.onResolve({ filter: /^preact\/hooks$/ }, () => ({
+            namespace: "global-preact-hooks",
+            path: "global-preact-hooks.js",
+          }));
+          buildContext.onLoad(
+            {
+              filter: /^global-preact-hooks\.js$/,
+              namespace: "global-preact-hooks",
+            },
+            () => ({
+              loader: "js",
+              contents: globalHookModuleScript,
+            })
+          );
+        },
+      },
+    ],
     tsConfig: {
       compilerOptions: {
         jsxFactory: "h",

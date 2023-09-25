@@ -1,15 +1,10 @@
-import { SourceStewConfig } from "../shared/types/StewConfig.ts";
+import { SourceStewConfig } from "../mod.ts";
 import musicDataset from "./music/music.dataset.ts";
 import spotsDataset from "./spots/spots.dataset.ts";
 
 export default getHelloStewConfig();
 
-async function getHelloStewConfig() {
-  await new Promise<void>((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, 500);
-  });
+function getHelloStewConfig(): SourceStewConfig {
   return {
     stewInfo: {
       stewName: "hello-stew",
@@ -49,5 +44,5 @@ async function getHelloStewConfig() {
         ],
       },
     ],
-  } satisfies SourceStewConfig;
+  };
 }

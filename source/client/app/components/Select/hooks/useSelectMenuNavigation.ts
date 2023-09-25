@@ -1,9 +1,4 @@
-import {
-  MutableRef,
-  Ref,
-  useRef,
-  useState,
-} from "../../../../../../shared/deps/preact/hooks.ts";
+import { MutableRef, Ref, useRef, useState } from "preact/hooks";
 import { ComponentProps } from "../../../../../../shared/deps/preact/mod.ts";
 import { throwInvalidPathError } from "../../../../../../shared/general/throwInvalidPathError.ts";
 import { ButtonProps } from "../../Button/Button.tsx";

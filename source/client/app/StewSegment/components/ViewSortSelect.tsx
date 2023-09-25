@@ -1,4 +1,4 @@
-import { useMemo } from "../../../../../shared/deps/preact/hooks.ts";
+import { useMemo } from "preact/hooks";
 import { ComponentProps } from "../../../../../shared/deps/preact/mod.ts";
 import { CustomAnchorButtonProps } from "../../components/Button/AnchorButton.tsx";
 import {

@@ -1,4 +1,4 @@
-import { useMemo } from "../../../../../shared/deps/preact/hooks.ts";
+import { useMemo } from "preact/hooks";
 import { throwInvalidPathError } from "../../../../../shared/general/throwInvalidPathError.ts";
 import { Bopper } from "../../components/Bopper/Bopper.tsx";
 import {

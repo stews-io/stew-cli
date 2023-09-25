@@ -1,7 +1,8 @@
-import { SegmentItemDisplayProps } from "../../shared/types/SegmentModule.ts";
+import {
+  MultiLinkImageItemDisplay,
+  SegmentItemDisplayProps,
+} from "../../mod.ts";
 import { MusicItem } from "./MusicItem.ts";
-// @deno-types="CssModule"
-import cssModule from "./MusicItemDisplay.module.scss";
 
 export interface MusicItemDisplayProps
   extends SegmentItemDisplayProps<MusicItem> {}
@@ -9,8 +10,40 @@ export interface MusicItemDisplayProps
 export function MusicItemDisplay(props: MusicItemDisplayProps) {
   const { someSegmentItem } = props;
   return (
-    <div className={cssModule.fooClass}>
-      <div className={cssModule.bazClass}>{someSegmentItem.musicTitle}</div>
-    </div>
+    <MultiLinkImageItemDisplay
+      itemTitle={someSegmentItem.musicTitle}
+      itemThumbnailHref={someSegmentItem.musicThumbnailHref}
+      itemLinks={someSegmentItem.externalLinks.map((someMusicLink) => ({
+        ...someMusicLink,
+        ariaLabel: `listen on ${someMusicLink.linkLabel}`,
+        ariaDescription: `a button that navigates in a new tab to ${someSegmentItem.musicTitle} by ${someSegmentItem.musicArtist[0]} on ${someMusicLink.linkLabel}`,
+      }))}
+      itemLabelLists={[
+        {
+          accessibilityLabel: "music title",
+          listLabels: [someSegmentItem.musicTitle],
+        },
+        {
+          accessibilityLabel: "music artist",
+          listLabels: someSegmentItem.musicArtist,
+        },
+        {
+          accessibilityLabel: "music context",
+          listLabels: [
+            `${
+              someSegmentItem.musicYear
+            } ${someSegmentItem.recordingContext.join("/")} ${
+              someSegmentItem.sourceType === "collection"
+                ? someSegmentItem.collectionType
+                : someSegmentItem.sourceType
+            }${someSegmentItem.musicType === "clip" ? " (clip)" : ""}`,
+          ],
+        },
+        {
+          accessibilityLabel: "music styles",
+          listLabels: someSegmentItem.musicTags,
+        },
+      ]}
+    />
   );
 }

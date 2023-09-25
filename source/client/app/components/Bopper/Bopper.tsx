@@ -1,4 +1,4 @@
-import { useRef, useState } from "../../../../../shared/deps/preact/hooks.ts";
+import { useRef, useState } from "preact/hooks";
 import {
   Fragment,
   FunctionComponent,

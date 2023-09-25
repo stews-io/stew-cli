@@ -1,8 +1,8 @@
 import { FunctionComponent, h as preactH } from "../shared/deps/preact/mod.ts";
 import {
   bundleModule,
-  bundlePreactModule,
   loadModuleBundle,
+  bundlePreactModule,
 } from "../shared/general/bundleModule.ts";
 import { getBundledAssetsLocationMap } from "../shared/general/getBundledAssetsLocationMap.ts";
 import { throwInvalidPathError } from "../shared/general/throwInvalidPathError.ts";

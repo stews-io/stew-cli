@@ -1,5 +1,5 @@
 import { BuildStewConfig } from "../../../../../mod.ts";
-import { useMemo } from "../../../../../shared/deps/preact/hooks.ts";
+import { useMemo } from "preact/hooks";
 import {
   ComponentProps,
   Fragment,

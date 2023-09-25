@@ -1,7 +1,4 @@
-import {
-  useLayoutEffect,
-  useRef,
-} from "../../../../../shared/deps/preact/hooks.ts";
+import { useLayoutEffect, useRef } from "preact/hooks";
 import { throwInvalidPathError } from "../../../../../shared/general/throwInvalidPathError.ts";
 
 export interface UseStickyPageHeaderWorkaroundApi {

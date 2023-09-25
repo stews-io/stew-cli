@@ -1,10 +1,4 @@
-import {
-  Ref,
-  StateUpdater,
-  useEffect,
-  useMemo,
-  useRef,
-} from "../../../../../shared/deps/preact/hooks.ts";
+import { Ref, StateUpdater, useEffect, useMemo, useRef } from "preact/hooks";
 import {
   FunctionComponent,
   RefObject,

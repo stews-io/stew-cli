@@ -22,7 +22,6 @@
   @extend .itemContainer;
   justify-content: flex-start;
   padding-inline: $themeSpacer;
-  padding-block-start: 2 * $themeSpacer;
   padding-block-end: calc(5 / 2) * $themeSpacer;
 }
 

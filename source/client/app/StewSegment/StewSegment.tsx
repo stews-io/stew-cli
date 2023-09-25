@@ -15,9 +15,9 @@ export function StewSegment(props: StewSegmentProps) {
       stewConfig,
       stewResourceMap,
       initialSegmentViewState,
-      getUpdateSegmentComponentsMutation: ({ stewSegmentMutations }) =>
+      routeUpdateSegmentComponentsMutation: ({ stewSegmentMutations }) =>
         stewSegmentMutations.updateSegmentComponents,
-      getViewPageSegmentContentMutationProps: ({ stewSegmentMutations }) => ({
+      routeGotoViewPageMutations: ({ stewSegmentMutations }) => ({
         gotoPreviousViewPage: stewSegmentMutations.gotoPreviousViewPage,
         gotoNextViewPage: stewSegmentMutations.gotoNextViewPage,
       }),

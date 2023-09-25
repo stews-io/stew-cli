@@ -1,7 +1,4 @@
-import {
-  useLayoutEffect,
-  useRef,
-} from "../../../../../shared/deps/preact/hooks.ts";
+import { useLayoutEffect, useRef } from "preact/hooks";
 import { Fragment } from "../../../../../shared/deps/preact/mod.ts";
 import { throwInvalidPathError } from "../../../../../shared/general/throwInvalidPathError.ts";
 import { BuildSegmentItem } from "../../../../../shared/types/SegmentDataset.ts";
@@ -71,6 +68,9 @@ export function ViewPageSegmentContent(props: ViewPageSegmentContentProps) {
   }, [stewSegmentState.segmentViewKey, stewSegmentState.viewPageIndex]);
   return (
     <Fragment>
+      <style key={stewSegmentState.segmentKey}>
+        {stewSegmentState.segmentCss}
+      </style>
       <div className={cssModule.viewPageItemsContainer}>
         <div ref={pageTopElementRef} />
         {viewPageItems.map((someSegmentItem) => (

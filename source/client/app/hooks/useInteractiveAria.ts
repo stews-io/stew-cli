@@ -1,9 +1,6 @@
-import {
-  useLayoutEffect,
-  useMemo,
-} from "../../../../shared/deps/preact/hooks.ts";
-import { createRef } from "../../../../shared/deps/preact/mod.ts";
+import { useLayoutEffect, useMemo } from "preact/hooks";
 import { throwInvalidPathError } from "../../../../shared/general/throwInvalidPathError.ts";
+import { createRef } from "../../../../shared/deps/preact/mod.ts";
 
 export interface CoreAriaOrnaments<AriaRole extends string>
   extends CoreAriaOrnamentsConfig<AriaRole>,
