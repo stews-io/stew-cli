@@ -9,6 +9,7 @@
 .messageContainer {
   @extend .itemContainer;
   padding: 4 * $themeSpacer;
+  padding-block-start: calc(19 / 4) * $themeSpacer;
 }
 
 .messageText {
