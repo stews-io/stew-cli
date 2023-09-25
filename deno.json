@@ -23,6 +23,7 @@
     "preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime"
   },
   "tasks": {
+    "writeLibraryPackageBundle": "deno run -A ./scripts/writeLibraryPackageBundle.ts",
     "writeClientBundleAssets": "deno run -A ./scripts/writeClientBundleAssets.ts",
     "runStewCommand": "deno run -A ./source/main.ts",
     "buildExampleStew": "deno task runStewCommand build ./example-stew/stew.config.ts",

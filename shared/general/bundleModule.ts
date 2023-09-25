@@ -12,7 +12,9 @@ export async function bundlePreactModule(api: BundlePreactModuleApi) {
   const bundlePreactModuleResult = await bundleModule({
     moduleEntryPath,
     additionalEsbuildPlugins: [
-      ...esbuildSassAdapterPlugins(),
+      ...esbuildSassAdapterPlugins({
+        type: "css",
+      }),
       {
         name: "global-preact-hooks-plugin",
         setup(buildContext) {

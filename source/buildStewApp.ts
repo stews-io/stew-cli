@@ -165,6 +165,17 @@ async function loadAndWriteSegmentModule(
     ),
   });
   // todo: validate currentSegmentModule as SegmentModule<SegmentItem>
+  // mock document interface for css style injection
+  // document.head.appendChild(document.createElement("style")).appendChild(document.createTextNode(css2)
+  globalThis.document = {
+    createTextNode: () => ({}),
+    createElement: () => ({}),
+    head: {
+      appendChild: () => ({
+        appendChild: () => ({}),
+      }),
+    },
+  };
   const currentSegmentModule = loadModuleBundle({
     moduleExportKey: "default",
     moduleIifeBundleScript: segmentModuleIifeScript,
