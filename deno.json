@@ -20,7 +20,12 @@
     "CssModule": "./declaration.d.ts",
     "preact": "https://esm.sh/preact@10.17.1",
     "preact/hooks": "https://esm.sh/preact@10.17.1/hooks",
-    "preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime"
+    "preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime",
+    "stew/components": "./stew-library/components/mod.ts",
+    "stew/config": "./stew-library/config/mod.ts",
+    "stew/hooks": "./stew-library/hooks/mod.ts",
+    "stew/internal": "./stew-library/internal/mod.ts",
+    "stew/utilities": "./stew-library/utilities/mod.ts"
   },
   "tasks": {
     "writeLibraryPackageBundle": "deno run -A ./scripts/writeLibraryPackageBundle.ts",
