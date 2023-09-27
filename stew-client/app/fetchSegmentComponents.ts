@@ -4,8 +4,8 @@ import {
   SegmentModule,
   SegmentViewsMap,
 } from "stew-library/config";
-import { StewResourceMap } from "../../../stew-library/internal/getStewResourceMap.ts";
-import { loadModuleBundle } from "../../../stew-library/internal/loadModuleBundle.ts";
+import { StewResourceMap } from "../../stew-library/internal/getStewResourceMap.ts";
+import { loadModuleBundle } from "../../stew-library/internal/loadModuleBundle.ts";
 
 export interface FetchSegmentComponentsApi {
   stewResourceMap: StewResourceMap;

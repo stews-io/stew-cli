@@ -1,9 +1,10 @@
 import * as Preact from "preact";
 import * as PreactHooks from "preact/hooks";
 import * as StewComponents from "stew-library/components";
+import * as StewHooks from "stew-library/hooks";
 import { BuildStewConfig } from "stew-library/config";
 import { findMapItem, throwInvalidPathError } from "stew-library/utilities";
-import { getStewResourceMap } from "../../../stew-library/internal/getStewResourceMap.ts";
+import { getStewResourceMap } from "../../stew-library/internal/getStewResourceMap.ts";
 import { StewApp, StewAppProps } from "./StewApp.tsx";
 import { fetchSegmentComponents } from "./fetchSegmentComponents.ts";
 
@@ -12,6 +13,7 @@ Object.assign(globalThis, {
   Preact,
   PreactHooks,
   StewComponents,
+  StewHooks,
 });
 loadStewApp();
 

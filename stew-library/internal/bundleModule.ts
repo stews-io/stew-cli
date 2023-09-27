@@ -3,28 +3,6 @@ import { esbuildSassAdapterPlugins } from "../deps/esbuild/esbuild-sass-plugin.t
 import { Esbuild, EsbuildPlugin, TsconfigRaw } from "../deps/esbuild/mod.ts";
 import { resolvePath } from "../deps/std/path.ts";
 
-export interface BundleAppModuleApi
-  extends Pick<BundlePreactModuleApi, "moduleEntryPath"> {}
-
-export function bundleAppModule(api: BundleAppModuleApi) {
-  const { moduleEntryPath } = api;
-  return bundlePreactModule({
-    moduleEntryPath,
-    additionalEsbuildPlugins: [],
-  });
-}
-
-export interface BundleInitialHtmlModuleApi
-  extends Pick<BundlePreactModuleApi, "moduleEntryPath"> {}
-
-export function bundleInitialHtmlModule(api: BundleInitialHtmlModuleApi) {
-  const { moduleEntryPath } = api;
-  return bundlePreactModule({
-    moduleEntryPath,
-    additionalEsbuildPlugins: [],
-  });
-}
-
 export interface BundleSegmentModuleApi
   extends Pick<BundlePreactModuleApi, "moduleEntryPath"> {}
 
@@ -47,39 +25,14 @@ export function bundleSegmentModule(api: BundleSegmentModuleApi) {
             importNameRegex: /^stew\/components$/,
             globalExportHandle: "globalThis.StewComponents",
           },
+          "stew/hooks": {
+            importNameRegex: /^stew\/hooks$/,
+            globalExportHandle: "globalThis.StewHooks",
+          },
         },
       }),
     ],
   });
-}
-
-interface BundlePreactModuleApi
-  extends Pick<
-    BundleModuleApi,
-    "moduleEntryPath" | "additionalEsbuildPlugins"
-  > {}
-
-async function bundlePreactModule(api: BundlePreactModuleApi) {
-  const { moduleEntryPath, additionalEsbuildPlugins } = api;
-  const bundlePreactModuleResult = await bundleModule({
-    moduleEntryPath,
-    additionalEsbuildPlugins: [
-      ...esbuildSassAdapterPlugins(),
-      ...additionalEsbuildPlugins,
-    ],
-    tsConfig: {
-      compilerOptions: {
-        jsxFactory: "h",
-        jsxFragmentFactory: "Fragment",
-      },
-    },
-  });
-  return [
-    bundlePreactModuleResult.outputFiles[0].text,
-    bundlePreactModuleResult.outputFiles[1]
-      ? bundlePreactModuleResult.outputFiles[1].text
-      : "",
-  ];
 }
 
 interface EsbuildStewGlobalsPluginApi {
@@ -121,6 +74,57 @@ function esbuildStewGlobalsPlugin(api: EsbuildStewGlobalsPluginApi) {
       );
     },
   };
+}
+
+export interface BundleAppModuleApi
+  extends Pick<BundlePreactModuleApi, "moduleEntryPath"> {}
+
+export function bundleAppModule(api: BundleAppModuleApi) {
+  const { moduleEntryPath } = api;
+  return bundlePreactModule({
+    moduleEntryPath,
+    additionalEsbuildPlugins: [],
+  });
+}
+
+export interface BundleInitialHtmlModuleApi
+  extends Pick<BundlePreactModuleApi, "moduleEntryPath"> {}
+
+export function bundleInitialHtmlModule(api: BundleInitialHtmlModuleApi) {
+  const { moduleEntryPath } = api;
+  return bundlePreactModule({
+    moduleEntryPath,
+    additionalEsbuildPlugins: [],
+  });
+}
+
+interface BundlePreactModuleApi
+  extends Pick<
+    BundleModuleApi,
+    "moduleEntryPath" | "additionalEsbuildPlugins"
+  > {}
+
+async function bundlePreactModule(api: BundlePreactModuleApi) {
+  const { moduleEntryPath, additionalEsbuildPlugins } = api;
+  const bundlePreactModuleResult = await bundleModule({
+    moduleEntryPath,
+    additionalEsbuildPlugins: [
+      ...esbuildSassAdapterPlugins(),
+      ...additionalEsbuildPlugins,
+    ],
+    tsConfig: {
+      compilerOptions: {
+        jsxFactory: "h",
+        jsxFragmentFactory: "Fragment",
+      },
+    },
+  });
+  return [
+    bundlePreactModuleResult.outputFiles[0].text,
+    bundlePreactModuleResult.outputFiles[1]
+      ? bundlePreactModuleResult.outputFiles[1].text
+      : "",
+  ];
 }
 
 export interface BundleConfigModuleApi

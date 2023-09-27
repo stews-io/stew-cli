@@ -6,7 +6,7 @@ export function getBundledAssetsLocationMap(
   api: GetBundledAssetsLocationMapApi
 ) {
   const { baseLocation } = api;
-  const clientBaseDirectoryPath = `${baseLocation}/client/__bundled-assets__`;
+  const clientBaseDirectoryPath = `${baseLocation}/stew-assets/client-bundles`;
   return {
     initialHtmlScript: `${clientBaseDirectoryPath}/INITIAL_HTML.js`,
     splashPageCss: `${clientBaseDirectoryPath}/SPLASH_PAGE.css`,

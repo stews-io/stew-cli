@@ -337,7 +337,7 @@ async function fetchBundledAssets(): Promise<{
   bundleAssetsDataMap: BundledAssetsDataMap;
 }> {
   const bundledAssetClientPathMap = getBundledAssetsLocationMap({
-    baseLocation: getDirectoryPath(import.meta.url),
+    baseLocation: joinPaths(getDirectoryPath(import.meta.url), "../"),
   });
   const [appScript, appCss, initialHtmlScript, splashPageCss] =
     await Promise.all([

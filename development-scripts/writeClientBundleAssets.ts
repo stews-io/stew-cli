@@ -12,14 +12,14 @@ async function writeClientBundleAssets() {
   const [[initialHtmlScript, splashPageCss], [appScript, appCss]] =
     await Promise.all([
       bundleInitialHtmlModule({
-        moduleEntryPath: "./stew-command/client/html/InitialStewHtml.tsx",
+        moduleEntryPath: "./stew-client/html/InitialStewHtml.tsx",
       }),
       bundleAppModule({
-        moduleEntryPath: "./stew-command/client/app/main.tsx",
+        moduleEntryPath: "./stew-client/app/main.tsx",
       }),
     ]);
   const bundledAssetClientPathMap = getBundledAssetsLocationMap({
-    baseLocation: "./stew-command",
+    baseLocation: Deno.cwd(),
   });
   Deno.writeTextFileSync(
     bundledAssetClientPathMap.initialHtmlScript,
