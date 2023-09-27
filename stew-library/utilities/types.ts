@@ -1,4 +1,4 @@
-import { JSX } from "stew-library/deps/preact/mod.ts";
+import { JSX } from "../../stew-library/deps/preact/mod.ts";
 import { Zod } from "../deps/zod/mod.ts";
 
 export type ArrayOfAtLeastOne<T> = [T, ...Array<T>];
