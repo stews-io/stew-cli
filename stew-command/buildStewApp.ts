@@ -405,7 +405,7 @@ function fetchAndWriteSecondaryAssetFiles(
     "../"
   );
   Deno.mkdirSync(buildDirectoryMap.stewAssetsDirectoryPath);
-  const assetsDirectoryUrlPath = "/assets";
+  const assetsDirectoryUrlPath = "/stew-assets";
   const iconsDirectoryUrlPath = `${assetsDirectoryUrlPath}/icons`;
   const fontsDirectoryUrlPath = `${assetsDirectoryUrlPath}/fonts`;
   return Promise.all(

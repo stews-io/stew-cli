@@ -1,5 +1,5 @@
-import { Esbuild } from "../shared/deps/esbuild/mod.ts";
-import { throwInvalidPathError } from "../shared/general/throwInvalidPathError.ts";
+import { throwInvalidPathError } from "stew/utilities";
+import { Esbuild } from "../stew-library/deps/esbuild/mod.ts";
 import { buildStewApp } from "./buildStewApp.ts";
 import { parseCliArgs } from "./deps/std/flags.ts";
 

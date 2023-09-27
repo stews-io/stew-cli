@@ -1,4 +1,4 @@
-import { SourceStewConfig } from "../mod.js";
+import { SourceStewConfig } from "stew/config";
 import musicDataset from "./music/music.dataset.ts";
 import spotsDataset from "./spots/spots.dataset.ts";
 

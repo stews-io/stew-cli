@@ -1,3 +1,4 @@
+import "../styles/globalReset.scss";
 import { BuildStewConfig } from "stew/config";
 import { SplashPage } from "./SplashPage.tsx";
 

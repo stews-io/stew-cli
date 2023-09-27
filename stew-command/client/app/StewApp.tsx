@@ -1,3 +1,4 @@
+import "../styles/globalReset.scss";
 import { Fragment } from "preact";
 import { BuildStewConfig } from "stew/config";
 import { StewResourceMap } from "stew/internal";

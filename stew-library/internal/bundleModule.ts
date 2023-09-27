@@ -2,7 +2,6 @@ import { esbuildDenoAdapterPlugins } from "../deps/esbuild/deno-adapter-plugin.t
 import { esbuildSassAdapterPlugins } from "../deps/esbuild/esbuild-sass-plugin.ts";
 import { Esbuild, EsbuildPlugin, TsconfigRaw } from "../deps/esbuild/mod.ts";
 import { resolvePath } from "../deps/std/path.ts";
-import * as PreactHooks from "../deps/preact/hooks.ts";
 
 export interface BundlePreactModuleApi
   extends Pick<BundleModuleApi, "moduleEntryPath"> {}
@@ -11,38 +10,64 @@ export async function bundlePreactModule(api: BundlePreactModuleApi) {
   const { moduleEntryPath } = api;
   const bundlePreactModuleResult = await bundleModule({
     moduleEntryPath,
-    externalModules: ["preact", "preact/hooks", "stew"],
+    // externalModules: ["preact", "preact/hooks", "stew/components"],
     additionalEsbuildPlugins: [
-      ...esbuildSassAdapterPlugins({
-        type: "css",
-      }),
-      // {
-      //   name: "esbuild-stew-globals-plugin",
-      //   setup(buildContext) {
-      //     const globalHookModuleDeclarations = Object.keys(PreactHooks)
-      //       .map(
-      //         (somePreactHookKey) =>
-      //           `const ${somePreactHookKey} = (...args) => globalThis.PreactHooks.${somePreactHookKey}(...args)`
-      //       )
-      //       .join("\n");
-      //     const globalHookModuleExports = Object.keys(PreactHooks).join(",");
-      //     const globalHookModuleScript = `${globalHookModuleDeclarations}\nexport {${globalHookModuleExports}}`;
-      //     buildContext.onResolve({ filter: /^preact\/hooks$/ }, () => ({
-      //       namespace: "stew-globals",
-      //       path: "global-preact-hooks.js",
-      //     }));
-      //     buildContext.onLoad(
-      //       {
-      //         filter: /^global-preact-hooks\.js$/,
-      //         namespace: "stew-globals",
-      //       },
-      //       () => ({
-      //         loader: "js",
-      //         contents: globalHookModuleScript,
-      //       })
-      //     );
-      //   },
-      // },
+      ...esbuildSassAdapterPlugins(),
+      {
+        name: "esbuild-stew-globals-plugin",
+        setup(buildContext) {
+          // const globalHookModuleDeclarations = Object.keys(PreactHooks)
+          //   .map(
+          //     (somePreactHookKey) =>
+          //       `const ${somePreactHookKey} = (...args) => globalThis.PreactHooks.${somePreactHookKey}(...args)`
+          //   )
+          //   .join("\n");
+          // const globalHookModuleExports = Object.keys(PreactHooks).join(",");
+          // const globalHookModuleScript = `${globalHookModuleDeclarations}\nexport {${globalHookModuleExports}}`;
+          buildContext.onResolve({ filter: /^preact$/ }, () => ({
+            namespace: "stew-globals",
+            path: "global-preact.js",
+          }));
+          buildContext.onLoad(
+            {
+              filter: /^global-preact\.js$/,
+              namespace: "stew-globals",
+            },
+            () => ({
+              loader: "js",
+              contents: `module.exports = Preact`,
+            })
+          );
+          buildContext.onResolve({ filter: /^preact\/hooks$/ }, () => ({
+            namespace: "stew-globals",
+            path: "global-preact-hooks.js",
+          }));
+          buildContext.onLoad(
+            {
+              filter: /^global-preact-hooks\.js$/,
+              namespace: "stew-globals",
+            },
+            () => ({
+              loader: "js",
+              contents: `module.exports = PreactHooks`,
+            })
+          );
+          buildContext.onResolve({ filter: /^stew\/components$/ }, () => ({
+            namespace: "stew-globals",
+            path: "global-stew-components.js",
+          }));
+          buildContext.onLoad(
+            {
+              filter: /^global-stew-components\.js$/,
+              namespace: "stew-globals",
+            },
+            () => ({
+              loader: "js",
+              contents: `module.exports = StewComponents`,
+            })
+          );
+        },
+      },
     ],
     tsConfig: {
       compilerOptions: {
@@ -63,12 +88,12 @@ export interface BundleModuleApi {
   moduleEntryPath: string;
   tsConfig: TsconfigRaw;
   additionalEsbuildPlugins: Array<EsbuildPlugin>;
-  externalModules: Array<string>;
+  // externalModules: Array<string>;
 }
 
 export function bundleModule(api: BundleModuleApi) {
   const {
-    externalModules,
+    // externalModules,
     moduleEntryPath,
     additionalEsbuildPlugins,
     tsConfig,
@@ -81,7 +106,6 @@ export function bundleModule(api: BundleModuleApi) {
     bundle: true,
     write: false,
     minify: true,
-    externals: externalModules,
     entryPoints: [moduleEntryPath],
     plugins: [
       ...additionalEsbuildPlugins,

@@ -8,6 +8,10 @@ import {
 } from "preact/hooks";
 import { BuildSegmentItem } from "stew/config";
 import { findMapItem, throwInvalidPathError } from "stew/utilities";
+import {
+  FetchSegmentComponentsResult,
+  fetchSegmentComponents,
+} from "../../fetchSegmentComponents.ts";
 import { StewSegmentProps } from "../StewSegment.tsx";
 import {
   EmptyViewSegmentContent,
@@ -16,10 +20,6 @@ import {
   ViewPageSegmentContent,
   ViewPageSegmentContentProps,
 } from "../components/SegmentContent.tsx";
-import {
-  FetchSegmentComponentsResult,
-  fetchSegmentComponents,
-} from "../general/fetchSegmentComponents.ts";
 import { StewSegmentState } from "../types/StewSegmentState.ts";
 
 export interface UseStewSegmentApi

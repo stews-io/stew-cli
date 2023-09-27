@@ -1,5 +1,5 @@
-import { SegmentItem } from "../../mod.js";
-import { ArrayOfAtLeastOne } from "../../shared/types/general.ts";
+import { SegmentItem } from "stew/config";
+import { ArrayOfAtLeastOne } from "stew/utilities";
 
 export type MusicItem = ClippedMusicItem | WholeMusicItem;
 

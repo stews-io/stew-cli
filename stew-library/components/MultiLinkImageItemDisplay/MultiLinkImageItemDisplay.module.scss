@@ -1,4 +1,4 @@
-@import "../../../shared/styles/theme.scss";
+@import "../../styles/theme.scss";
 
 .itemDisplayContainer {
   @extend .columnContainer;
@@ -7,10 +7,6 @@
   &:nth-child(2) {
     padding-block-start: $themeSpacer;
   }
-
-  // &:last-child {
-  //   padding-block-end: 0;
-  // }
 }
 
 .topRow {

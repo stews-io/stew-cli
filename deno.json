@@ -28,11 +28,10 @@
     "stew/utilities": "./stew-library/utilities/mod.ts"
   },
   "tasks": {
-    "writeLibraryPackageBundle": "deno run -A ./scripts/writeLibraryPackageBundle.ts",
-    "writeClientBundleAssets": "deno run -A ./scripts/writeClientBundleAssets.ts",
-    "runStewCommand": "deno run -A ./source/main.ts",
-    "buildExampleStew": "deno task runStewCommand build ./example-stew/stew.config.ts",
-    "serveStewBuild": "deno run -A ./scripts/serveStewBuild.ts",
+    "writeClientBundleAssets": "deno run -A ./development-scripts/writeClientBundleAssets.ts",
+    "serveStewBuild": "deno run -A ./development-scripts/serveStewBuild.ts",
+    "runStewCommand": "deno run -A ./stew-command/main.ts",
+    "buildExampleStew": "deno task runStewCommand build ./stew-example/stew.config.ts",
     "buildAndServeExampleStew": "rm -rf ./build_hello-stew && deno task writeClientBundleAssets && deno task buildExampleStew && deno task serveStewBuild ./build_hello-stew"
   }
 }

@@ -1,4 +1,4 @@
-import { SegmentModule } from "../../mod.js";
+import { SegmentModule } from "stew/config";
 import { SpotItem } from "./SpotItem.ts";
 
 export default {
