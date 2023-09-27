@@ -1,9 +1,9 @@
+import { getCssClass } from "stew/utilities";
 import {
   AnchorButton,
   CoreAnchorButtonProps,
   CustomAnchorButtonProps,
-} from "stew/components";
-import { getCssClass } from "stew/utilities";
+} from "../../mod.ts";
 import {
   SelectBaseConfigProps,
   SelectBaseDataProps,

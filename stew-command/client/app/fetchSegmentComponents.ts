@@ -30,7 +30,7 @@ export function fetchSegmentComponents(
       .then((getSegmentModuleScript) => getSegmentModuleScript.text())
       .then((nextSegmentModuleScript) =>
         new Function(
-          `${nextSegmentModuleScript}return __moduleIifeResult.default`
+          `${nextSegmentModuleScript}return __segmentModuleResult.default`
         )()
       ),
     fetch(`${stewResourceMap.viewsDirectoryPath}/${someSegmentKey}.json`).then(

@@ -1,4 +1,4 @@
-import { PopoverDataProps } from "stew/components";
+import { PopoverDataProps } from "../mod.ts";
 import { CoreAriaOrnaments, CoreAriaOrnamentsData } from "stew/hooks";
 import { ButtonBase, ButtonBaseProps } from "./ButtonBase.tsx";
 

@@ -9,11 +9,13 @@ import {
 } from "stew/config";
 import {
   StewResourceMap,
-  bundleModule,
-  bundlePreactModule,
+  bundleConfigModule,
+  bundleSegmentModule,
   getBundledAssetsLocationMap,
   getStewResourceMap,
-  loadModuleBundle,
+  loadConfigModuleBundle,
+  loadInitialHtmlModuleBundle,
+  loadSegmentModuleBundle,
 } from "stew/internal";
 import { throwInvalidPathError } from "stew/utilities";
 import {
@@ -85,15 +87,10 @@ async function loadStewSourceConfig(
   api: LoadStewSourceConfigApi
 ): Promise<LoadStewSourceConfigResult> {
   const { stewSourceConfigPath } = api;
-  const sourceConfigBundleResult = await bundleModule({
+  const sourceConfigIifeScript = await bundleConfigModule({
     moduleEntryPath: stewSourceConfigPath,
-    tsConfig: {},
-    additionalEsbuildPlugins: [],
-    externalModules: [],
   });
-  const sourceConfigIifeScript = sourceConfigBundleResult.outputFiles[0].text;
-  const stewSourceConfigResult: unknown = await loadModuleBundle({
-    moduleExportKey: "default",
+  const stewSourceConfigResult: unknown = await loadConfigModuleBundle({
     moduleIifeBundleScript: sourceConfigIifeScript,
   });
   const stewSourceConfig: SourceStewConfig = SourceStewConfigSchema().parse(
@@ -162,28 +159,16 @@ async function loadAndWriteSegmentModule(
     someSegmentSourceConfig,
     buildDirectoryMap,
   } = api;
-  const [segmentModuleIifeScript, segmentModuleCss] = await bundlePreactModule({
-    moduleEntryPath: joinPaths(
-      stewSourceDirectoryPath,
-      someSegmentSourceConfig.segmentModulePath
-    ),
-  });
+  const [segmentModuleIifeScript, segmentModuleCss] = await bundleSegmentModule(
+    {
+      moduleEntryPath: joinPaths(
+        stewSourceDirectoryPath,
+        someSegmentSourceConfig.segmentModulePath
+      ),
+    }
+  );
   // todo: validate currentSegmentModule as SegmentModule<SegmentItem>
-  // mock document interface for css style injection
-  // document.head.appendChild(document.createElement("style")).appendChild(document.createTextNode(css2)
-  Object.assign(globalThis, {
-    document: {
-      createTextNode: () => ({}),
-      createElement: () => ({}),
-      head: {
-        appendChild: () => ({
-          appendChild: () => ({}),
-        }),
-      },
-    },
-  });
-  const currentSegmentModule = loadModuleBundle({
-    moduleExportKey: "default",
+  const currentSegmentModule = loadSegmentModuleBundle({
     moduleIifeBundleScript: segmentModuleIifeScript,
   }) as any as SegmentModule<SegmentItem>;
   await Promise.all([
@@ -329,10 +314,10 @@ async function fetchBundledAssetsAndWriteCoreBuildFiles(
   );
   Deno.writeTextFileSync(buildDirectoryMap.appCss, bundleAssetsDataMap.appCss);
   (window as any).h = preactH;
-  const initialStewHtmlComponent: FunctionComponent<any> = loadModuleBundle({
-    moduleExportKey: "InitialStewHtml",
-    moduleIifeBundleScript: bundleAssetsDataMap.initialHtmlScript,
-  });
+  const initialStewHtmlComponent: FunctionComponent<any> =
+    loadInitialHtmlModuleBundle({
+      moduleIifeBundleScript: bundleAssetsDataMap.initialHtmlScript,
+    });
   Deno.writeTextFileSync(
     buildDirectoryMap.indexHtml,
     `<!DOCTYPE html>${preactRenderToString(
@@ -439,11 +424,11 @@ function fetchAndWriteSecondaryAssetFiles(
         secondaryAssetBuildPath: buildDirectoryMap.extraLargeIconPng,
       },
       {
-        terminalSecondaryAssetUrl: `${assetsDirectoryUrlPath}/RedHatMonoVF.woff2`,
+        terminalSecondaryAssetUrl: `${fontsDirectoryUrlPath}/RedHatMonoVF.woff2`,
         secondaryAssetBuildPath: buildDirectoryMap.normalFontWoff,
       },
       {
-        terminalSecondaryAssetUrl: `${assetsDirectoryUrlPath}/RedHatMonoVF-Italic.woff2`,
+        terminalSecondaryAssetUrl: `${fontsDirectoryUrlPath}/RedHatMonoVF-Italic.woff2`,
         secondaryAssetBuildPath: buildDirectoryMap.italicFontWoff,
       },
     ].map((someSecondaryAssetConfig) =>

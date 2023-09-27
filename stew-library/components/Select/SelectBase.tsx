@@ -1,7 +1,11 @@
 import { FunctionComponent } from "preact";
-import { SelectButton } from "./components/SelectButton.tsx";
-import { SelectMenuBaseDataProps } from "./components/SelectMenuBase.tsx";
-import { Bopper, BopperProps, CustomAnchorButtonProps } from "stew/components";
+import {
+  Bopper,
+  BopperProps,
+  CustomAnchorButtonProps,
+  SelectMenuBaseDataProps,
+  SelectButton,
+} from "../mod.ts";
 
 interface SelectBaseProps<
   MenuOption extends object,

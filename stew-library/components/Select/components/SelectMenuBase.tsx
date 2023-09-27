@@ -2,17 +2,17 @@ import { FunctionComponent } from "preact";
 import { getCssClass } from "stew/utilities";
 import {
   Button,
-  CustomAnchorButtonProps,
   CorePopoverContentProps,
+  CustomAnchorButtonProps,
   SelectBaseConfigProps,
   SelectBaseDataProps,
+  SelectOptionLabel,
   VerifiedOptionLabelKey,
-} from "stew/components";
+} from "../../mod.ts";
 import {
   UseSelectMenuNavigationResult,
   useSelectMenuNavigation,
 } from "../hooks/useSelectMenuNavigation.ts";
-import { SelectOptionLabel } from "./SelectOptionLabel.tsx";
 // @deno-types="CssModule"
 import cssModule from "./SelectMenuBase.module.scss";
 

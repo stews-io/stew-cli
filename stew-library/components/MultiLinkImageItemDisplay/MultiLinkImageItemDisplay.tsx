@@ -1,4 +1,4 @@
-import { LinkButton } from "stew/components";
+import { LinkButton } from "../mod.ts";
 // @deno-types="CssModule"
 import cssModule from "./MultiLinkImageItemDisplay.module.scss";
 
