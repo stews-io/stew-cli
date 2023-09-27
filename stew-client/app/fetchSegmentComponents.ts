@@ -3,7 +3,7 @@ import {
   SegmentDataset,
   SegmentModule,
   SegmentViewsMap,
-} from "stew-library/config";
+} from "../../stew-library/config/mod.ts";
 import { StewResourceMap } from "../../stew-library/internal/getStewResourceMap.ts";
 import { loadModuleBundle } from "../../stew-library/internal/loadModuleBundle.ts";
 

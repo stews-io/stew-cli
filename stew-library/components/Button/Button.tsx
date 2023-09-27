@@ -1,4 +1,4 @@
-import { CoreAriaOrnaments, CoreAriaOrnamentsData } from "stew-library/hooks";
+import { CoreAriaOrnaments, CoreAriaOrnamentsData } from "../../hooks/mod.ts";
 import { ButtonBase, ButtonBaseProps } from "./ButtonBase.tsx";
 
 export interface ButtonProps extends CoreButtonProps, CustomButtonProps {}

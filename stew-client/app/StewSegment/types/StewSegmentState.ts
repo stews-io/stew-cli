@@ -3,7 +3,7 @@ import {
   SegmentDataset,
   SegmentModule,
   SegmentViewsMap,
-} from "stew-library/config";
+} from "../../../../stew-library/config/mod.ts";
 
 export type StewSegmentState =
   | SegmentLoadedStewState

@@ -5,7 +5,7 @@ import {
   SelectBase,
   SelectBaseConfigProps,
   SelectMenuBase,
-} from "stew-library/components";
+} from "../../../../stew-library/components/mod.ts";
 import { SegmentPageProps } from "./SegmentPage.tsx";
 // @deno-types="CssModule"
 import cssModule from "./ViewSortSelect.module.scss";

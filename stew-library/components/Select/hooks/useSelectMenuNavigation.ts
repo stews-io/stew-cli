@@ -1,6 +1,6 @@
 import { ComponentProps } from "preact";
 import { MutableRef, Ref, useRef, useState } from "preact/hooks";
-import { throwInvalidPathError } from "stew-library/utilities";
+import { throwInvalidPathError } from "../../../utilities/mod.ts";
 import { ButtonProps, SelectMenuBaseDataProps } from "../../mod.ts";
 
 export interface UseSelectMenuNavigationApi

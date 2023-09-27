@@ -1,6 +1,6 @@
 import { createRef } from "preact";
 import { useLayoutEffect, useMemo } from "preact/hooks";
-import { throwInvalidPathError } from "stew-library/utilities";
+import { throwInvalidPathError } from "../utilities/mod.ts";
 
 export interface CoreAriaOrnaments<AriaRole extends string>
   extends CoreAriaOrnamentsConfig<AriaRole>,

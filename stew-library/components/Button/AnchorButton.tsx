@@ -1,5 +1,5 @@
 import { PopoverDataProps } from "../mod.ts";
-import { CoreAriaOrnaments, CoreAriaOrnamentsData } from "stew-library/hooks";
+import { CoreAriaOrnaments, CoreAriaOrnamentsData } from "../../hooks/mod.ts";
 import { ButtonBase, ButtonBaseProps } from "./ButtonBase.tsx";
 
 export interface AnchorButtonProps

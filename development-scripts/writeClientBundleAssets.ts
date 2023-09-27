@@ -2,7 +2,7 @@ import {
   bundleAppModule,
   bundleInitialHtmlModule,
   getBundledAssetsLocationMap,
-} from "stew-library/internal";
+} from "../stew-library/internal/mod.ts";
 import { Esbuild } from "../stew-library/deps/esbuild/mod.ts";
 
 await writeClientBundleAssets();

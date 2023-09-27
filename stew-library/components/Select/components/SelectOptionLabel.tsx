@@ -1,6 +1,6 @@
 import { Fragment } from "preact";
-import { CustomAnchorButtonProps } from "stew-library/components";
-import { throwInvalidPathError } from "stew-library/utilities";
+import { CustomAnchorButtonProps } from "../../mod.ts";
+import { throwInvalidPathError } from "../../../utilities/mod.ts";
 import {
   SelectBaseConfigProps,
   VerifiedOptionLabelKey,

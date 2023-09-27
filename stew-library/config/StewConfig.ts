@@ -1,4 +1,4 @@
-import { ArrayOfAtLeastOne, ArrayOfOneSchema } from "stew-library/utilities";
+import { ArrayOfAtLeastOne, ArrayOfOneSchema } from "../utilities/mod.ts";
 import { Zod } from "../deps/zod/mod.ts";
 import {
   SegmentDataset,

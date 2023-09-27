@@ -21,11 +21,6 @@
     "preact": "https://esm.sh/preact@10.17.1",
     "preact/hooks": "https://esm.sh/preact@10.17.1/hooks",
     "preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime",
-    "stew-library/components": "./stew-library/components/mod.ts",
-    "stew-library/config": "./stew-library/config/mod.ts",
-    "stew-library/hooks": "./stew-library/hooks/mod.ts",
-    "stew-library/internal": "./stew-library/internal/mod.ts",
-    "stew-library/utilities": "./stew-library/utilities/mod.ts",
     "stew/components": "./stew-library/components/mod.ts"
   },
   "tasks": {

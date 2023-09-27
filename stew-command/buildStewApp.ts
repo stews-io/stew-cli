@@ -7,7 +7,7 @@ import {
   SourceSegmentConfig,
   SourceStewConfig,
   SourceStewConfigSchema,
-} from "stew-library/config";
+} from "../stew-library/config/mod.ts";
 import {
   StewResourceMap,
   bundleConfigModule,
@@ -15,8 +15,8 @@ import {
   getBundledAssetsLocationMap,
   getStewResourceMap,
   loadModuleBundle,
-} from "stew-library/internal";
-import { throwInvalidPathError } from "stew-library/utilities";
+} from "../stew-library/internal/mod.ts";
+import { throwInvalidPathError } from "../stew-library/utilities/mod.ts";
 import { getRandomCryptoString } from "./deps/crypto-random-string/mod.ts";
 import { preactRenderToString } from "./deps/preact/render-to-string.ts";
 import { getDirectoryPath, joinPaths } from "./deps/std/path.ts";
