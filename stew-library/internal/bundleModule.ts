@@ -13,10 +13,6 @@ export function bundleSegmentModule(api: BundleSegmentModuleApi) {
     additionalEsbuildPlugins: [
       esbuildStewGlobalsPlugin({
         globalImportsMap: {
-          zod: {
-            importNameRegex: /^zod$/,
-            globalExport: "{}",
-          },
           preact: {
             importNameRegex: /^preact$/,
             globalExport: "globalThis.Preact",
@@ -50,7 +46,7 @@ export function bundleAppModule(api: BundleAppModuleApi) {
       esbuildStewGlobalsPlugin({
         globalImportsMap: {
           zod: {
-            importNameRegex: /^zod$/,
+            importNameRegex: /^https:\/\/deno\.land\/x\/zod/,
             globalExport: "{}",
           },
         },
