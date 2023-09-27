@@ -1,5 +1,8 @@
-import { ComponentProps, Fragment } from "preact";
-import { useMemo } from "preact/hooks";
+import {
+  ComponentProps,
+  Fragment,
+} from "../../../../stew-library/deps/preact/mod.ts";
+import { useMemo } from "../../../../stew-library/deps/preact/hooks.ts";
 import {
   CustomAnchorButtonProps,
   SelectBase,

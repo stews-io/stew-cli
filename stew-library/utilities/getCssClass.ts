@@ -1,4 +1,4 @@
-import { JSX } from "preact";
+import { JSX } from "../../stew-library/deps/preact/mod.ts";
 
 export type CssClass = Exclude<
   JSX.HTMLAttributes["className"],

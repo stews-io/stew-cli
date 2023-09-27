@@ -1,4 +1,4 @@
-import { JSX } from "preact";
+import { JSX } from "../../stew-library/deps/preact/mod.ts";
 import { SegmentItem } from "./SegmentDataset.ts";
 
 export interface SegmentModule<SomeSegmentItem extends SegmentItem> {

@@ -1,7 +1,7 @@
 import "../styles/globalReset.scss";
-import { Fragment } from "preact";
-import { BuildStewConfig } from "stew-library/config";
-import { StewResourceMap } from "stew-library/internal";
+import { Fragment } from "../../stew-library/deps/preact/mod.ts";
+import { BuildStewConfig } from "../../stew-library/config/mod.ts";
+import { StewResourceMap } from "../../stew-library/internal/mod.ts";
 import { StewSegment } from "./StewSegment/StewSegment.tsx";
 import { StewSegmentState } from "./StewSegment/types/StewSegmentState.ts";
 

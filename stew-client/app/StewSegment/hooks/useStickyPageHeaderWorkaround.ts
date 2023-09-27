@@ -1,4 +1,7 @@
-import { useLayoutEffect, useRef } from "preact/hooks";
+import {
+  useLayoutEffect,
+  useRef,
+} from "../../../../stew-library/deps/preact/hooks.ts";
 import { throwInvalidPathError } from "../../../../stew-library/utilities/mod.ts";
 
 export interface UseStickyPageHeaderWorkaroundApi {

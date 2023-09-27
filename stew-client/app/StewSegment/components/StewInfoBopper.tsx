@@ -1,4 +1,4 @@
-import { useMemo } from "preact/hooks";
+import { useMemo } from "../../../../stew-library/deps/preact/hooks.ts";
 import {
   AnchorButton,
   Bopper,

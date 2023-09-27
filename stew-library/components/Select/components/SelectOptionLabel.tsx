@@ -1,4 +1,4 @@
-import { Fragment } from "preact";
+import { Fragment } from "../../../../stew-library/deps/preact/mod.ts";
 import { CustomAnchorButtonProps } from "../../mod.ts";
 import { throwInvalidPathError } from "../../../utilities/mod.ts";
 import {

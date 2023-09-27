@@ -1,4 +1,7 @@
-import { FunctionComponent, h as preactH } from "preact";
+import {
+  FunctionComponent,
+  h as preactH,
+} from "stew-library/deps/preact/mod.ts";
 import {
   BuildStewConfig,
   SegmentItem,

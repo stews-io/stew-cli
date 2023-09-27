@@ -1,4 +1,4 @@
-import { Ref } from "preact";
+import { Ref } from "../../../stew-library/deps/preact/mod.ts";
 import {
   CoreAriaOrnaments,
   UseInteractiveAriaApi,

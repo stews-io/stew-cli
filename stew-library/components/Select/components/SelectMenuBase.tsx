@@ -1,4 +1,4 @@
-import { FunctionComponent } from "preact";
+import { FunctionComponent } from "../../../../stew-library/deps/preact/mod.ts";
 import { getCssClass } from "../../../utilities/mod.ts";
 import {
   Button,

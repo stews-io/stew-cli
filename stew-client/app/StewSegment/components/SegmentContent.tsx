@@ -1,5 +1,8 @@
-import { Fragment } from "preact";
-import { useLayoutEffect, useRef } from "preact/hooks";
+import { Fragment } from "../../../../stew-library/deps/preact/mod.ts";
+import {
+  useLayoutEffect,
+  useRef,
+} from "../../../../stew-library/deps/preact/hooks.ts";
 import { LinkButton } from "../../../../stew-library/components/mod.ts";
 import { BuildSegmentItem } from "../../../../stew-library/config/mod.ts";
 import { throwInvalidPathError } from "../../../../stew-library/utilities/mod.ts";

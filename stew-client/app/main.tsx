@@ -1,5 +1,5 @@
-import * as Preact from "preact";
-import * as PreactHooks from "preact/hooks";
+import * as Preact from "../../stew-library/deps/preact/mod.ts";
+import * as PreactHooks from "../../stew-library/deps/preact/hooks.ts";
 import * as StewComponents from "../../stew-library/components/mod.ts";
 import { BuildStewConfig } from "../../stew-library/config/mod.ts";
 import * as StewHooks from "../../stew-library/hooks/mod.ts";

@@ -1,5 +1,10 @@
-import { ComponentProps } from "preact";
-import { MutableRef, Ref, useRef, useState } from "preact/hooks";
+import { ComponentProps } from "../../../../stew-library/deps/preact/mod.ts";
+import {
+  MutableRef,
+  Ref,
+  useRef,
+  useState,
+} from "../../../../stew-library/deps/preact/hooks.ts";
 import { throwInvalidPathError } from "../../../utilities/mod.ts";
 import { ButtonProps, SelectMenuBaseDataProps } from "../../mod.ts";
 

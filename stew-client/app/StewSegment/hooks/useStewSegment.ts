@@ -1,11 +1,15 @@
-import { ComponentProps, FunctionComponent, JSX } from "preact";
+import {
+  ComponentProps,
+  FunctionComponent,
+  JSX,
+} from "../../../../stew-library/deps/preact/mod.ts";
 import {
   StateUpdater,
   useEffect,
   useMemo,
   useRef,
   useState,
-} from "preact/hooks";
+} from "../../../../stew-library/deps/preact/hooks.ts";
 import { BuildSegmentItem } from "../../../../stew-library/config/mod.ts";
 import {
   findMapItem,

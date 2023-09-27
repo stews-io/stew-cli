@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "preact/hooks";
+import { useMemo, useRef } from "../../../../stew-library/deps/preact/hooks.ts";
 import { Button } from "../../../../stew-library/components/mod.ts";
 import { throwInvalidPathError } from "../../../../stew-library/utilities/mod.ts";
 import { SegmentPageProps } from "./SegmentPage.tsx";

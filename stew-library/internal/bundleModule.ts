@@ -17,7 +17,7 @@ export function bundleSegmentModule(api: BundleSegmentModuleApi) {
             importNameRegex: /^preact$/,
             globalExport: "globalThis.Preact",
           },
-          "preact/hooks": {
+          "stew-library/deps/preact/hooks.ts": {
             importNameRegex: /^preact\/hooks$/,
             globalExport: "globalThis.PreactHooks",
           },

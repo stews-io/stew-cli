@@ -1,5 +1,8 @@
-import { Fragment, FunctionComponent } from "preact";
-import { useRef, useState } from "preact/hooks";
+import {
+  Fragment,
+  FunctionComponent,
+} from "../../../stew-library/deps/preact/mod.ts";
+import { useRef, useState } from "../../../stew-library/deps/preact/hooks.ts";
 import { CoreAriaOrnamentsData } from "../../hooks/mod.ts";
 import { CoreAnchorButtonProps, Popover, PopoverProps } from "../mod.ts";
 

@@ -1,4 +1,4 @@
-import { ComponentChildren } from "preact";
+import { ComponentChildren } from "../../../stew-library/deps/preact/mod.ts";
 // @deno-types="CssModule"
 import cssModule from "./Page.module.scss";
 
