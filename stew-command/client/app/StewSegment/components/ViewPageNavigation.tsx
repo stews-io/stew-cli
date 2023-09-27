@@ -1,6 +1,6 @@
-import { Button, ButtonProps } from "stew/components";
-import { CoreAriaOrnamentsData, useInteractiveAria } from "stew/hooks";
-import { getCssClass } from "stew/utilities";
+import { Button, ButtonProps } from "stew-library/components";
+import { CoreAriaOrnamentsData, useInteractiveAria } from "stew-library/hooks";
+import { getCssClass } from "stew-library/utilities";
 // @deno-types="CssModule"
 import cssModule from "./ViewPageNavigation.module.scss";
 

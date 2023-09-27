@@ -1,5 +1,5 @@
 import { FunctionComponent } from "preact";
-import { getCssClass } from "stew/utilities";
+import { getCssClass } from "stew-library/utilities";
 import {
   Button,
   CorePopoverContentProps,

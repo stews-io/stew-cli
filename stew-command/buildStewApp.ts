@@ -6,7 +6,7 @@ import {
   SourceSegmentConfig,
   SourceStewConfig,
   SourceStewConfigSchema,
-} from "stew/config";
+} from "stew-library/config";
 import {
   StewResourceMap,
   bundleConfigModule,
@@ -16,8 +16,8 @@ import {
   loadConfigModuleBundle,
   loadInitialHtmlModuleBundle,
   loadSegmentModuleBundle,
-} from "stew/internal";
-import { throwInvalidPathError } from "stew/utilities";
+} from "stew-library/internal";
+import { throwInvalidPathError } from "stew-library/utilities";
 import {
   FunctionComponent,
   h as preactH,

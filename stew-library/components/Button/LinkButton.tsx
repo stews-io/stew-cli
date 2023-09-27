@@ -1,5 +1,5 @@
-import { CoreAriaOrnaments, CoreAriaOrnamentsData } from "stew/hooks";
-import { SimpleComponentProps } from "stew/utilities";
+import { CoreAriaOrnaments, CoreAriaOrnamentsData } from "stew-library/hooks";
+import { SimpleComponentProps } from "stew-library/utilities";
 import { ButtonBase, ButtonBaseProps } from "./ButtonBase.tsx";
 
 export interface LinkButtonProps

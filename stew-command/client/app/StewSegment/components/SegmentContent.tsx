@@ -1,8 +1,8 @@
 import { Fragment } from "preact";
 import { useLayoutEffect, useRef } from "preact/hooks";
-import { LinkButton } from "stew/components";
-import { BuildSegmentItem } from "stew/config";
-import { throwInvalidPathError } from "stew/utilities";
+import { LinkButton } from "stew-library/components";
+import { BuildSegmentItem } from "stew-library/config";
+import { throwInvalidPathError } from "stew-library/utilities";
 import { StewSegmentMutations } from "../hooks/useStewSegment.ts";
 import { SegmentLoadedStewState } from "../types/StewSegmentState.ts";
 import { ViewPageNavigation } from "./ViewPageNavigation.tsx";

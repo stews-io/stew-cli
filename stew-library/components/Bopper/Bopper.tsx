@@ -1,7 +1,11 @@
 import { Fragment, FunctionComponent } from "preact";
 import { useRef, useState } from "preact/hooks";
-import { CoreAriaOrnamentsData } from "stew/hooks";
-import { CoreAnchorButtonProps, Popover, PopoverProps } from "../mod.ts";
+import { CoreAriaOrnamentsData } from "stew-library/hooks";
+import {
+  CoreAnchorButtonProps,
+  Popover,
+  PopoverProps,
+} from "stew-library/components";
 
 export interface BopperProps<
   CustomSomeAnchorButtonProps,

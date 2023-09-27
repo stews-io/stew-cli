@@ -1,5 +1,5 @@
 import "../styles/globalReset.scss";
-import { BuildStewConfig } from "stew/config";
+import { BuildStewConfig } from "stew-library/config";
 import { SplashPage } from "./SplashPage.tsx";
 
 export interface InitialStewHtmlProps {

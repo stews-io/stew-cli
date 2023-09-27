@@ -6,8 +6,8 @@ import {
   useRef,
   useState,
 } from "preact/hooks";
-import { BuildSegmentItem } from "stew/config";
-import { findMapItem, throwInvalidPathError } from "stew/utilities";
+import { BuildSegmentItem } from "stew-library/config";
+import { findMapItem, throwInvalidPathError } from "stew-library/utilities";
 import {
   FetchSegmentComponentsResult,
   fetchSegmentComponents,

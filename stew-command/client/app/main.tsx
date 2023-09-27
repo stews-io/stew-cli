@@ -1,6 +1,6 @@
 import { render } from "preact";
-import { BuildStewConfig } from "stew/config";
-import { findMapItem, throwInvalidPathError } from "stew/utilities";
+import { BuildStewConfig } from "stew-library/config";
+import { findMapItem, throwInvalidPathError } from "stew-library/utilities";
 import { getStewResourceMap } from "../../../stew-library/internal/getStewResourceMap.ts";
 import { StewApp, StewAppProps } from "./StewApp.tsx";
 import { fetchSegmentComponents } from "./fetchSegmentComponents.ts";

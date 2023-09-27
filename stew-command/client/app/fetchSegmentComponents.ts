@@ -3,8 +3,8 @@ import {
   SegmentDataset,
   SegmentModule,
   SegmentViewsMap,
-} from "stew/config";
-import { StewResourceMap } from "stew/internal";
+} from "stew-library/config";
+import { StewResourceMap } from "stew-library/internal";
 
 export interface FetchSegmentComponentsApi {
   stewResourceMap: StewResourceMap;

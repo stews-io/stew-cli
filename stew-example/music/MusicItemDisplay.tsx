@@ -1,5 +1,5 @@
 import { MultiLinkImageItemDisplay } from "stew/components";
-import { SegmentItemDisplayProps } from "stew/config";
+import { SegmentItemDisplayProps } from "stew-library/config";
 import { MusicItem } from "./MusicItem.ts";
 
 export interface MusicItemDisplayProps

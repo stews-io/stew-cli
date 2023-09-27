@@ -1,4 +1,4 @@
-import { Page } from "stew/components";
+import { Page } from "stew-library/components";
 import { StewSegmentProps } from "../StewSegment.tsx";
 import { UseStewSegmentResult } from "../hooks/useStewSegment.ts";
 import { useStickyPageHeaderWorkaround } from "../hooks/useStickyPageHeaderWorkaround.ts";

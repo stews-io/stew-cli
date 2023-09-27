@@ -3,8 +3,8 @@ import {
   CoreAriaOrnaments,
   UseInteractiveAriaApi,
   useInteractiveAria,
-} from "stew/hooks";
-import { getCssClass, SimpleComponentProps } from "stew/utilities";
+} from "stew-library/hooks";
+import { getCssClass, SimpleComponentProps } from "stew-library/utilities";
 // @deno-types="CssModule"
 import cssModule from "./ButtonBase.module.scss";
 

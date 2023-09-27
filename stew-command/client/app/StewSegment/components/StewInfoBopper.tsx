@@ -6,8 +6,8 @@ import {
   CoreAnchorButtonProps,
   CorePopoverContentProps,
   LinkButton,
-} from "stew/components";
-import { getCssClass, throwInvalidPathError } from "stew/utilities";
+} from "stew-library/components";
+import { getCssClass, throwInvalidPathError } from "stew-library/utilities";
 import { SegmentPageProps } from "./SegmentPage.tsx";
 // @deno-types="CssModule"
 import cssModule from "./StewInfoBopper.module.scss";

@@ -1,6 +1,6 @@
 import { useMemo, useRef } from "preact/hooks";
-import { Button } from "stew/components";
-import { throwInvalidPathError } from "stew/utilities";
+import { Button } from "stew-library/components";
+import { throwInvalidPathError } from "stew-library/utilities";
 import { SegmentPageProps } from "./SegmentPage.tsx";
 // @deno-types="CssModule"
 import cssModule from "./ViewSearchInput.module.scss";

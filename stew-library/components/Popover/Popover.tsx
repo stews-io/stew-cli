@@ -1,6 +1,6 @@
 import { FunctionComponent, RefObject, createRef } from "preact";
 import { Ref, StateUpdater, useEffect, useMemo, useRef } from "preact/hooks";
-import { throwInvalidPathError } from "stew/utilities";
+import { throwInvalidPathError } from "stew-library/utilities";
 // @deno-types="CssModule"
 import cssModule from "./Popover.module.scss";
 

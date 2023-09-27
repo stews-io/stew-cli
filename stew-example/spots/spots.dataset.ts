@@ -1,4 +1,4 @@
-import { SegmentDataset } from "stew/config";
+import { SegmentDataset } from "stew-library/config";
 import { SpotItem } from "./SpotItem.ts";
 
 export default [

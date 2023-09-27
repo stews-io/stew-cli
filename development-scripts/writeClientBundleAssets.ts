@@ -4,7 +4,7 @@ import {
   bundleStewGlobalsModule,
   bundleThirdPartyGlobalsModule,
   getBundledAssetsLocationMap,
-} from "stew/internal";
+} from "stew-library/internal";
 import { Esbuild } from "../stew-library/deps/esbuild/mod.ts";
 
 await writeClientBundleAssets();
@@ -38,13 +38,11 @@ async function bundleAppModuleWithGlobals() {
     await bundleThirdPartyGlobalsModule({
       moduleEntryPath: "./stew-command/client/app/third-party-globals.ts",
     });
-  console.log(thirdPartyGlobalsCss);
   const [appGlobalsScript, appGlobalsCss] = await bundleStewGlobalsModule({
     moduleEntryPath: "./stew-command/client/app/stew-globals.ts",
     jsBundleBanner: thirdPartyGlobalsScript,
-    cssBundleBanner: "",
+    cssBundleBanner: thirdPartyGlobalsCss,
   });
-  // console.log(appGlobalsCss);
   return bundleAppModule({
     jsBundleBanner: appGlobalsScript,
     cssBundleBanner: appGlobalsCss,
