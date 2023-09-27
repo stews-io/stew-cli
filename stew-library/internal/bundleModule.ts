@@ -15,65 +15,24 @@ export function bundleSegmentModule(api: BundleSegmentModuleApi) {
         globalImportsMap: {
           preact: {
             importNameRegex: /^preact$/,
-            globalExportHandle: "globalThis.Preact",
+            globalExport: "globalThis.Preact",
           },
           "preact/hooks": {
             importNameRegex: /^preact\/hooks$/,
-            globalExportHandle: "globalThis.PreactHooks",
+            globalExport: "globalThis.PreactHooks",
           },
           "stew/components": {
             importNameRegex: /^stew\/components$/,
-            globalExportHandle: "globalThis.StewComponents",
+            globalExport: "globalThis.StewComponents",
           },
           "stew/hooks": {
             importNameRegex: /^stew\/hooks$/,
-            globalExportHandle: "globalThis.StewHooks",
+            globalExport: "globalThis.StewHooks",
           },
         },
       }),
     ],
   });
-}
-
-interface EsbuildStewGlobalsPluginApi {
-  globalImportsMap: Record<
-    string,
-    {
-      importNameRegex: RegExp;
-      globalExportHandle: string;
-    }
-  >;
-}
-
-function esbuildStewGlobalsPlugin(api: EsbuildStewGlobalsPluginApi) {
-  const { globalImportsMap } = api;
-  return {
-    name: "esbuild-stew-globals-plugin",
-    setup(buildContext) {
-      Object.entries(globalImportsMap).forEach(
-        ([someGlobalImportConfigKey, someGlobalImportConfig]) => {
-          const globalModuleFileName = `${someGlobalImportConfigKey}.global.js`;
-          buildContext.onResolve(
-            { filter: someGlobalImportConfig.importNameRegex },
-            () => ({
-              namespace: "stew-globals",
-              path: globalModuleFileName,
-            })
-          );
-          buildContext.onLoad(
-            {
-              filter: new RegExp(globalModuleFileName),
-              namespace: "stew-globals",
-            },
-            () => ({
-              loader: "js",
-              contents: `module.exports = ${someGlobalImportConfig.globalExportHandle}`,
-            })
-          );
-        }
-      );
-    },
-  };
 }
 
 export interface BundleAppModuleApi
@@ -83,7 +42,16 @@ export function bundleAppModule(api: BundleAppModuleApi) {
   const { moduleEntryPath } = api;
   return bundlePreactModule({
     moduleEntryPath,
-    additionalEsbuildPlugins: [],
+    additionalEsbuildPlugins: [
+      esbuildStewGlobalsPlugin({
+        globalImportsMap: {
+          preact: {
+            importNameRegex: /^zod$/,
+            globalExport: "{}",
+          },
+        },
+      }),
+    ],
   });
 }
 
@@ -125,6 +93,47 @@ async function bundlePreactModule(api: BundlePreactModuleApi) {
       ? bundlePreactModuleResult.outputFiles[1].text
       : "",
   ];
+}
+
+interface EsbuildStewGlobalsPluginApi {
+  globalImportsMap: Record<
+    string,
+    {
+      importNameRegex: RegExp;
+      globalExport: string;
+    }
+  >;
+}
+
+function esbuildStewGlobalsPlugin(api: EsbuildStewGlobalsPluginApi) {
+  const { globalImportsMap } = api;
+  return {
+    name: "esbuild-stew-globals-plugin",
+    setup(buildContext) {
+      Object.entries(globalImportsMap).forEach(
+        ([someGlobalImportConfigKey, someGlobalImportConfig]) => {
+          const globalModuleFileName = `${someGlobalImportConfigKey}.global.js`;
+          buildContext.onResolve(
+            { filter: someGlobalImportConfig.importNameRegex },
+            () => ({
+              namespace: "stew-globals",
+              path: globalModuleFileName,
+            })
+          );
+          buildContext.onLoad(
+            {
+              filter: new RegExp(globalModuleFileName),
+              namespace: "stew-globals",
+            },
+            () => ({
+              loader: "js",
+              contents: `module.exports = ${someGlobalImportConfig.globalExport}`,
+            })
+          );
+        }
+      );
+    },
+  };
 }
 
 export interface BundleConfigModuleApi

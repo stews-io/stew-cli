@@ -18,6 +18,7 @@
   },
   "imports": {
     "CssModule": "./declaration.d.ts",
+    "zod": "https://deno.land/x/zod@v3.22.2/mod.ts",
     "preact": "https://esm.sh/preact@10.17.1",
     "preact/hooks": "https://esm.sh/preact@10.17.1/hooks",
     "preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime",
