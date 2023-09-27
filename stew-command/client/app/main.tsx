@@ -1,16 +1,24 @@
-import { render } from "preact";
+import * as Preact from "preact";
+import * as PreactHooks from "preact/hooks";
+import * as StewComponents from "stew-library/components";
 import { BuildStewConfig } from "stew-library/config";
 import { findMapItem, throwInvalidPathError } from "stew-library/utilities";
 import { getStewResourceMap } from "../../../stew-library/internal/getStewResourceMap.ts";
 import { StewApp, StewAppProps } from "./StewApp.tsx";
 import { fetchSegmentComponents } from "./fetchSegmentComponents.ts";
 
+Object.assign(globalThis, {
+  h: Preact.h,
+  Preact,
+  PreactHooks,
+  StewComponents,
+});
 loadStewApp();
 
 async function loadStewApp() {
   const { stewConfig, stewResourceMap, stewAppCss, initialSegmentViewState } =
     await loadStewResources();
-  render(
+  Preact.render(
     <StewApp
       stewConfig={stewConfig}
       stewResourceMap={stewResourceMap}

@@ -1,8 +1,6 @@
 import {
   bundleAppModule,
   bundleInitialHtmlModule,
-  bundleStewGlobalsModule,
-  bundleThirdPartyGlobalsModule,
   getBundledAssetsLocationMap,
 } from "stew-library/internal";
 import { Esbuild } from "../stew-library/deps/esbuild/mod.ts";
@@ -16,7 +14,9 @@ async function writeClientBundleAssets() {
       bundleInitialHtmlModule({
         moduleEntryPath: "./stew-command/client/html/InitialStewHtml.tsx",
       }),
-      bundleAppModuleWithGlobals(),
+      bundleAppModule({
+        moduleEntryPath: "./stew-command/client/app/main.tsx",
+      }),
     ]);
   const bundledAssetClientPathMap = getBundledAssetsLocationMap({
     baseLocation: "./stew-command",
@@ -31,21 +31,4 @@ async function writeClientBundleAssets() {
   );
   Deno.writeTextFileSync(bundledAssetClientPathMap.appScript, appScript);
   Deno.writeTextFileSync(bundledAssetClientPathMap.appCss, appCss);
-}
-
-async function bundleAppModuleWithGlobals() {
-  const [thirdPartyGlobalsScript, thirdPartyGlobalsCss] =
-    await bundleThirdPartyGlobalsModule({
-      moduleEntryPath: "./stew-command/client/app/third-party-globals.ts",
-    });
-  const [appGlobalsScript, appGlobalsCss] = await bundleStewGlobalsModule({
-    moduleEntryPath: "./stew-command/client/app/stew-globals.ts",
-    jsBundleBanner: thirdPartyGlobalsScript,
-    cssBundleBanner: thirdPartyGlobalsCss,
-  });
-  return bundleAppModule({
-    jsBundleBanner: appGlobalsScript,
-    cssBundleBanner: appGlobalsCss,
-    moduleEntryPath: "./stew-command/client/app/main.tsx",
-  });
 }

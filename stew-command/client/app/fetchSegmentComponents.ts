@@ -4,7 +4,8 @@ import {
   SegmentModule,
   SegmentViewsMap,
 } from "stew-library/config";
-import { StewResourceMap } from "stew-library/internal";
+import { StewResourceMap } from "../../../stew-library/internal/getStewResourceMap.ts";
+import { loadModuleBundle } from "../../../stew-library/internal/loadModuleBundle.ts";
 
 export interface FetchSegmentComponentsApi {
   stewResourceMap: StewResourceMap;
@@ -29,9 +30,10 @@ export function fetchSegmentComponents(
     fetch(`${stewResourceMap.modulesDirectoryPath}/${someSegmentKey}.js`)
       .then((getSegmentModuleScript) => getSegmentModuleScript.text())
       .then((nextSegmentModuleScript) =>
-        new Function(
-          `${nextSegmentModuleScript}return __segmentModuleResult.default`
-        )()
+        loadModuleBundle({
+          moduleExportKey: "default",
+          moduleIifeBundleScript: nextSegmentModuleScript,
+        })
       ),
     fetch(`${stewResourceMap.viewsDirectoryPath}/${someSegmentKey}.json`).then(
       (getSegmentViews) => getSegmentViews.json()

@@ -4,49 +4,13 @@ import { Esbuild, EsbuildPlugin, TsconfigRaw } from "../deps/esbuild/mod.ts";
 import { resolvePath } from "../deps/std/path.ts";
 
 export interface BundleAppModuleApi
-  extends Pick<
-    BundlePreactModuleApi,
-    "moduleEntryPath" | "jsBundleBanner" | "cssBundleBanner"
-  > {}
-
-export function bundleAppModule(api: BundleAppModuleApi) {
-  const { moduleEntryPath, jsBundleBanner, cssBundleBanner } = api;
-  return bundlePreactModule({
-    iifeResultName: "__appModuleResult",
-    moduleEntryPath,
-    jsBundleBanner,
-    cssBundleBanner,
-  });
-}
-
-export interface BundleThirdPartyGlobalsModuleApi
   extends Pick<BundlePreactModuleApi, "moduleEntryPath"> {}
 
-export function bundleThirdPartyGlobalsModule(
-  api: BundleThirdPartyGlobalsModuleApi
-) {
+export function bundleAppModule(api: BundleAppModuleApi) {
   const { moduleEntryPath } = api;
   return bundlePreactModule({
-    iifeResultName: "__thirdPartyGlobalsModuleResult",
-    jsBundleBanner: "",
-    cssBundleBanner: "",
     moduleEntryPath,
-  });
-}
-
-export interface BundleStewGlobalsModuleApi
-  extends Pick<
-    BundlePreactModuleApi,
-    "moduleEntryPath" | "jsBundleBanner" | "cssBundleBanner"
-  > {}
-
-export function bundleStewGlobalsModule(api: BundleStewGlobalsModuleApi) {
-  const { moduleEntryPath, jsBundleBanner, cssBundleBanner } = api;
-  return bundlePreactModule({
-    iifeResultName: "__stewGlobalsModuleResult",
-    moduleEntryPath,
-    jsBundleBanner,
-    cssBundleBanner,
+    additionalEsbuildPlugins: [],
   });
 }
 
@@ -56,24 +20,8 @@ export interface BundleInitialHtmlModuleApi
 export function bundleInitialHtmlModule(api: BundleInitialHtmlModuleApi) {
   const { moduleEntryPath } = api;
   return bundlePreactModule({
-    iifeResultName: "__initialHtmlModuleResult",
-    jsBundleBanner: "",
-    cssBundleBanner: "",
     moduleEntryPath,
-  });
-}
-
-export interface LoadInitialHtmlModuleBundleApi
-  extends Pick<LoadModuleBundleApi, "moduleIifeBundleScript"> {}
-
-export function loadInitialHtmlModuleBundle(
-  api: LoadInitialHtmlModuleBundleApi
-) {
-  const { moduleIifeBundleScript } = api;
-  return loadModuleBundle({
-    iifeResultName: "__initialHtmlModuleResult",
-    moduleExportKey: "InitialStewHtml",
-    moduleIifeBundleScript,
+    additionalEsbuildPlugins: [],
   });
 }
 
@@ -83,41 +31,8 @@ export interface BundleSegmentModuleApi
 export function bundleSegmentModule(api: BundleSegmentModuleApi) {
   const { moduleEntryPath } = api;
   return bundlePreactModule({
-    iifeResultName: "__segmentModuleResult",
-    jsBundleBanner: "",
-    cssBundleBanner: "",
     moduleEntryPath,
-  });
-}
-
-export interface LoadSegmentModuleBundleApi
-  extends Pick<LoadModuleBundleApi, "moduleIifeBundleScript"> {}
-
-export function loadSegmentModuleBundle(api: LoadSegmentModuleBundleApi) {
-  const { moduleIifeBundleScript } = api;
-  return loadModuleBundle({
-    iifeResultName: "__segmentModuleResult",
-    moduleExportKey: "default",
-    moduleIifeBundleScript,
-  });
-}
-
-interface BundlePreactModuleApi
-  extends Pick<
-    BundleModuleApi,
-    "iifeResultName" | "moduleEntryPath" | "jsBundleBanner" | "cssBundleBanner"
-  > {}
-
-async function bundlePreactModule(api: BundlePreactModuleApi) {
-  const { moduleEntryPath, iifeResultName, jsBundleBanner, cssBundleBanner } =
-    api;
-  const bundlePreactModuleResult = await bundleModule({
-    moduleEntryPath,
-    iifeResultName,
-    jsBundleBanner,
-    cssBundleBanner,
     additionalEsbuildPlugins: [
-      ...esbuildSassAdapterPlugins(),
       esbuildStewGlobalsPlugin({
         globalImportsMap: {
           preact: {
@@ -134,6 +49,23 @@ async function bundlePreactModule(api: BundlePreactModuleApi) {
           },
         },
       }),
+    ],
+  });
+}
+
+interface BundlePreactModuleApi
+  extends Pick<
+    BundleModuleApi,
+    "moduleEntryPath" | "additionalEsbuildPlugins"
+  > {}
+
+async function bundlePreactModule(api: BundlePreactModuleApi) {
+  const { moduleEntryPath, additionalEsbuildPlugins } = api;
+  const bundlePreactModuleResult = await bundleModule({
+    moduleEntryPath,
+    additionalEsbuildPlugins: [
+      ...esbuildSassAdapterPlugins(),
+      ...additionalEsbuildPlugins,
     ],
     tsConfig: {
       compilerOptions: {
@@ -197,9 +129,6 @@ export interface BundleConfigModuleApi
 export async function bundleConfigModule(api: BundleConfigModuleApi) {
   const { moduleEntryPath } = api;
   const bundleConfigModuleResult = await bundleModule({
-    iifeResultName: "__configModuleResult",
-    jsBundleBanner: "",
-    cssBundleBanner: "",
     tsConfig: {},
     additionalEsbuildPlugins: [],
     moduleEntryPath,
@@ -207,49 +136,23 @@ export async function bundleConfigModule(api: BundleConfigModuleApi) {
   return bundleConfigModuleResult.outputFiles[0].text;
 }
 
-interface LoadConfigModuleBundleApi
-  extends Pick<LoadModuleBundleApi, "moduleIifeBundleScript"> {}
-
-export function loadConfigModuleBundle(api: LoadConfigModuleBundleApi) {
-  const { moduleIifeBundleScript } = api;
-  return loadModuleBundle({
-    iifeResultName: "__configModuleResult",
-    moduleExportKey: "default",
-    moduleIifeBundleScript,
-  });
-}
-
 interface BundleModuleApi {
   moduleEntryPath: string;
-  iifeResultName: string;
-  jsBundleBanner: string;
-  cssBundleBanner: string;
   tsConfig: TsconfigRaw;
   additionalEsbuildPlugins: Array<EsbuildPlugin>;
 }
 
 function bundleModule(api: BundleModuleApi) {
-  const {
-    iifeResultName,
-    moduleEntryPath,
-    jsBundleBanner,
-    cssBundleBanner,
-    additionalEsbuildPlugins,
-    tsConfig,
-  } = api;
+  const { moduleEntryPath, additionalEsbuildPlugins, tsConfig } = api;
   return Esbuild.runBuild({
     platform: "browser",
     format: "iife",
+    globalName: "__moduleBundleIifeResult",
     outdir: "out",
     bundle: true,
     write: false,
     minify: true,
-    globalName: iifeResultName,
     entryPoints: [moduleEntryPath],
-    banner: {
-      js: jsBundleBanner,
-      css: cssBundleBanner,
-    },
     plugins: [
       ...additionalEsbuildPlugins,
       ...(esbuildDenoAdapterPlugins({
@@ -259,16 +162,4 @@ function bundleModule(api: BundleModuleApi) {
     ],
     tsconfigRaw: tsConfig,
   });
-}
-
-interface LoadModuleBundleApi extends Pick<BundleModuleApi, "iifeResultName"> {
-  moduleExportKey: string;
-  moduleIifeBundleScript: string;
-}
-
-function loadModuleBundle(api: LoadModuleBundleApi) {
-  const { moduleIifeBundleScript, iifeResultName, moduleExportKey } = api;
-  return new Function(
-    `${moduleIifeBundleScript}return ${iifeResultName}["${moduleExportKey}"]`
-  )();
 }

@@ -1,3 +1,4 @@
+import { FunctionComponent, h as preactH } from "preact";
 import {
   BuildStewConfig,
   SegmentItem,
@@ -13,15 +14,9 @@ import {
   bundleSegmentModule,
   getBundledAssetsLocationMap,
   getStewResourceMap,
-  loadConfigModuleBundle,
-  loadInitialHtmlModuleBundle,
-  loadSegmentModuleBundle,
+  loadModuleBundle,
 } from "stew-library/internal";
 import { throwInvalidPathError } from "stew-library/utilities";
-import {
-  FunctionComponent,
-  h as preactH,
-} from "../stew-library/deps/preact/mod.ts";
 import { getRandomCryptoString } from "./deps/crypto-random-string/mod.ts";
 import { preactRenderToString } from "./deps/preact/render-to-string.ts";
 import { getDirectoryPath, joinPaths } from "./deps/std/path.ts";
@@ -90,7 +85,8 @@ async function loadStewSourceConfig(
   const sourceConfigIifeScript = await bundleConfigModule({
     moduleEntryPath: stewSourceConfigPath,
   });
-  const stewSourceConfigResult: unknown = await loadConfigModuleBundle({
+  const stewSourceConfigResult: unknown = await loadModuleBundle({
+    moduleExportKey: "default",
     moduleIifeBundleScript: sourceConfigIifeScript,
   });
   const stewSourceConfig: SourceStewConfig = SourceStewConfigSchema().parse(
@@ -168,7 +164,8 @@ async function loadAndWriteSegmentModule(
     }
   );
   // todo: validate currentSegmentModule as SegmentModule<SegmentItem>
-  const currentSegmentModule = loadSegmentModuleBundle({
+  const currentSegmentModule = loadModuleBundle({
+    moduleExportKey: "default",
     moduleIifeBundleScript: segmentModuleIifeScript,
   }) as any as SegmentModule<SegmentItem>;
   await Promise.all([
@@ -314,10 +311,10 @@ async function fetchBundledAssetsAndWriteCoreBuildFiles(
   );
   Deno.writeTextFileSync(buildDirectoryMap.appCss, bundleAssetsDataMap.appCss);
   (window as any).h = preactH;
-  const initialStewHtmlComponent: FunctionComponent<any> =
-    loadInitialHtmlModuleBundle({
-      moduleIifeBundleScript: bundleAssetsDataMap.initialHtmlScript,
-    });
+  const initialStewHtmlComponent: FunctionComponent<any> = loadModuleBundle({
+    moduleExportKey: "InitialStewHtml",
+    moduleIifeBundleScript: bundleAssetsDataMap.initialHtmlScript,
+  });
   Deno.writeTextFileSync(
     buildDirectoryMap.indexHtml,
     `<!DOCTYPE html>${preactRenderToString(
