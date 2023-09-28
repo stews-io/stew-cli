@@ -3,7 +3,7 @@
   // note: @jsxImportSource pragma seems to be needed for compile to work
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "stew-library/deps/preact/mod.ts"
+    "jsxImportSource": "preact"
   },
   "fmt": {
     "useTabs": false,
@@ -18,10 +18,12 @@
   },
   "imports": {
     "CssModule": "./declaration.d.ts",
-    "stew-library/deps/preact/mod.ts": "https://esm.sh/preact@10.17.1",
-    "stew-library/deps/preact/hooks.ts": "https://esm.sh/preact@10.17.1/hooks",
+    "preact": "https://esm.sh/preact@10.17.1",
+    "preact/hooks": "https://esm.sh/preact@10.17.1/hooks",
     "preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime",
-    "stew/components": "./stew-library/components/mod.ts"
+    "stew/components": "./stew-library/components/mod.ts",
+    "stew/config": "./stew-library/config/mod.ts",
+    "stew/config/helpers": "./stew-library/config/helpers/mod.ts"
   },
   "tasks": {
     "writeClientBundleAssets": "deno run -A ./development-scripts/writeClientBundleAssets.ts",

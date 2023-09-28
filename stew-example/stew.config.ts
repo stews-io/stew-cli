@@ -1,4 +1,5 @@
-import { SourceStewConfig } from "stew-library/config";
+import { SourceStewConfig } from "stew/config";
+import { getGithubIconSvg, getWebsiteIconSvg } from "stew/config/helpers";
 import musicDataset from "./music/music.dataset.ts";
 import spotsDataset from "./spots/spots.dataset.ts";
 
@@ -14,10 +15,12 @@ function getHelloStewConfig(): SourceStewConfig {
         {
           linkLabel: "website",
           linkHref: "https://clumsycomputer.com",
+          linkIconSvg: getWebsiteIconSvg(),
         },
         {
           linkLabel: "github",
           linkHref: "https://github.com/stews-io",
+          linkIconSvg: getGithubIconSvg(),
         },
       ],
     },

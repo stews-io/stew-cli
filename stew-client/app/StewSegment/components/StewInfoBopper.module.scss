@@ -109,9 +109,9 @@
 
 .externalLinkButton {
   padding: calc(1 / 16) * $themeSpacer;
-}
 
-.curatorLinkIcon {
-  width: 20px;
-  height: 20px;
+  & div svg {
+    width: 20px;
+    height: 20px;
+  }
 }

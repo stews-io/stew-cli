@@ -124,12 +124,14 @@ function StewInfoSchema(): Zod.ZodType<StewInfo> {
 interface StewExternalLink {
   linkLabel: string;
   linkHref: string;
+  linkIconSvg: string;
 }
 
 function StewExternalLinkSchema(): Zod.ZodType<StewExternalLink> {
   return Zod.object({
     linkLabel: Zod.string(),
     linkHref: Zod.string(),
+    linkIconSvg: Zod.string(),
   });
 }
 
