@@ -1,4 +1,4 @@
-import { SegmentItem } from "stew-library/config";
+import { SegmentItem } from "stew/config";
 
 export interface SpotItem extends SegmentItem {
   spotName: string;

@@ -23,7 +23,8 @@
     "preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime",
     "stew/components": "./stew-library/components/mod.ts",
     "stew/config": "./stew-library/config/mod.ts",
-    "stew/config/helpers": "./stew-library/config/helpers/mod.ts"
+    "stew/config/helpers": "./stew-library/config/helpers/mod.ts",
+    "stew/utilities": "./stew-library/utilities/mod.ts"
   },
   "tasks": {
     "writeClientBundleAssets": "deno run -A ./development-scripts/writeClientBundleAssets.ts",

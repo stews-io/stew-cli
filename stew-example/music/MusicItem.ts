@@ -1,5 +1,5 @@
-import { SegmentItem } from "stew-library/config";
-import { ArrayOfAtLeastOne } from "stew-library/utilities";
+import { SegmentItem } from "stew/config";
+import { ArrayOfAtLeastOne } from "stew/utilities";
 
 export type MusicItem = ClippedMusicItem | WholeMusicItem;
 

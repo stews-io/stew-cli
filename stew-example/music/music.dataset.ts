@@ -1,4 +1,4 @@
-import { SegmentDataset } from "stew-library/config";
+import { SegmentDataset } from "stew/config";
 import { MusicItem } from "./MusicItem.ts";
 import {
   getAppleLinkData,
