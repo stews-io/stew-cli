@@ -1,0 +1,41 @@
+@import "../../../../stew-library/styles/theme.scss";
+
+.navigationContainer {
+  @extend .rowContainer;
+  align-items: baseline;
+  padding-inline: calc(3 / 2) * $themeSpacer;
+  padding-block-start: 3 * $themeSpacer;
+  padding-block-end: calc(13 / 4) * $themeSpacer;
+}
+
+.navigationMeterContainer {
+  @extend .itemContainer;
+  flex-grow: 1;
+}
+
+.navigationMeter {
+  @extend .navigationText;
+}
+
+.viewPageButton {
+  @extend .navigationText;
+  color: $themeButtonTextColor;
+}
+
+.disabledViewPageButtonOverride {
+  color: $themeDisabledColor;
+  cursor: default;
+}
+
+.navigationText {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.navigationMeterAccessibilityDescription {
+  display: none;
+}
+
+.pageButtonAccessibilityDescription {
+  display: none;
+}

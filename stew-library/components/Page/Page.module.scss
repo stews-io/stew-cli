@@ -1,0 +1,16 @@
+@import "../../styles/theme.scss";
+
+.pageContainer {
+  @extend .itemContainer;
+  width: 100%;
+}
+
+.pageContentContainer {
+  @extend .columnContainer;
+  max-width: 512px;
+  flex-basis: 100%;
+}
+
+.pageAccessibilityHeader {
+  display: none;
+}
