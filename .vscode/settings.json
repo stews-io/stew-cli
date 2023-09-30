@@ -1,5 +1,4 @@
 {
   "deno.enable": true,
-  "editor.tabSize": 2,
-  "css.lint.validProperties": ["composes"]
+  "editor.tabSize": 2
 }
