@@ -23,7 +23,7 @@
   @extend .itemContainer;
   justify-content: flex-start;
   padding-inline: $themeSpacer;
-  padding-block-end: calc(3 / 2) * $themeSpacer;
+  padding-block-end: calc(17 / 8) * $themeSpacer;
 }
 
 .contentFooter {
@@ -33,7 +33,7 @@
   border-top: solid 0.5px $themeTextBackgroundColor;
   border-radius: $themeBorderRadius;
   padding-inline: calc(1 / 2) * $themeSpacer;
-  padding-block-start: $themeSpacer;
+  padding-block-start: 2 * $themeSpacer;
 }
 
 .footerLinkButtonContainer {
@@ -41,15 +41,8 @@
 }
 
 .footerLinkButton {
-  color: $themeButtonTextColor;
-  padding: calc(1 / 4) * $themeSpacer;
-
-  & svg {
-    width: 36px;
-    height: 36px;
-
-    circle {
-      fill: grey;
-    }
-  }
+  color: grey;
+  font-weight: 600;
+  font-style: italic;
+  font-size: calc(11 / 12) * 1rem;
 }
