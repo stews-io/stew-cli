@@ -49,7 +49,7 @@ export function ViewSearchInput(props: ViewSearchInputProps) {
         autocapitalize={"off"}
         spellcheck={false}
         className={cssModule.searchInput}
-        placeholder={`search ${
+        placeholder={`${
           stewConfig.stewSegments[stewSegmentState.segmentKey].segmentLabel
         }`}
         ref={searchInputRef}
