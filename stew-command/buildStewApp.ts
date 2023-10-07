@@ -94,7 +94,7 @@ async function loadStewSourceConfig(
     }
   );
   if (!stewSourceConfigPathExists) {
-    throw new Error(`config at "${stewSourceConfigPath}" does not exist`);
+    throw new Error(`stew config at "${stewSourceConfigPath}" does not exist`);
   }
   const sourceConfigIifeScript = await bundleConfigModule({
     moduleEntryPath: stewSourceConfigPath,

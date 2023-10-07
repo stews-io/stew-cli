@@ -1,4 +1,4 @@
-import { SegmentModule } from "stew/config";
+import { SegmentModule } from "stew/config/mod.ts";
 import { MusicItem } from "./MusicItem.ts";
 import { MusicItemDisplay } from "./MusicItemDisplay.tsx";
 

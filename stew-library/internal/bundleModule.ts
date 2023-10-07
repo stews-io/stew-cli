@@ -22,11 +22,13 @@ export function bundleSegmentModule(api: BundleSegmentModuleApi) {
             globalExport: "globalThis.PreactHooks",
           },
           "stew/components": {
-            importNameRegex: /^stew\/components$/,
+            importNameRegex:
+              /^(stew\/components|https:\/\/deno\.land\/x\/stew.*\/stew-library\/components|https:\/\/raw\.githubusercontent\.com\/stews-io\/toolkit\/.*\/stew-library\/components)/,
             globalExport: "globalThis.StewComponents",
           },
           "stew/hooks": {
-            importNameRegex: /^stew\/hooks$/,
+            importNameRegex:
+              /^(stew\/hooks|https:\/\/deno\.land\/x\/stew.*\/stew-library\/hooks|https:\/\/raw\.githubusercontent\.com\/stews-io\/toolkit\/.*\/stew-library\/hooks)/,
             globalExport: "globalThis.StewHooks",
           },
         },
@@ -105,7 +107,9 @@ interface EsbuildStewGlobalsPluginApi {
   >;
 }
 
-function esbuildStewGlobalsPlugin(api: EsbuildStewGlobalsPluginApi) {
+function esbuildStewGlobalsPlugin(
+  api: EsbuildStewGlobalsPluginApi
+): EsbuildPlugin {
   const { globalImportsMap } = api;
   return {
     name: "esbuild-stew-globals-plugin",
