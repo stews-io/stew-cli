@@ -1,11 +1,16 @@
-import { throwInvalidPathError } from "../stew-library/utilities/mod.ts";
 import { Esbuild } from "../stew-library/deps/esbuild/mod.ts";
+import { throwInvalidPathError } from "../stew-library/utilities/mod.ts";
 import { buildStewApp } from "./buildStewApp.ts";
 import { parseCliArgs } from "./deps/std/flags.ts";
+import { setupStewProject } from "./setupStewProject.ts";
 
-runStewCommand({
-  parsedCliArgs: parseCliArgs(Deno.args),
-});
+try {
+  runStewCommand({
+    parsedCliArgs: parseCliArgs(Deno.args),
+  });
+} catch (someStewCommandError) {
+  console.error(someStewCommandError);
+}
 
 interface RunStewComandApi {
   parsedCliArgs: ReturnType<typeof parseCliArgs>;
@@ -21,9 +26,16 @@ async function runStewCommand(api: RunStewComandApi) {
         : throwInvalidPathError("parsedCliArgs._[1]");
     await buildStewApp({
       stewSourceConfigPath: maybeStewSourceConfigPath,
-      maybeBuildDirectoryPath: parsedCliArgs["buildDirectoryPath"] ?? null,
+      buildDirectoryPath: parsedCliArgs["buildDirectoryPath"] ?? "./build",
     });
     Esbuild.close();
+  } else if (userStewCommand === "init") {
+    const maybeProjectDirectoryPath =
+      typeof parsedCliArgs._[1] === "string" ? parsedCliArgs._[1] : ".";
+    await setupStewProject({
+      projectDirectoryPath: maybeProjectDirectoryPath,
+      stewPackageVersion: parsedCliArgs["stewPackageVersion"] ?? "0.3.0",
+    });
   } else {
     throw new Error(`unrecognized command: ${userStewCommand}`);
   }
