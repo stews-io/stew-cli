@@ -1,8 +1,4 @@
 import {
-  FunctionComponent,
-  h as preactH,
-} from "../stew-library/deps/preact/mod.ts";
-import {
   BuildStewConfig,
   SegmentItem,
   SegmentModule,
@@ -11,6 +7,10 @@ import {
   SourceStewConfig,
   SourceStewConfigSchema,
 } from "../stew-library/config/mod.ts";
+import {
+  FunctionComponent,
+  h as preactH,
+} from "../stew-library/deps/preact/mod.ts";
 import {
   StewResourceMap,
   bundleConfigModule,
@@ -22,6 +22,7 @@ import {
 import { throwInvalidPathError } from "../stew-library/utilities/mod.ts";
 import { getRandomCryptoString } from "./deps/crypto-random-string/mod.ts";
 import { preactRenderToString } from "./deps/preact/render-to-string.ts";
+import { validatePathExists } from "./deps/std/fs.ts";
 import { getDirectoryPath, joinPaths } from "./deps/std/path.ts";
 
 export interface BuildStewAppApi {
@@ -85,6 +86,16 @@ async function loadStewSourceConfig(
   api: LoadStewSourceConfigApi
 ): Promise<LoadStewSourceConfigResult> {
   const { stewSourceConfigPath } = api;
+  const stewSourceConfigPathExists = await validatePathExists(
+    stewSourceConfigPath,
+    {
+      isReadable: true,
+      isFile: true,
+    }
+  );
+  if (!stewSourceConfigPathExists) {
+    throw new Error(`stew config at "${stewSourceConfigPath}" does not exist`);
+  }
   const sourceConfigIifeScript = await bundleConfigModule({
     moduleEntryPath: stewSourceConfigPath,
   });
@@ -158,12 +169,22 @@ async function loadAndWriteSegmentModule(
     someSegmentSourceConfig,
     buildDirectoryMap,
   } = api;
+  const segmentModulePath = joinPaths(
+    stewSourceDirectoryPath,
+    someSegmentSourceConfig.segmentModulePath
+  );
+  const segmentModuleExists = await validatePathExists(segmentModulePath, {
+    isReadable: true,
+    isFile: true,
+  });
+  if (!segmentModuleExists) {
+    throw new Error(
+      `${someSegmentSourceConfig.segmentKey}.segmentModulePath: "${someSegmentSourceConfig.segmentModulePath}" does not exist`
+    );
+  }
   const [segmentModuleIifeScript, segmentModuleCss] = await bundleSegmentModule(
     {
-      moduleEntryPath: joinPaths(
-        stewSourceDirectoryPath,
-        someSegmentSourceConfig.segmentModulePath
-      ),
+      moduleEntryPath: segmentModulePath,
     }
   );
   // todo: validate currentSegmentModule as SegmentModule<SegmentItem>
