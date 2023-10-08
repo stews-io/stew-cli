@@ -1,17 +1,9 @@
 @import "../../../styles/theme.scss";
 
-.itemDisplayContainer {
-  @extend .columnContainer;
-  padding-block-start: calc(11 / 4) * $themeSpacer;
-
-  &:nth-child(2) {
-    padding-block-start: $themeSpacer;
-  }
-}
-
 .topContainer {
   @extend .rowContainer;
   flex-wrap: wrap;
+  max-width: 100%;
 }
 
 .itemThumbnail {
@@ -27,16 +19,21 @@
 
 .itemLinks {
   @extend .columnContainer;
+  max-width: 100%;
   flex-grow: 1;
   align-items: flex-end;
   padding-inline-start: $themeSpacer;
 }
 
 .itemLinkContainer {
+  @extend .itemContainer;
+  max-width: 100%;
   padding-block-end: $themeSpacer;
 }
 
 .itemLinkButton {
+  @extend .textEllipsis;
+  max-width: 100%;
   font-weight: 700;
   text-decoration: underline;
   color: $themeButtonTextColor;
@@ -50,28 +47,4 @@
 .itemInfoContainer {
   @extend .columnContainer;
   padding-inline-start: calc(1 / 5) * $themeSpacer;
-}
-
-.itemLabelListContainer {
-  @extend .rowContainer;
-}
-
-.itemLabelList {
-  @extend .rowContainer;
-  flex-wrap: wrap;
-  width: 0;
-  flex-grow: 1;
-}
-
-.itemLabel {
-  @extend .textEllipsis;
-  margin-inline-end: $themeSpacer;
-  margin-block-start: $themeSpacer;
-  background-color: $themeTextBackgroundColor;
-  border-radius: 3px;
-  padding-inline: calc(1 / 2) * $themeSpacer;
-  padding-block-start: calc(1 / 8) * $themeSpacer + 1px;
-  padding-block-end: calc(1 / 8) * $themeSpacer;
-  font-weight: 700;
-  font-size: 16px;
 }

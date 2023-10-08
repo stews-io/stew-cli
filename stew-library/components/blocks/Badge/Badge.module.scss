@@ -1,13 +1,8 @@
 @import "../../../styles/theme.scss";
 
-.badgeContainer {
-  @extend .itemContainer;
-  margin-inline-end: $themeSpacer;
-  margin-block-start: $themeSpacer;
-}
-
 .badgeBase {
   @extend .rowContainer;
+  max-width: 100%;
   align-items: center;
   background-color: $themeTextBackgroundColor;
   border-radius: 3px;
@@ -22,14 +17,38 @@
   font-size: 16px;
 }
 
+.badgeLinkButton {
+  @extend .rowContainer;
+  max-width: 100%;
+}
+
 .badgeLinkIcon {
   margin-left: 4px;
   width: 16px;
   height: 16px;
 
   & path {
-    fill: grey;
-    stroke: grey;
+    fill: $themeInteractiveGrey;
+    stroke: $themeInteractiveGrey;
     stroke-width: 0.25;
   }
+}
+
+.badgeListContainer {
+  @extend .rowContainer;
+  max-width: 100%;
+}
+
+.badgeList {
+  @extend .rowContainer;
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+.badgeListItem {
+  @extend .itemContainer;
+  max-width: 100%;
+  justify-content: flex-start;
+  margin-inline-end: $themeSpacer;
+  margin-block-start: $themeSpacer;
 }

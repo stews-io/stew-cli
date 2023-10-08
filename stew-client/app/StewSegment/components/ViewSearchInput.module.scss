@@ -22,6 +22,10 @@
   width: 0;
   flex-grow: 1;
   padding-inline-end: calc(5 / 4) * $themeSpacer;
+
+  &::placeholder {
+    color: $themeInteractiveGrey;
+  }
 }
 
 .clearIcon {

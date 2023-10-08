@@ -3,15 +3,6 @@ import { LinkButton, LinkButtonProps } from "../../mod.ts";
 // @deno-types="CssModule"
 import cssModule from "./Badge.module.scss";
 
-export interface BadgeContainerProps {
-  children: ComponentChildren;
-}
-
-export function BadgeContainer(props: BadgeContainerProps) {
-  const { children } = props;
-  return <div className={cssModule.badgeContainer}>{children}</div>;
-}
-
 export interface TextBadgeProps extends BadgeBaseDataProps {}
 
 export function TextBadge(props: TextBadgeProps) {
@@ -33,10 +24,11 @@ export function LinkBadge(props: LinkBadgeProps) {
   const { badgeHref, ariaLabel, ariaDescription, badgeLabel } = props;
   return (
     <LinkButton
-      target={"_blank"}
+      className={cssModule.badgeLinkButton}
       href={badgeHref}
       ariaLabel={ariaLabel}
       ariaDescription={ariaDescription}
+      target={"_blank"}
     >
       <BadgeBase BadgeIcon={LinkBadgeIcon} badgeLabel={badgeLabel} />
     </LinkButton>
@@ -73,4 +65,26 @@ function BadgeBase(props: BadgeBaseProps) {
       <BadgeIcon />
     </div>
   );
+}
+
+export interface BadgeListProps {
+  children: ComponentChildren;
+}
+
+export function BadgeList(props: BadgeListProps) {
+  const { children } = props;
+  return (
+    <div className={cssModule.badgeListContainer}>
+      <div className={cssModule.badgeList}>{children}</div>
+    </div>
+  );
+}
+
+export interface BadgeListItemProps {
+  children: ComponentChildren;
+}
+
+export function BadgeListItem(props: BadgeListItemProps) {
+  const { children } = props;
+  return <div className={cssModule.badgeListItem}>{children}</div>;
 }

@@ -13,8 +13,3 @@
   text-decoration: underline;
   color: $themeButtonTextColor;
 }
-
-.itemBadgesContainer {
-  @extend .rowContainer;
-  flex-wrap: wrap;
-}

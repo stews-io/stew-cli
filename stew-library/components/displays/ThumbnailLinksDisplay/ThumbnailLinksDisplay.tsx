@@ -1,4 +1,10 @@
-import { DisplayContainer, LinkButton } from "stew/components/mod.ts";
+import {
+  BadgeList,
+  BadgeListItem,
+  DisplayContainer,
+  LinkButton,
+  TextBadge,
+} from "stew/components/mod.ts";
 // @deno-types="CssModule"
 import cssModule from "./ThumbnailLinksDisplay.module.scss";
 
@@ -28,62 +34,32 @@ export function ThumbnailLinksDisplay(props: ThumbnailLinksDisplayProps) {
           src={itemThumbnailHref}
         />
         <div className={cssModule.itemLinks}>
-          {itemLinks.map((someItemLink) => {
-            return (
-              <div className={cssModule.itemLinkContainer}>
-                <LinkButton
-                  className={cssModule.itemLinkButton}
-                  ariaLabel={someItemLink.ariaLabel}
-                  ariaDescription={someItemLink.ariaDescription}
-                  href={someItemLink.linkHref}
-                  target={"_blank"}
-                >
-                  {someItemLink.linkLabel}
-                </LinkButton>
-              </div>
-            );
-          })}
+          {itemLinks.map((someItemLink) => (
+            <div className={cssModule.itemLinkContainer}>
+              <LinkButton
+                className={cssModule.itemLinkButton}
+                ariaLabel={someItemLink.ariaLabel}
+                ariaDescription={someItemLink.ariaDescription}
+                href={someItemLink.linkHref}
+                target={"_blank"}
+              >
+                {someItemLink.linkLabel.toLocaleLowerCase()}
+              </LinkButton>
+            </div>
+          ))}
         </div>
       </div>
       <div className={cssModule.itemInfoContainer}>
         {itemLabelLists.map((someLabelList) => (
-          <ItemLabelList
-            accessibilityLabel={someLabelList.accessibilityLabel}
-            listLabels={someLabelList.listLabels}
-          />
+          <BadgeList>
+            {someLabelList.listLabels.map((someListLabel) => (
+              <BadgeListItem>
+                <TextBadge badgeLabel={someListLabel.toLowerCase()} />
+              </BadgeListItem>
+            ))}
+          </BadgeList>
         ))}
       </div>
     </DisplayContainer>
-  );
-}
-
-interface ItemLabelListProps {
-  accessibilityLabel: string;
-  listLabels: Array<string>;
-}
-
-function ItemLabelList(props: ItemLabelListProps) {
-  const { accessibilityLabel, listLabels } = props;
-  return (
-    <div
-      className={cssModule.itemLabelListContainer}
-      aria-label={accessibilityLabel}
-    >
-      <div
-        role={"list"}
-        className={cssModule.itemLabelList}
-        aria-label={accessibilityLabel}
-      >
-        {listLabels.map((someListLabel) => (
-          <div
-            role={"listitem"}
-            className={cssModule.itemLabel}
-            key={someListLabel}
-          >
-            {someListLabel.toLowerCase()}
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }

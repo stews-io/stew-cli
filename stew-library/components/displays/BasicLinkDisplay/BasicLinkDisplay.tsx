@@ -1,5 +1,6 @@
 import {
-  BadgeContainer,
+  BadgeList,
+  BadgeListItem,
   DisplayContainer,
   LinkBadge,
   LinkButton,
@@ -33,23 +34,23 @@ export function BasicLinkDisplay(props: BasicLinkDisplayProps) {
           {itemTitle.toLocaleLowerCase()}
         </LinkButton>
       </div>
-      <div className={cssModule.itemBadgesContainer}>
+      <BadgeList>
         {itemLabels.map((someItemLabel) => (
-          <BadgeContainer>
+          <BadgeListItem>
             <TextBadge badgeLabel={someItemLabel.toLocaleLowerCase()} />
-          </BadgeContainer>
+          </BadgeListItem>
         ))}
         {itemSecondaryLinks.map((someSecondaryLink) => (
-          <BadgeContainer>
+          <BadgeListItem>
             <LinkBadge
               badgeLabel={someSecondaryLink.linkLabel.toLocaleLowerCase()}
               badgeHref={someSecondaryLink.linkHref}
               ariaLabel={`open "${someSecondaryLink.linkLabel}" link for "${itemTitle}"`}
               ariaDescription={`a button that opens up a new tab and navigates to ${someSecondaryLink.linkHref}`}
             />
-          </BadgeContainer>
+          </BadgeListItem>
         ))}
-      </div>
+      </BadgeList>
     </DisplayContainer>
   );
 }
