@@ -18,7 +18,7 @@ export interface ThumbnailLinksDisplayProps {
     ariaDescription: string;
   }>;
   itemLabelLists: Array<{
-    accessibilityLabel: string;
+    ariaLabel: string;
     listLabels: Array<string>;
   }>;
 }
@@ -51,7 +51,7 @@ export function ThumbnailLinksDisplay(props: ThumbnailLinksDisplayProps) {
       </div>
       <div className={cssModule.itemInfoContainer}>
         {itemLabelLists.map((someLabelList) => (
-          <BadgeList>
+          <BadgeList ariaLabel={someLabelList.ariaLabel}>
             {someLabelList.listLabels.map((someListLabel) => (
               <BadgeListItem>
                 <TextBadge badgeLabel={someListLabel.toLowerCase()} />

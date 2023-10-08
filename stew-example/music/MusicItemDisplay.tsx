@@ -18,15 +18,15 @@ export function MusicItemDisplay(props: MusicItemDisplayProps) {
       }))}
       itemLabelLists={[
         {
-          accessibilityLabel: "music title",
+          ariaLabel: "music title",
           listLabels: [someSegmentItem.musicTitle],
         },
         {
-          accessibilityLabel: "music artist",
+          ariaLabel: "music artist",
           listLabels: someSegmentItem.musicArtist,
         },
         {
-          accessibilityLabel: "music context",
+          ariaLabel: "music context",
           listLabels: [
             `${
               someSegmentItem.musicYear
@@ -38,7 +38,7 @@ export function MusicItemDisplay(props: MusicItemDisplayProps) {
           ],
         },
         {
-          accessibilityLabel: "music styles",
+          ariaLabel: "music styles",
           listLabels: someSegmentItem.musicTags,
         },
       ]}

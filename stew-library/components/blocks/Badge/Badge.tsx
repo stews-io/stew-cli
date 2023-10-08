@@ -1,5 +1,6 @@
 import { ComponentChildren, FunctionComponent } from "stew/deps/preact/mod.ts";
 import { LinkButton, LinkButtonProps } from "../../mod.ts";
+import { CoreAriaOrnaments } from "../../../hooks/mod.ts";
 // @deno-types="CssModule"
 import cssModule from "./Badge.module.scss";
 
@@ -67,15 +68,18 @@ function BadgeBase(props: BadgeBaseProps) {
   );
 }
 
-export interface BadgeListProps {
+export interface BadgeListProps
+  extends Pick<CoreAriaOrnaments<"list">, "ariaLabel"> {
   children: ComponentChildren;
 }
 
 export function BadgeList(props: BadgeListProps) {
-  const { children } = props;
+  const { children, ariaLabel } = props;
   return (
     <div className={cssModule.badgeListContainer}>
-      <div className={cssModule.badgeList}>{children}</div>
+      <div className={cssModule.badgeList} role={"list"} aria-label={ariaLabel}>
+        {children}
+      </div>
     </div>
   );
 }
@@ -86,5 +90,9 @@ export interface BadgeListItemProps {
 
 export function BadgeListItem(props: BadgeListItemProps) {
   const { children } = props;
-  return <div className={cssModule.badgeListItem}>{children}</div>;
+  return (
+    <div className={cssModule.badgeListItem} role={"listitem"}>
+      {children}
+    </div>
+  );
 }
