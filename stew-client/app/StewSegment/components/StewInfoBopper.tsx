@@ -204,26 +204,24 @@ function StewInfoPopoverContent(props: StewInfoPopoverContentProps) {
         ))}
       </div>
       <div className={cssModule.contentNavigationFooter}>
-        {stewConfig.stewInfo.stewExternalLinks.map(
-          (someExternalLink, linkIndex) => (
-            <div key={linkIndex} className={cssModule.externalLinkContainer}>
-              <LinkButton
-                target={"_blank"}
-                ariaLabel={`go to ${stewConfig.stewInfo.stewName}'s ${someExternalLink.linkLabel}`}
-                ariaDescription={`a button that opens a new tab and navigates to ${stewConfig.stewInfo.stewName}'s ${someExternalLink.linkLabel}`}
-                className={cssModule.externalLinkButton}
-                onBlur={popoverNavigationItemBlurHandler}
-                href={someExternalLink.linkHref}
-              >
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: someExternalLink.linkIconSvg,
-                  }}
-                />
-              </LinkButton>
-            </div>
-          )
-        )}
+        {stewConfig.stewInfo.stewLinks.map((someExternalLink, linkIndex) => (
+          <div key={linkIndex} className={cssModule.externalLinkContainer}>
+            <LinkButton
+              target={"_blank"}
+              ariaLabel={`go to ${stewConfig.stewInfo.stewName}'s ${someExternalLink.linkLabel}`}
+              ariaDescription={`a button that opens a new tab and navigates to ${stewConfig.stewInfo.stewName}'s ${someExternalLink.linkLabel}`}
+              className={cssModule.externalLinkButton}
+              onBlur={popoverNavigationItemBlurHandler}
+              href={someExternalLink.linkHref}
+            >
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: someExternalLink.linkIconSvg,
+                }}
+              />
+            </LinkButton>
+          </div>
+        ))}
       </div>
     </div>
   );

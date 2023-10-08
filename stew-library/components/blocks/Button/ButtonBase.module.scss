@@ -1,0 +1,17 @@
+@import "../../../styles/theme.scss";
+
+.buttonBase {
+  @extend .itemContainer;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus {
+    @extend .themeFocusOutline;
+
+    &[data-pointer-focus] {
+      @extend .themeFocusWithoutOutline;
+    }
+  }
+}

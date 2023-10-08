@@ -1,0 +1,20 @@
+@import "../../../styles/theme.scss";
+
+.itemTitleContainer {
+  @extend .rowContainer;
+}
+
+.itemTitleButton {
+  padding-inline: calc(1 / 2) * $themeSpacer;
+  padding-block-start: calc(1 / 8) * $themeSpacer + 1px;
+  padding-block-end: calc(1 / 8) * $themeSpacer;
+  font-weight: 700;
+  font-size: 18px;
+  text-decoration: underline;
+  color: $themeButtonTextColor;
+}
+
+.itemBadgesContainer {
+  @extend .rowContainer;
+  flex-wrap: wrap;
+}

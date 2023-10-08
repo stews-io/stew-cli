@@ -3,18 +3,18 @@ import {
   getGithubIconSvg,
   getWebsiteIconSvg,
 } from "stew/config/helpers/mod.ts";
-import musicDataset from "./music/music.dataset.ts";
-import spotsDataset from "./spots/spots.dataset.ts";
+import { musicDataset } from "./music/music.dataset.ts";
+import { linksDataset } from "./links/links.dataset.ts";
 
-export default getHelloStewConfig();
+export default getStewExampleConfig();
 
-function getHelloStewConfig(): SourceStewConfig {
+function getStewExampleConfig(): SourceStewConfig {
   return {
     stewInfo: {
-      stewName: "hello-stew",
+      stewName: "stew-example",
       stewTagline: "just stewin",
-      stewMessage: "an assortment of awesome stuff",
-      stewExternalLinks: [
+      stewMessage: "a brief example showing off the things",
+      stewLinks: [
         {
           linkLabel: "website",
           linkHref: "https://clumsycomputer.com",
@@ -44,16 +44,16 @@ function getHelloStewConfig(): SourceStewConfig {
         ],
       },
       {
-        segmentDataset: spotsDataset,
-        segmentModulePath: "./spots/spots.module.tsx",
-        segmentKey: "spots",
-        segmentLabel: "spots",
+        segmentDataset: linksDataset,
+        segmentModulePath: "./links/links.module.ts",
+        segmentKey: "links",
+        segmentLabel: "links",
         segmentViews: [
           {
             viewKey: "all",
             viewLabel: "all",
-            viewItemIds: spotsDataset.map(
-              (someSpotItem) => someSpotItem.itemId
+            viewItemIds: linksDataset.map(
+              (someLinkItem) => someLinkItem.itemId
             ),
           },
         ],

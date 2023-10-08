@@ -1,0 +1,10 @@
+@import "../../../styles/theme.scss";
+
+.displayContainer {
+  @extend .columnContainer;
+  padding-block-start: calc(11 / 4) * $themeSpacer;
+
+  &:nth-child(2) {
+    padding-block-start: $themeSpacer;
+  }
+}

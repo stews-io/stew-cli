@@ -1,0 +1,35 @@
+@import "../../../styles/theme.scss";
+
+.badgeContainer {
+  @extend .itemContainer;
+  margin-inline-end: $themeSpacer;
+  margin-block-start: $themeSpacer;
+}
+
+.badgeBase {
+  @extend .rowContainer;
+  align-items: center;
+  background-color: $themeTextBackgroundColor;
+  border-radius: 3px;
+  padding-inline: calc(1 / 2) * $themeSpacer;
+  padding-block-start: calc(1 / 8) * $themeSpacer + 1px;
+  padding-block-end: calc(1 / 8) * $themeSpacer;
+}
+
+.badgeLabel {
+  @extend .textEllipsis;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.badgeLinkIcon {
+  margin-left: 4px;
+  width: 16px;
+  height: 16px;
+
+  & path {
+    fill: grey;
+    stroke: grey;
+    stroke-width: 0.25;
+  }
+}

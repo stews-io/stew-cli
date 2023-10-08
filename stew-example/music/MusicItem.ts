@@ -1,13 +1,7 @@
 import { SegmentItem } from "stew/config/mod.ts";
 import { ArrayOfAtLeastOne } from "stew/utilities/mod.ts";
 
-export type MusicItem = ClippedMusicItem | WholeMusicItem;
-
-interface ClippedMusicItem
-  extends MusicItemBase<"clip">,
-    Pick<SongMusicItem | MixMusicItem, "sourceType"> {}
-
-type WholeMusicItem = SongMusicItem | CollectionMusicItem | MixMusicItem;
+export type MusicItem = SongMusicItem | CollectionMusicItem | MixMusicItem;
 
 interface SongMusicItem extends SourceMusicItemBase<"track"> {}
 
