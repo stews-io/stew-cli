@@ -34,7 +34,7 @@ export function BasicLinkDisplay(props: BasicLinkDisplayProps) {
           {itemTitle.toLocaleLowerCase()}
         </LinkButton>
       </div>
-      <BadgeList>
+      <BadgeList ariaLabel={"link badges"}>
         {itemLabels.map((someItemLabel) => (
           <BadgeListItem>
             <TextBadge badgeLabel={someItemLabel.toLocaleLowerCase()} />

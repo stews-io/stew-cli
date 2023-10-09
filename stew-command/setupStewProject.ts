@@ -226,10 +226,22 @@ async function fetchAndWriteSourceFiles(api: FetchAndWriteSourceFilesApi) {
       boilerplateAssetsDirectoryPath,
       sourceDirectoryPath,
     }),
-    // fetchAndWriteLinksModule(),
-    // fetchAndWriteLinksDataset(),
-    // fetchAndWriteLinkItemDisplay(),
-    // fetchAndWriteLinkItem(),
+    fetchAndWriteLinkItemFile({
+      boilerplateAssetsDirectoryPath,
+      linksSegmentDirectoryPath,
+    }),
+    fetchAndWriteLinkItemDisplayFile({
+      boilerplateAssetsDirectoryPath,
+      linksSegmentDirectoryPath,
+    }),
+    fetchAndWriteLinksModuleFile({
+      boilerplateAssetsDirectoryPath,
+      linksSegmentDirectoryPath,
+    }),
+    fetchAndWriteLinksDatasetFile({
+      boilerplateAssetsDirectoryPath,
+      linksSegmentDirectoryPath,
+    }),
   ]);
 }
 
@@ -242,11 +254,81 @@ async function fetchAndWriteStewConfigFile(
   api: FetchAndWriteStewConfigFileApi
 ) {
   const { boilerplateAssetsDirectoryPath, sourceDirectoryPath } = api;
-  const deployProductionWorkflowTemplateFile = await fetch(
+  const stewConfigTemplateFile = await fetch(
     joinPaths(boilerplateAssetsDirectoryPath, "./stew.config.ts.TEMPLATE")
   ).then((fileResponse) => fileResponse.text());
   await Deno.writeTextFile(
     joinPaths(sourceDirectoryPath, "./stew.config.ts"),
-    deployProductionWorkflowTemplateFile
+    stewConfigTemplateFile
+  );
+}
+
+interface FetchAndWriteLinkItemFileApi
+  extends Pick<FetchAndWriteSourceFilesApi, "boilerplateAssetsDirectoryPath"> {
+  linksSegmentDirectoryPath: string;
+}
+
+async function fetchAndWriteLinkItemFile(api: FetchAndWriteLinkItemFileApi) {
+  const { boilerplateAssetsDirectoryPath, linksSegmentDirectoryPath } = api;
+  const displayItemTemplateFile = await fetch(
+    joinPaths(boilerplateAssetsDirectoryPath, "./LinkItem.ts.TEMPLATE")
+  ).then((fileResponse) => fileResponse.text());
+  await Deno.writeTextFile(
+    joinPaths(linksSegmentDirectoryPath, "./LinkItem.ts"),
+    displayItemTemplateFile
+  );
+}
+
+interface FetchAndWriteLinkItemDisplayFileApi
+  extends Pick<FetchAndWriteSourceFilesApi, "boilerplateAssetsDirectoryPath"> {
+  linksSegmentDirectoryPath: string;
+}
+
+async function fetchAndWriteLinkItemDisplayFile(
+  api: FetchAndWriteLinkItemDisplayFileApi
+) {
+  const { boilerplateAssetsDirectoryPath, linksSegmentDirectoryPath } = api;
+  const displayItemDisplayTemplateFile = await fetch(
+    joinPaths(boilerplateAssetsDirectoryPath, "./LinkItemDisplay.tsx.TEMPLATE")
+  ).then((fileResponse) => fileResponse.text());
+  await Deno.writeTextFile(
+    joinPaths(linksSegmentDirectoryPath, "./LinkItemDisplay.tsx"),
+    displayItemDisplayTemplateFile
+  );
+}
+
+interface FetchAndWriteLinksModuleFileApi
+  extends Pick<FetchAndWriteSourceFilesApi, "boilerplateAssetsDirectoryPath"> {
+  linksSegmentDirectoryPath: string;
+}
+
+async function fetchAndWriteLinksModuleFile(
+  api: FetchAndWriteLinksModuleFileApi
+) {
+  const { boilerplateAssetsDirectoryPath, linksSegmentDirectoryPath } = api;
+  const linksModuleTemplateFile = await fetch(
+    joinPaths(boilerplateAssetsDirectoryPath, "./links.module.ts.TEMPLATE")
+  ).then((fileResponse) => fileResponse.text());
+  await Deno.writeTextFile(
+    joinPaths(linksSegmentDirectoryPath, "./links.module.ts"),
+    linksModuleTemplateFile
+  );
+}
+
+interface FetchAndWriteLinksDatasetFileApi
+  extends Pick<FetchAndWriteSourceFilesApi, "boilerplateAssetsDirectoryPath"> {
+  linksSegmentDirectoryPath: string;
+}
+
+async function fetchAndWriteLinksDatasetFile(
+  api: FetchAndWriteLinksDatasetFileApi
+) {
+  const { boilerplateAssetsDirectoryPath, linksSegmentDirectoryPath } = api;
+  const linksDatasetTemplateFile = await fetch(
+    joinPaths(boilerplateAssetsDirectoryPath, "./links.dataset.ts.TEMPLATE")
+  ).then((fileResponse) => fileResponse.text());
+  await Deno.writeTextFile(
+    joinPaths(linksSegmentDirectoryPath, "./links.dataset.ts"),
+    linksDatasetTemplateFile
   );
 }
