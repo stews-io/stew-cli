@@ -274,7 +274,10 @@
     "https://raw.githubusercontent.com/stews-io/esbuild_deno_loader/fix/allow-css-passthrough/src/loader_portable.ts": "d999f452ef3d8ec2dd3c8443f542adf57efc8a2cd59b29cc41f5b3d7dff512e5",
     "https://raw.githubusercontent.com/stews-io/esbuild_deno_loader/fix/allow-css-passthrough/src/plugin_deno_loader.ts": "8b1f7eeb80f8c539d5903fd414531ba7e60436a5be67b93ed080defea7970aba",
     "https://raw.githubusercontent.com/stews-io/esbuild_deno_loader/fix/allow-css-passthrough/src/plugin_deno_resolver.ts": "0449ed23ae93db1ec74d015a46934aefd7ba7a8f719f7a4980b616cb3f5bbee4",
-    "https://raw.githubusercontent.com/stews-io/esbuild_deno_loader/fix/allow-css-passthrough/src/shared.ts": "33052684aeb542ebd24da372816bbbf885cd090a7ab0fde7770801f7f5b49572"
+    "https://raw.githubusercontent.com/stews-io/esbuild_deno_loader/fix/allow-css-passthrough/src/shared.ts": "33052684aeb542ebd24da372816bbbf885cd090a7ab0fde7770801f7f5b49572",
+    "https://raw.githubusercontent.com/stews-io/toolkit/production/stew-command/deps/std/flags.ts": "7393fb37d82d0088a9a1b0176268fa415a24405cf84a57f47e46b4061e79b8f7",
+    "https://raw.githubusercontent.com/stews-io/toolkit/production/stew-command/deps/std/path.ts": "e6b98d531f206404ee33585d47b3b65607a49ba904363227b71186e1759ee35f",
+    "https://raw.githubusercontent.com/stews-io/toolkit/production/stew-command/setupStewProject.ts": "f90a42d328231ac811aa1cb80b9712a46de77fcd3ddcdf6cadbfdc3c5916bb99"
   },
   "npm": {
     "specifiers": {

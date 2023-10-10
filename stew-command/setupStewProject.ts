@@ -1,4 +1,8 @@
-import { getDirectoryPath, joinPaths } from "./deps/std/path.ts";
+// importing directly instead of proxying through deps because vercel.json "rewrites" :/
+import {
+  dirname as getDirectoryPath,
+  join as joinPaths,
+} from "https://deno.land/std@0.200.0/path/mod.ts";
 
 export interface SetupStewProjectApi {
   projectDirectoryPath: string;
