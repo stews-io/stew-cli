@@ -1,4 +1,4 @@
-import { getDirectoryPath, joinPaths } from "./deps/std/path.ts";
+import { getDirectoryPath, joinPaths } from "../deps/std/path.ts";
 
 export interface SetupStewProjectApi {
   projectDirectoryPath: string;

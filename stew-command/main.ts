@@ -1,8 +1,8 @@
 import { Esbuild } from "../stew-library/deps/esbuild/mod.ts";
 import { throwInvalidPathError } from "../stew-library/utilities/mod.ts";
-import { buildStewApp } from "./buildStewApp.ts";
 import { parseCliArgs } from "./deps/std/flags.ts";
-import { setupStewProject } from "./setupStewProject.ts";
+import { buildStewApp } from "./sub-commands/buildStewApp.ts";
+import { setupStewProject } from "./sub-commands/setupStewProject.ts";
 
 try {
   runStewCommand({
