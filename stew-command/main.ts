@@ -34,7 +34,6 @@ async function runStewCommand(api: RunStewComandApi) {
       typeof parsedCliArgs._[1] === "string" ? parsedCliArgs._[1] : ".";
     await setupStewProject({
       projectDirectoryPath: maybeProjectDirectoryPath,
-      stewPackageVersion: parsedCliArgs["stewPackageVersion"] ?? "0.3.0",
     });
   } else {
     throw new Error(`unrecognized command: ${userStewCommand}`);
