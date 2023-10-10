@@ -1,0 +1,50 @@
+@import "../../../styles/theme.scss";
+
+.topContainer {
+  @extend .rowContainer;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.itemThumbnail {
+  margin-left: 1px;
+  margin-bottom: calc(1 / 2) * $themeSpacer;
+  width: 160px;
+  height: 160px;
+  border-radius: calc(1 / 2) * $themeSpacer;
+  background-color: $themeTextBackgroundColor;
+  box-shadow: 0 0 0 1px $themeTextBackgroundColor;
+  object-fit: cover;
+}
+
+.itemLinks {
+  @extend .columnContainer;
+  max-width: 100%;
+  flex-grow: 1;
+  align-items: flex-end;
+  padding-inline-start: $themeSpacer;
+}
+
+.itemLinkContainer {
+  @extend .itemContainer;
+  max-width: 100%;
+  padding-block-end: $themeSpacer;
+}
+
+.itemLinkButton {
+  @extend .textEllipsis;
+  max-width: 100%;
+  font-weight: 700;
+  text-decoration: underline;
+  color: $themeButtonTextColor;
+  padding-inline: calc(1 / 4) * $themeSpacer;
+  text-decoration: underline;
+  text-decoration-skip-ink: all;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 1.5px;
+}
+
+.itemInfoContainer {
+  @extend .columnContainer;
+  padding-inline-start: calc(1 / 5) * $themeSpacer;
+}

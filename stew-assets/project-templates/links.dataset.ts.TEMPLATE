@@ -1,0 +1,19 @@
+import { SegmentDataset } from "stew/config/SegmentDataset.ts";
+import { LinkItem } from "./LinkItem.ts";
+
+export const linksDataset: SegmentDataset<LinkItem> = [
+  {
+    itemId: 0,
+    linkTitle: "Example Link",
+    linkHref: "https://example.com/",
+    linkAuthor: ["The Internet"],
+    linkTags: ["example"],
+    secondaryLinks: [
+      {
+        linkLabel: "archive",
+        linkHref:
+          "https://web.archive.org/web/20231008230036/https://example.com/",
+      },
+    ],
+  },
+];

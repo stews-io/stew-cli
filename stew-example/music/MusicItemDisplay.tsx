@@ -1,5 +1,5 @@
-import { MultiLinkImageItemDisplay } from "stew/components/mod.ts";
 import { SegmentItemDisplayProps } from "stew/config/mod.ts";
+import { ThumbnailLinksDisplay } from "stew/components/mod.ts";
 import { MusicItem } from "./MusicItem.ts";
 
 export interface MusicItemDisplayProps
@@ -8,7 +8,7 @@ export interface MusicItemDisplayProps
 export function MusicItemDisplay(props: MusicItemDisplayProps) {
   const { someSegmentItem } = props;
   return (
-    <MultiLinkImageItemDisplay
+    <ThumbnailLinksDisplay
       itemTitle={someSegmentItem.musicTitle}
       itemThumbnailHref={someSegmentItem.musicThumbnailHref}
       itemLinks={someSegmentItem.externalLinks.map((someMusicLink) => ({
@@ -18,15 +18,15 @@ export function MusicItemDisplay(props: MusicItemDisplayProps) {
       }))}
       itemLabelLists={[
         {
-          accessibilityLabel: "music title",
+          ariaLabel: "music title",
           listLabels: [someSegmentItem.musicTitle],
         },
         {
-          accessibilityLabel: "music artist",
+          ariaLabel: "music artist",
           listLabels: someSegmentItem.musicArtist,
         },
         {
-          accessibilityLabel: "music context",
+          ariaLabel: "music context",
           listLabels: [
             `${
               someSegmentItem.musicYear
@@ -34,11 +34,11 @@ export function MusicItemDisplay(props: MusicItemDisplayProps) {
               someSegmentItem.sourceType === "collection"
                 ? someSegmentItem.collectionType
                 : someSegmentItem.sourceType
-            }${someSegmentItem.musicType === "clip" ? " (clip)" : ""}`,
+            }`,
           ],
         },
         {
-          accessibilityLabel: "music styles",
+          ariaLabel: "music styles",
           listLabels: someSegmentItem.musicTags,
         },
       ]}

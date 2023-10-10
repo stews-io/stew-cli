@@ -1,0 +1,47 @@
+import { SourceStewConfig } from "stew/config/mod.ts";
+import {
+  getGithubIconSvg,
+  getWebsiteIconSvg,
+} from "stew/config/helpers/mod.ts";
+import { linksDataset } from "./links/links.dataset.ts";
+
+export default getStewConfig();
+
+function getStewConfig(): SourceStewConfig {
+  return {
+    stewInfo: {
+      stewName: "[REPLACE W/ NAME]",
+      stewTagline: "[REPLACE W/ TAGLINE]",
+      stewMessage: "[REPLACE W/ MESSAGE]",
+      stewLinks: [
+        {
+          linkLabel: "website",
+          linkHref: "https://www.stews.io",
+          linkIconSvg: getWebsiteIconSvg(),
+        },
+        {
+          linkLabel: "github",
+          linkHref: "https://github.com/stews-io",
+          linkIconSvg: getGithubIconSvg(),
+        },
+      ],
+    },
+    stewSegments: [
+      {
+        segmentDataset: linksDataset,
+        segmentModulePath: "./links/links.module.ts",
+        segmentKey: "links",
+        segmentLabel: "links",
+        segmentViews: [
+          {
+            viewKey: "all",
+            viewLabel: "all",
+            viewItemIds: linksDataset.map(
+              (someLinkItem) => someLinkItem.itemId
+            ),
+          },
+        ],
+      },
+    ],
+  };
+}

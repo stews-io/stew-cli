@@ -27,17 +27,16 @@ import { getDirectoryPath, joinPaths } from "./deps/std/path.ts";
 
 export interface BuildStewAppApi {
   stewSourceConfigPath: string;
-  maybeBuildDirectoryPath: string | null;
+  buildDirectoryPath: string;
 }
 
 export async function buildStewApp(api: BuildStewAppApi) {
-  const { stewSourceConfigPath, maybeBuildDirectoryPath } = api;
+  const { stewSourceConfigPath, buildDirectoryPath } = api;
   const { stewSourceConfig } = await loadStewSourceConfig({
     stewSourceConfigPath,
   });
   const { buildDirectoryMap, stewBuildId } = setupBuildDirectories({
-    maybeBuildDirectoryPath,
-    stewSourceConfig,
+    buildDirectoryPath,
   });
   const stewSourceDirectoryPath = getDirectoryPath(stewSourceConfigPath);
   const loadedSegmentModules: Record<string, SegmentModule<SegmentItem>> = {};
@@ -112,17 +111,14 @@ async function loadStewSourceConfig(
 }
 
 interface SetupBuildDirectoriesApi
-  extends Pick<BuildStewAppApi, "maybeBuildDirectoryPath">,
-    Pick<LoadStewSourceConfigResult, "stewSourceConfig"> {}
+  extends Pick<BuildStewAppApi, "buildDirectoryPath"> {}
 
 type BuildDirectoryMap = {
   [SomeStewResourceKey in keyof StewResourceMap]: `${string}/${StewResourceMap[SomeStewResourceKey]}`;
 };
 
 function setupBuildDirectories(api: SetupBuildDirectoriesApi) {
-  const { maybeBuildDirectoryPath, stewSourceConfig } = api;
-  const buildDirectoryPath =
-    maybeBuildDirectoryPath ?? `./build_${stewSourceConfig.stewInfo.stewName}`;
+  const { buildDirectoryPath } = api;
   const stewBuildId = getRandomCryptoString({
     length: 6,
     type: "alphanumeric",

@@ -6,7 +6,7 @@ import {
   getYoutubeLinkData,
 } from "./getMusicLinkData.ts";
 
-export default [
+export const musicDataset: SegmentDataset<MusicItem> = [
   {
     itemId: 0,
     musicType: "source",
@@ -310,4 +310,4 @@ export default [
       }),
     ],
   },
-] satisfies SegmentDataset<MusicItem>;
+];

@@ -1,0 +1,14 @@
+{
+  "buildCommand": "deno task buildStew",
+  "outputDirectory": "build",
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/:segmentKey((?!stew_))((?!app.))((?!assets))((?!favicon.))((?!manifest.))(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

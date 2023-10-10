@@ -109,7 +109,7 @@ interface StewInfo {
   stewName: string;
   stewTagline: string;
   stewMessage: string;
-  stewExternalLinks: Array<StewExternalLink>;
+  stewLinks: Array<StewLink>;
 }
 
 function StewInfoSchema(): Zod.ZodType<StewInfo> {
@@ -117,17 +117,17 @@ function StewInfoSchema(): Zod.ZodType<StewInfo> {
     stewName: Zod.string(),
     stewTagline: Zod.string(),
     stewMessage: Zod.string(),
-    stewExternalLinks: Zod.array(StewExternalLinkSchema()),
+    stewLinks: Zod.array(StewLinkSchema()),
   });
 }
 
-interface StewExternalLink {
+interface StewLink {
   linkLabel: string;
   linkHref: string;
   linkIconSvg: string;
 }
 
-function StewExternalLinkSchema(): Zod.ZodType<StewExternalLink> {
+function StewLinkSchema(): Zod.ZodType<StewLink> {
   return Zod.object({
     linkLabel: Zod.string(),
     linkHref: Zod.string(),
