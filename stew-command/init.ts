@@ -4,7 +4,7 @@ import { setupStewProject } from "https://raw.githubusercontent.com/stews-io/too
 try {
   const parsedCliArgs = parseCliArgs(Deno.args);
   const maybeProjectDirectoryPath =
-    typeof parsedCliArgs._[1] === "string" ? parsedCliArgs._[1] : ".";
+    typeof parsedCliArgs._[0] === "string" ? parsedCliArgs._[0] : ".";
   setupStewProject({
     projectDirectoryPath: maybeProjectDirectoryPath,
   });
