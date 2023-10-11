@@ -8,7 +8,7 @@ export async function setupStewProject(api: SetupStewProjectApi) {
   const { projectDirectoryPath } = api;
   const projectTemplatesDirectoryPath = joinPaths(
     getDirectoryPath(import.meta.url),
-    "../stew-assets/project-templates"
+    "../../stew-assets/project-templates"
   );
   const workflowsDirectoryPath = joinPaths(
     projectDirectoryPath,
