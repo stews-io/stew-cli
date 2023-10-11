@@ -1,6 +1,6 @@
 # stews.io/toolkit
 
-**tools for publishing quality curations**
+> **tools for publishing quality curations to the web**
 
 ## get inspired
 
@@ -20,7 +20,7 @@ choice selections from modern electronic music
 
 ### create stew
 
-##### run initialization command for setting up your stew
+##### run command to create stew
 
 ```bash
 deno run -A https://deno.stews.io/init.ts ./your-stew
