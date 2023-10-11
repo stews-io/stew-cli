@@ -1,38 +1,54 @@
 # stews.io/toolkit
 
-tools for publishing quality curations
+**tools for publishing quality curations**
 
 ## get inspired
 
-- [**clumsycomputer _(personal)_**](https://www.clumsycomputer.stews.io)
+### [clumsycomputer](https://www.clumsycomputer.stews.io) _(personal stew)_
 
-- [**pl-archive _(community)_**](https://www.prettylights.stews.io)
+an assortment of great music, awesome spots, and sweet links
 
-- [**bakedgoods _(curator)_**](https://www.bakedgoods.stews.io)
+### [pl-archive](https://www.prettylights.stews.io) _(community stew)_
+
+an extensive catalog of the Pretty Lights musical project
+
+### [bakedgoods](https://www.bakedgoods.stews.io) _(curator stew)_
+
+choice selections from modern electronic music
 
 ## get started
+
+### create stew
+
+##### run initialization command for setting up your stew
 
 ```bash
 deno run -A https://deno.stews.io/init.ts ./your-stew
 ```
 
+##### navigate into your stew's directory
+
 ```bash
 cd ./your-stew
 ```
+
+##### build and serve your stew locally
 
 ```bash
 deno task buildAndServeStew
 ```
 
-open browser at localhost:8080
+##### see what you get out of the box
 
-## make it yours
+> open browser at localhost:8080
 
-- customize `stewInfo` in `./source/stew.config.ts`
+### make it yours
 
-- customize `stewSegments` in `./source/stew.config.ts`
+- customize your stew at `./source/stew.config.ts`
 
-## publish to vercel
+  - [config documentation](#config)
+
+### publish to vercel
 
 1. create new repository on github
 
@@ -59,3 +75,9 @@ open browser at localhost:8080
    - if branch === `production` then production deployed
 
    - if branch !== `production` then preview deployed
+
+## documentation
+
+### config
+
+### command
