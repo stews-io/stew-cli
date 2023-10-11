@@ -1,6 +1,14 @@
 # stews.io/toolkit
 
-## getting started
+## get inspired
+
+- [**clumsycomputer _(personal)_**](https://www.clumsycomputer.stews.io)
+
+- [**pl-archive _(community)_**](https://www.prettylights.stews.io)
+
+- [**bakedgoods _(curator)_**](https://www.bakedgoods.stews.io)
+
+## get started
 
 ```bash
 deno run -A https://deno.stews.io/init.ts ./your-stew
@@ -16,7 +24,13 @@ deno task buildAndServeStew
 
 open browser at localhost:8080
 
-## publishing
+## make it yours
+
+- customize `stewInfo` in `./source/stew.config.ts`
+
+- customize `stewSegments` in `./source/stew.config.ts`
+
+## publish to vercel
 
 1. create new repository on github
 
