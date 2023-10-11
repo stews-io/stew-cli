@@ -404,7 +404,7 @@ function fetchAndWriteSecondaryAssetFiles(
   const { buildDirectoryMap } = api;
   const repoRootDirectoryPath = joinPaths(
     getDirectoryPath(import.meta.url),
-    "../"
+    "../../"
   );
   Deno.mkdirSync(buildDirectoryMap.stewAssetsDirectoryPath);
   const assetsDirectoryUrlPath = "/stew-assets";

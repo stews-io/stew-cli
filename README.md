@@ -1,12 +1,12 @@
 # stews.io/toolkit
 
-> **tools for publishing quality curations to the web**
+> **power tools for publishing quality curations to the web**
 
 ## get inspired
 
 ### [clumsycomputer](https://www.clumsycomputer.stews.io) _(personal stew)_
 
-an assortment of great music, awesome spots, and sweet links
+an assortment of great music, awesome spots, and sweet sweet links
 
 ### [pl-archive](https://www.prettylights.stews.io) _(community stew)_
 
@@ -80,4 +80,8 @@ deno task buildAndServeStew
 
 ### config
 
+todo
+
 ### command
+
+todo
