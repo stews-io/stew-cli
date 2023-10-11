@@ -1,5 +1,7 @@
 # stews.io/toolkit
 
+tools for publishing quality curations
+
 ## get inspired
 
 - [**clumsycomputer _(personal)_**](https://www.clumsycomputer.stews.io)
