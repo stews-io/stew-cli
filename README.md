@@ -141,6 +141,9 @@ interface BasicLinkDisplayProps {
 ```
 
 ```typescript
+import { SegmentItemDisplayProps } from "stew/config/mod.ts";
+import { BasicLinkDisplay } from "stew/components/mod.ts";
+
 interface CustomLinkItem extends SegmentItem {
   customTitle: string;
   customHref: string;
@@ -186,6 +189,9 @@ interface ThumbnailLinksDisplayProps {
 ```
 
 ```typescript
+import { SegmentItemDisplayProps } from "stew/config/mod.ts";
+import { ThumbnailLinksDisplay } from "stew/components/mod.ts";
+
 interface CustomThumbnailItem extends SegmentItem {
   customTitle: string;
   customThumbnailHref: string;
@@ -229,8 +235,24 @@ function CustomThumbnailItemDisplay(
 
 ##### init
 
-todo
+```bash
+deno run -A https://deno.stews.io/init.ts ./your-stew-directory
+```
+
+```bash
+deno run -A https://deno.stews.io/command/main.ts init ./your-stew-directory
+```
 
 ##### build
 
-todo
+```bash
+deno run -A https://deno.stews.io/command/main.ts build ./your-stew-config.ts
+```
+
+- `_**buildDirectoryPath:**_` override default build directory _(./build)_
+
+##### serve
+
+```bash
+deno run -A https://deno.stews.io/scripts/serveStew.ts ./your-build-directory
+```
