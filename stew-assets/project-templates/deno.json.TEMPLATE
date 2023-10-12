@@ -8,11 +8,11 @@
     "preact": "https://esm.sh/preact@10.17.1",
     "preact/hooks": "https://esm.sh/preact@10.17.1/hooks",
     "preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime",
-    "stew/": "https://deno.land/x/stew@0.4.6/stew-library/"
+    "stew/": "https://deno.land/x/stew@0.4.7/stew-library/"
   },
   "tasks": {
-    "buildStew": "rm -rf ./build && deno run -A https://raw.githubusercontent.com/stews-io/toolkit/0.4.6/stew-command/main.ts build ./source/stew.config.ts",
-    "serveStew": "deno run -A https://raw.githubusercontent.com/stews-io/toolkit/0.4.6/development-scripts/serveStewBuild.ts ./build",
+    "buildStew": "rm -rf ./build && deno run -A https://raw.githubusercontent.com/stews-io/toolkit/0.4.7/stew-command/main.ts build ./source/stew.config.ts",
+    "serveStew": "deno run -A https://raw.githubusercontent.com/stews-io/toolkit/0.4.7/development-scripts/serveStewBuild.ts ./build",
     "buildAndServeStew": "deno task buildStew && deno task serveStew"
   }
 }
