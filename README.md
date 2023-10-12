@@ -249,7 +249,7 @@ deno run -A https://deno.stews.io/command/main.ts init ./your-stew-directory
 deno run -A https://deno.stews.io/command/main.ts build ./your-stew-config.ts
 ```
 
-- `buildDirectoryPath`: override default build directory _(./build)_
+- `buildDirectoryPath` override default build directory _(./build)_
 
 ##### serve
 
