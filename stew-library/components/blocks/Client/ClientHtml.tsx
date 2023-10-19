@@ -1,22 +1,20 @@
-import "../styles/globalReset.scss";
-import { BuildStewConfig } from "stew-library/config";
+import "./globalReset.scss";
 import { SplashPage } from "./SplashPage.tsx";
 
-export interface InitialStewHtmlProps {
-  stewBuildConfig: BuildStewConfig;
+export interface ClientHtmlProps {
+  clientVersionId: string;
+  htmlTitle: string;
+  htmlDescription: string;
   splashPageCss: string;
 }
 
-export function InitialStewHtml(props: InitialStewHtmlProps) {
-  const { stewBuildConfig, splashPageCss } = props;
+export function ClientHtml(props: ClientHtmlProps) {
+  const { clientVersionId, htmlTitle, htmlDescription, splashPageCss } = props;
   return (
-    <html lang={"en"}>
+    <html lang={"en"} data-client_version_id={clientVersionId}>
       <head>
-        <title>{stewBuildConfig.stewInfo.stewName}</title>
-        <meta
-          name={"description"}
-          content={`${stewBuildConfig.stewInfo.stewName}: ${stewBuildConfig.stewInfo.stewMessage}`}
-        />
+        <title>{htmlTitle}</title>
+        <meta name={"description"} content={htmlDescription} />
         <meta charSet={"utf-8"} />
         <meta
           name={"viewport"}
@@ -24,7 +22,7 @@ export function InitialStewHtml(props: InitialStewHtmlProps) {
         />
         <meta name={"mobile-web-app-capable"} content={"yes"} />
         <meta name={"apple-mobile-web-app-capable"} content={"yes"} />
-        <link rel="apple-touch-icon" href="/assets/icon-512x512.png" />
+        <link rel={"apple-touch-icon"} href={"/assets/icon-512x512.png"} />
         <link rel={"icon"} href={"/favicon.ico"} sizes={"any"} />
         <link rel={"icon"} href={"/favicon.svg"} type={"image/svg+xml"} />
         <link rel={"manifest"} href={"/manifest.json"} />
@@ -34,11 +32,7 @@ export function InitialStewHtml(props: InitialStewHtmlProps) {
         <div id={"appContainer"}>
           <SplashPage />
         </div>
-        <script
-          id={"appScript"}
-          data-stew_build_id={stewBuildConfig.stewBuildId}
-          src={`/app.${stewBuildConfig.stewBuildId}.js`}
-        />
+        <script src={`/app.${clientVersionId}.js`} />
       </body>
     </html>
   );

@@ -9,13 +9,13 @@ import {
 } from "../../stew-library/config/mod.ts";
 import {
   FunctionComponent,
-  h as preactH,
+  createElement,
 } from "../../stew-library/deps/preact/mod.ts";
 import {
   StewResourceMap,
   bundleConfigModule,
   bundleSegmentModule,
-  getBundledAssetsLocationMap,
+  getStewBundlesLocationMap,
   getStewResourceMap,
   loadModuleBundle,
 } from "../../stew-library/internal/mod.ts";
@@ -330,15 +330,17 @@ async function fetchBundledAssetsAndWriteCoreBuildFiles(
     bundleAssetsDataMap.appScript
   );
   Deno.writeTextFileSync(buildDirectoryMap.appCss, bundleAssetsDataMap.appCss);
-  (window as any).h = preactH;
-  const initialStewHtmlComponent: FunctionComponent<any> = loadModuleBundle({
-    moduleExportKey: "InitialStewHtml",
-    moduleIifeBundleScript: bundleAssetsDataMap.initialHtmlScript,
+  const stewHtmlComponent: FunctionComponent<any> = loadModuleBundle({
+    moduleExportKey: "StewHtml",
+    moduleIifeBundleScript: bundleAssetsDataMap.stewHtmlScript,
+  });
+  Object.assign(globalThis, {
+    h: createElement,
   });
   Deno.writeTextFileSync(
     buildDirectoryMap.indexHtml,
     `<!DOCTYPE html>${preactRenderToString(
-      preactH(initialStewHtmlComponent, {
+      createElement(stewHtmlComponent, {
         stewBuildConfig,
         splashPageCss: bundleAssetsDataMap.splashPageCss,
       })
@@ -349,36 +351,35 @@ async function fetchBundledAssetsAndWriteCoreBuildFiles(
 interface BundledAssetsDataMap {
   appScript: string;
   appCss: string;
-  initialHtmlScript: string;
+  stewHtmlScript: string;
   splashPageCss: string;
 }
 
 async function fetchBundledAssets(): Promise<{
   bundleAssetsDataMap: BundledAssetsDataMap;
 }> {
-  const bundledAssetClientPathMap = getBundledAssetsLocationMap({
+  const stewBundlesLocationMap = getStewBundlesLocationMap({
     baseLocation: joinPaths(getDirectoryPath(import.meta.url), "../../"),
   });
-  const [appScript, appCss, initialHtmlScript, splashPageCss] =
-    await Promise.all([
-      fetchBundleAsset({
-        bundledAssetUrl: bundledAssetClientPathMap.appScript,
-      }),
-      fetchBundleAsset({
-        bundledAssetUrl: bundledAssetClientPathMap.appCss,
-      }),
-      fetchBundleAsset({
-        bundledAssetUrl: bundledAssetClientPathMap.initialHtmlScript,
-      }),
-      fetchBundleAsset({
-        bundledAssetUrl: bundledAssetClientPathMap.splashPageCss,
-      }),
-    ]);
+  const [appScript, appCss, stewHtmlScript, splashPageCss] = await Promise.all([
+    fetchBundleAsset({
+      bundledAssetUrl: stewBundlesLocationMap.appScript,
+    }),
+    fetchBundleAsset({
+      bundledAssetUrl: stewBundlesLocationMap.appCss,
+    }),
+    fetchBundleAsset({
+      bundledAssetUrl: stewBundlesLocationMap.stewHtmlScript,
+    }),
+    fetchBundleAsset({
+      bundledAssetUrl: stewBundlesLocationMap.splashPageCss,
+    }),
+  ]);
   return {
     bundleAssetsDataMap: {
       appScript,
       appCss,
-      initialHtmlScript,
+      stewHtmlScript,
       splashPageCss,
     },
   };

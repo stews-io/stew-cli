@@ -1,41 +1,27 @@
-import * as Preact from "../../stew-library/deps/preact/mod.ts";
-import * as PreactHooks from "../../stew-library/deps/preact/hooks.ts";
-import * as StewComponents from "../../stew-library/components/mod.ts";
-import { BuildStewConfig } from "../../stew-library/config/mod.ts";
-import * as StewHooks from "../../stew-library/hooks/mod.ts";
-import { getStewResourceMap } from "../../stew-library/internal/getStewResourceMap.ts";
+import * as Preact from "../stew-library/deps/preact/mod.ts";
+import * as PreactHooks from "../stew-library/deps/preact/hooks.ts";
+import * as StewComponents from "../stew-library/components/mod.ts";
+import * as StewHooks from "../stew-library/hooks/mod.ts";
+import { loadClientApp } from "../stew-library/components/blocks/Client/loadClientApp.ts";
+import { BuildStewConfig } from "../stew-library/config/mod.ts";
+import { getStewResourceMap } from "../stew-library/internal/getStewResourceMap.ts";
 import {
   findMapItem,
   throwInvalidPathError,
-} from "../../stew-library/utilities/mod.ts";
-import { StewApp, StewAppProps } from "./StewApp.tsx";
-import { fetchSegmentComponents } from "./fetchSegmentComponents.ts";
+} from "../stew-library/utilities/mod.ts";
+import { StewApp, StewAppProps } from "./StewApp/StewApp.tsx";
+import { fetchSegmentComponents } from "./StewApp/fetchSegmentComponents.ts";
 
-Object.assign(globalThis, {
-  h: Preact.h,
-  Preact,
-  PreactHooks,
-  StewComponents,
-  StewHooks,
+loadClientApp({
+  App: StewApp,
+  fetchAppProps: loadStewResources,
+  appGlobals: {
+    Preact,
+    PreactHooks,
+    StewComponents,
+    StewHooks,
+  },
 });
-loadStewApp();
-
-async function loadStewApp() {
-  const { stewConfig, stewResourceMap, stewAppCss, initialSegmentViewState } =
-    await loadStewResources();
-  Preact.render(
-    <StewApp
-      stewConfig={stewConfig}
-      stewResourceMap={stewResourceMap}
-      stewAppCss={stewAppCss}
-      initialSegmentViewState={initialSegmentViewState}
-    />,
-    document.getElementById("appContainer") ??
-      throwInvalidPathError("hydrate.appContainer")
-  );
-  document.getElementById("splashPageStyle")?.remove();
-  console.info(stewConfig);
-}
 
 async function loadStewResources(): Promise<StewAppProps> {
   // display splash page for minimum amount of time
@@ -45,7 +31,7 @@ async function loadStewResources(): Promise<StewAppProps> {
     }, 700);
   });
   const stewBuildId =
-    document.getElementById("appScript")?.dataset["stew_build_id"] ??
+    document.documentElement.dataset["client_version_id"] ??
     throwInvalidPathError("loadStewResources.stewBuildId");
   const stewResourceMap = getStewResourceMap({
     stewBuildId,
@@ -54,6 +40,7 @@ async function loadStewResources(): Promise<StewAppProps> {
     (getConfigResponse) =>
       getConfigResponse.json() as unknown as BuildStewConfig
   );
+  console.info(stewConfig);
   const [_, urlSegmentKey] = window.location.pathname.split("/");
   const initialSearchParams = new URLSearchParams(window.location.search);
   const initialSegmentConfig =

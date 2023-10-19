@@ -57,10 +57,10 @@ export function bundleAppModule(api: BundleAppModuleApi) {
   });
 }
 
-export interface BundleInitialHtmlModuleApi
+export interface BundleHtmlModuleApi
   extends Pick<BundlePreactModuleApi, "moduleEntryPath"> {}
 
-export function bundleInitialHtmlModule(api: BundleInitialHtmlModuleApi) {
+export function bundleHtmlModule(api: BundleHtmlModuleApi) {
   const { moduleEntryPath } = api;
   return bundlePreactModule({
     moduleEntryPath,

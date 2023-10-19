@@ -4,6 +4,8 @@ export * from "./blocks/Button/AnchorButton.tsx";
 export * from "./blocks/Button/Button.tsx";
 export * from "./blocks/Button/ButtonBase.tsx";
 export * from "./blocks/Button/LinkButton.tsx";
+export * from "./blocks/Client/ClientApp.tsx";
+export * from "./blocks/Client/ClientHtml.tsx";
 export * from "./blocks/DisplayContainer/DisplayContainer.tsx";
 export * from "./blocks/Page/Page.tsx";
 export * from "./blocks/Popover/Popover.tsx";
