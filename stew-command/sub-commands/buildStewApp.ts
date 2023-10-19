@@ -8,20 +8,16 @@ import {
   SourceStewConfigSchema,
 } from "../../stew-library/config/mod.ts";
 import {
-  FunctionComponent,
-  createElement,
-} from "../../stew-library/deps/preact/mod.ts";
-import {
   StewResourceMap,
   bundleConfigModule,
   bundleSegmentModule,
+  writeClientBundles,
   getStewBundlesLocationMap,
   getStewResourceMap,
   loadModuleBundle,
+  createBuildId,
 } from "../../stew-library/internal/mod.ts";
 import { throwInvalidPathError } from "../../stew-library/utilities/mod.ts";
-import { getRandomCryptoString } from "../deps/crypto-random-string/mod.ts";
-import { preactRenderToString } from "../deps/preact/render-to-string.ts";
 import { validatePathExists } from "../deps/std/fs.ts";
 import { getDirectoryPath, joinPaths } from "../deps/std/path.ts";
 
@@ -119,10 +115,7 @@ type BuildDirectoryMap = {
 
 function setupBuildDirectories(api: SetupBuildDirectoriesApi) {
   const { buildDirectoryPath } = api;
-  const stewBuildId = getRandomCryptoString({
-    length: 6,
-    type: "alphanumeric",
-  });
+  const stewBuildId = createBuildId();
   const stewResourceMap = getStewResourceMap({
     stewBuildId,
   });
@@ -320,69 +313,44 @@ async function fetchBundledAssetsAndWriteCoreBuildFiles(
   api: FetchBundledAssetsAndWriteCoreBuildFilesApi
 ) {
   const { buildDirectoryMap, stewBuildConfig } = api;
-  const { bundleAssetsDataMap } = await fetchBundledAssets();
   Deno.writeTextFileSync(
     buildDirectoryMap.configPath,
     JSON.stringify(stewBuildConfig)
   );
-  Deno.writeTextFileSync(
-    buildDirectoryMap.appScript,
-    bundleAssetsDataMap.appScript
-  );
-  Deno.writeTextFileSync(buildDirectoryMap.appCss, bundleAssetsDataMap.appCss);
-  const stewHtmlComponent: FunctionComponent<any> = loadModuleBundle({
-    moduleExportKey: "StewHtml",
-    moduleIifeBundleScript: bundleAssetsDataMap.stewHtmlScript,
-  });
-  Object.assign(globalThis, {
-    h: createElement,
-  });
-  Deno.writeTextFileSync(
-    buildDirectoryMap.indexHtml,
-    `<!DOCTYPE html>${preactRenderToString(
-      createElement(stewHtmlComponent, {
-        stewBuildConfig,
-        splashPageCss: bundleAssetsDataMap.splashPageCss,
-      })
-    )}`
-  );
-}
-
-interface BundledAssetsDataMap {
-  appScript: string;
-  appCss: string;
-  stewHtmlScript: string;
-  splashPageCss: string;
-}
-
-async function fetchBundledAssets(): Promise<{
-  bundleAssetsDataMap: BundledAssetsDataMap;
-}> {
   const stewBundlesLocationMap = getStewBundlesLocationMap({
     baseLocation: joinPaths(getDirectoryPath(import.meta.url), "../../"),
   });
-  const [appScript, appCss, stewHtmlScript, splashPageCss] = await Promise.all([
+  const [htmlScript, splashPageCss, appScript, appCss] = await Promise.all([
+    fetchBundleAsset({
+      bundledAssetUrl: stewBundlesLocationMap.htmlScript,
+    }),
+    fetchBundleAsset({
+      bundledAssetUrl: stewBundlesLocationMap.splashPageCss,
+    }),
     fetchBundleAsset({
       bundledAssetUrl: stewBundlesLocationMap.appScript,
     }),
     fetchBundleAsset({
       bundledAssetUrl: stewBundlesLocationMap.appCss,
     }),
-    fetchBundleAsset({
-      bundledAssetUrl: stewBundlesLocationMap.stewHtmlScript,
-    }),
-    fetchBundleAsset({
-      bundledAssetUrl: stewBundlesLocationMap.splashPageCss,
-    }),
   ]);
-  return {
-    bundleAssetsDataMap: {
+  await writeClientBundles({
+    htmlComponentName: "StewHtml",
+    htmlComponentProps: {
+      stewBuildConfig,
+    },
+    clientBundles: {
+      htmlScript,
+      splashPageCss,
       appScript,
       appCss,
-      stewHtmlScript,
-      splashPageCss,
     },
-  };
+    outputDirectoryMap: {
+      indexHtml: buildDirectoryMap.indexHtml,
+      appScript: buildDirectoryMap.appScript,
+      appCss: buildDirectoryMap.appCss,
+    },
+  });
 }
 
 interface FetchBundleAssetApi {

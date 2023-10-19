@@ -7,23 +7,23 @@ import {
 
 export interface LoadClientAppApi<AppProps extends Record<string, any>> {
   appGlobals: Record<string, unknown>;
-  App: FunctionComponent<AppProps>;
-  fetchAppProps: () => Promise<AppProps>;
+  clientApp: FunctionComponent<AppProps>;
+  fetchClientAppProps: () => Promise<AppProps>;
 }
 
 export async function loadClientApp<AppProps extends Record<string, any>>(
   api: LoadClientAppApi<AppProps>
 ) {
-  const { appGlobals, fetchAppProps, App } = api;
+  const { appGlobals, fetchClientAppProps, clientApp } = api;
   Object.assign(globalThis, {
     h: createElement,
     ...appGlobals,
   });
-  const someAppProps: AppProps = await fetchAppProps();
+  const clientAppProps: AppProps = await fetchClientAppProps();
   renderElement(
-    createElement(App, someAppProps),
+    createElement(clientApp, clientAppProps),
     document.getElementById("appContainer") ??
-      throwInvalidPathError("hydrate.appContainer")
+      throwInvalidPathError("loadClientApp.appContainer")
   );
   document.getElementById("splashPageStyle")?.remove();
 }

@@ -10,7 +10,7 @@ export function StewHtml(props: StewHtmlProps) {
   return (
     <ClientHtml
       splashPageCss={splashPageCss}
-      clientVersionId={stewBuildConfig.stewBuildId}
+      buildId={stewBuildConfig.stewBuildId}
       htmlTitle={stewBuildConfig.stewInfo.stewName}
       htmlDescription={`${stewBuildConfig.stewInfo.stewName}: ${stewBuildConfig.stewInfo.stewMessage}`}
     />

@@ -2,16 +2,16 @@ import "./globalReset.scss";
 import { SplashPage } from "./SplashPage.tsx";
 
 export interface ClientHtmlProps {
-  clientVersionId: string;
+  buildId: string;
   htmlTitle: string;
   htmlDescription: string;
   splashPageCss: string;
 }
 
 export function ClientHtml(props: ClientHtmlProps) {
-  const { clientVersionId, htmlTitle, htmlDescription, splashPageCss } = props;
+  const { buildId, htmlTitle, htmlDescription, splashPageCss } = props;
   return (
-    <html lang={"en"} data-client_version_id={clientVersionId}>
+    <html lang={"en"} data-build_id={buildId}>
       <head>
         <title>{htmlTitle}</title>
         <meta name={"description"} content={htmlDescription} />
@@ -32,7 +32,7 @@ export function ClientHtml(props: ClientHtmlProps) {
         <div id={"appContainer"}>
           <SplashPage />
         </div>
-        <script src={`/app.${clientVersionId}.js`} />
+        <script src={`/app.${buildId}.js`} />
       </body>
     </html>
   );

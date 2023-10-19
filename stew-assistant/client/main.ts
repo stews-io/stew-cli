@@ -1,21 +1,19 @@
-import { createElement, render as renderElement } from "preact";
+import { loadClientApp } from "../../stew-library/components/blocks/Client/loadClientApp.ts";
 import { throwInvalidPathError } from "../../stew-library/utilities/mod.ts";
 import { AssistantApp } from "./AssistantApp.tsx";
 
-Object.assign(globalThis, {
-  h: createElement,
+loadClientApp({
+  appGlobals: {},
+  clientApp: AssistantApp,
+  fetchClientAppProps: loadAssistantResources,
 });
-loadClientApp();
 
-async function loadClientApp() {
-  const appCss = await fetch("/app.css").then((getAppCssResponse) =>
-    getAppCssResponse.text()
+async function loadAssistantResources() {
+  const assistantBuildId =
+    document.documentElement.dataset["build_id"] ??
+    throwInvalidPathError("loadAssistantResources.assistantBuildId");
+  const appCss = await fetch(`/app.${assistantBuildId}.css`).then(
+    (getAppCssResponse) => getAppCssResponse.text()
   );
-  renderElement(
-    createElement(AssistantApp, {
-      appCss,
-    }),
-    document.getElementById("appContainer") ??
-      throwInvalidPathError("preactRender.appContainer")
-  );
+  return { appCss };
 }

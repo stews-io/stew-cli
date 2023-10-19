@@ -13,8 +13,8 @@ import { StewApp, StewAppProps } from "./StewApp/StewApp.tsx";
 import { fetchSegmentComponents } from "./StewApp/fetchSegmentComponents.ts";
 
 loadClientApp({
-  App: StewApp,
-  fetchAppProps: loadStewResources,
+  clientApp: StewApp,
+  fetchClientAppProps: loadStewResources,
   appGlobals: {
     Preact,
     PreactHooks,
@@ -31,7 +31,7 @@ async function loadStewResources(): Promise<StewAppProps> {
     }, 700);
   });
   const stewBuildId =
-    document.documentElement.dataset["client_version_id"] ??
+    document.documentElement.dataset["build_id"] ??
     throwInvalidPathError("loadStewResources.stewBuildId");
   const stewResourceMap = getStewResourceMap({
     stewBuildId,

@@ -23,11 +23,14 @@
     "stew/": "./stew-library/"
   },
   "tasks": {
-    "writeStewBundles": "deno run -A ./development-scripts/writeStewBundles.ts",
+    "bundleAndWriteStewBundles": "deno run -A ./development-scripts/bundleAndWriteStewBundles.ts",
     "serveStewBuild": "deno run -A ./development-scripts/serveStewBuild.ts",
     "runStewCommand": "deno run -A ./stew-command/main.ts",
     "buildStewExample": "deno task runStewCommand build ./stew-example/stew.config.ts",
-    "buildAndServeStewExample": "rm -rf ./build && deno task writeStewBundles && deno task buildStewExample && deno task serveStewBuild ./build",
-    "setupBuildAndServeFooExample": "rm -rf ./foo-example && rm -rf ./build_foo && mkdir ./foo-example && deno task runStewCommand init ./foo-example && deno task runStewCommand build ./foo-example/source/stew.config.ts --buildDirectoryPath ./build_foo && deno task serveStewBuild ./build_foo"
+    "buildAndServeStewExample": "rm -rf ./build && deno task bundleAndWriteStewBundles && deno task buildStewExample && deno task serveStewBuild ./build",
+    "setupBuildAndServeFooExample": "rm -rf ./foo-example && rm -rf ./build_foo && mkdir ./foo-example && deno task runStewCommand init ./foo-example && deno task runStewCommand build ./foo-example/source/stew.config.ts --buildDirectoryPath ./build_foo && deno task serveStewBuild ./build_foo",
+    "buildAssistantClient": "rm -rf ./__assistant-build && deno run -A ./development-scripts/buildAssistantClient.ts",
+    "serveAssistantClient": "deno run -A ./development-scripts/serveAssistantClient.ts",
+    "buildAndServeAssistantClient": "deno task buildAssistantClient && deno task serveAssistantClient"
   }
 }
