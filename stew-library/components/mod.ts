@@ -7,6 +7,7 @@ export * from "./blocks/Button/LinkButton.tsx";
 export * from "./blocks/Client/ClientApp.tsx";
 export * from "./blocks/Client/ClientHtml.tsx";
 export * from "./blocks/DisplayContainer/DisplayContainer.tsx";
+export * from "./blocks/Input/Input.tsx";
 export * from "./blocks/Page/Page.tsx";
 export * from "./blocks/Popover/Popover.tsx";
 export * from "./blocks/Select/SelectBase.tsx";

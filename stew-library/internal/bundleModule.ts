@@ -38,20 +38,16 @@ export function bundleSegmentModule(api: BundleSegmentModuleApi) {
 }
 
 export interface BundleAppModuleApi
-  extends Pick<BundlePreactModuleApi, "moduleEntryPath"> {}
+  extends Pick<BundlePreactModuleApi, "moduleEntryPath">,
+    Pick<EsbuildStewGlobalsPluginApi, "globalImportsMap"> {}
 
 export function bundleAppModule(api: BundleAppModuleApi) {
-  const { moduleEntryPath } = api;
+  const { moduleEntryPath, globalImportsMap } = api;
   return bundlePreactModule({
     moduleEntryPath,
     additionalEsbuildPlugins: [
       esbuildStewGlobalsPlugin({
-        globalImportsMap: {
-          zod: {
-            importNameRegex: /^https:\/\/deno\.land\/x\/zod/,
-            globalExport: "{}",
-          },
-        },
+        globalImportsMap,
       }),
     ],
   });

@@ -1,10 +1,10 @@
+import { Esbuild } from "../stew-library/deps/esbuild/mod.ts";
 import {
   bundleAppModule,
   bundleHtmlModule,
   createBuildId,
   writeClientBundles,
 } from "../stew-library/internal/mod.ts";
-import { Esbuild } from "../stew-library/deps/esbuild/mod.ts";
 
 buildAssistantClient({
   buildDirectoryPath: "./__assistant-build",
@@ -29,6 +29,7 @@ async function buildAssistantClient(api: BuildAssistantClientApi) {
     }),
     bundleAppModule({
       moduleEntryPath: "./stew-assistant/client/main.ts",
+      globalImportsMap: {},
     }),
   ]);
   await writeClientBundles({

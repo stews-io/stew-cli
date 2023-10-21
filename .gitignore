@@ -2,3 +2,4 @@ stew
 /build*
 /__assistant-build
 foo-example
+/.secrets

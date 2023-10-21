@@ -15,6 +15,12 @@ async function bundleAndWriteStewBundles() {
     }),
     bundleAppModule({
       moduleEntryPath: "./stew-client/main.ts",
+      globalImportsMap: {
+        zod: {
+          importNameRegex: /^https:\/\/deno\.land\/x\/zod/,
+          globalExport: "{}",
+        },
+      },
     }),
   ]);
   const stewBundlesLocationMap = getStewBundlesLocationMap({

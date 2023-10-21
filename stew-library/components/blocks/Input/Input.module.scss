@@ -1,4 +1,4 @@
-@import "../../../../stew-library/styles/theme.scss";
+@import "../../../styles/theme.scss";
 
 .inputContainer {
   @extend .rowContainer;
@@ -9,12 +9,12 @@
   padding-inline: calc(1 / 2) * $themeSpacer;
   font-size: 18px;
 
-  &:has(.searchInput:focus) {
+  &:has(.textInput:focus) {
     @extend .themeFocusOutline;
   }
 }
 
-.searchInput {
+.textInput {
   @extend .defaultFont;
   font-size: inherit;
   font-weight: 700;
@@ -28,12 +28,12 @@
   }
 }
 
-.clearIcon {
+.clearInputIcon {
   width: 0.9em;
   height: 0.9em;
 }
 
-.closeIconOutlineCircle {
+.iconOutlineCircle {
   fill: transparent;
   stroke: black;
   stroke-width: 1.75;
