@@ -8,7 +8,9 @@ interface SuccessAsyncValue<T> extends AsyncValueBase<"success"> {
   value: T;
 }
 
-interface ErrorAsyncValue extends AsyncValueBase<"error"> {}
+interface ErrorAsyncValue extends AsyncValueBase<"error"> {
+  errorMessage: string;
+}
 
 interface LoadingAsyncValue extends AsyncValueBase<"loading"> {
   valueWorker: Promise<void>;

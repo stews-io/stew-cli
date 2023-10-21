@@ -14,6 +14,18 @@
   @extend .rowContainer;
 }
 
+.fieldMessage {
+  height: 0.75rem;
+  padding-block-start: calc(1 / 2) * $themeSpacer;
+  padding-inline: calc(3 / 4) * $themeSpacer;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.errorFieldMessage {
+  color: red;
+}
+
 .formFooterContainer {
   @extend .rowContainer;
   justify-content: flex-end;
