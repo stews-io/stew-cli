@@ -1,3 +1,4 @@
+import { getCssClass } from "stew/utilities/getCssClass.ts";
 import {
   Button,
   ClientApp,
@@ -5,18 +6,17 @@ import {
   Input,
   Page,
 } from "../../stew-library/components/mod.ts";
+import { useMemo, useState } from "../../stew-library/deps/preact/hooks.ts";
 import { JSX } from "../../stew-library/deps/preact/mod.ts";
-import {
-  StateUpdater,
-  useMemo,
-  useState,
-} from "../../stew-library/deps/preact/hooks.ts";
 import { Zod } from "../../stew-library/deps/zod/mod.ts";
-import { getCssClass } from "stew/utilities/getCssClass.ts";
 import { throwInvalidPathError } from "../../stew-library/utilities/mod.ts";
-import { AsyncValue } from "../library/AsyncValue.ts";
-import { musicArtistTypeSystemPrompt } from "../library/gptPrompts.ts";
+import {
+  artistDiscographySystemPrompt,
+  artistGroupMembersSystemPrompt,
+  artistTypeSystemPrompt,
+} from "../library/gptPrompts.ts";
 import { queryGptData } from "../library/queryGptData.ts";
+import { FormField, FormState } from "../library/FormState.ts";
 // @deno-types="CssModule"
 import cssModule from "./AssistantApp.module.scss";
 
@@ -66,34 +66,37 @@ type AssistantState =
   | GroupArtistAssistantState;
 
 interface NewArtistAssistantState
-  extends AssistantStateBase<"newArtistForm", NewArtistFormState> {}
+  extends AssistantStateBase<"newArtistForm", NewArtistFormFields> {}
 
 interface SoloArtistAssistantState
-  extends AssistantStateBase<"soloArtistForm", SoloArtistFormState> {}
+  extends AssistantStateBase<"soloArtistForm", SoloArtistFormFields> {}
 
 interface GroupArtistAssistantState
-  extends AssistantStateBase<"groupArtistForm", GroupArtistFormState> {}
+  extends AssistantStateBase<"groupArtistForm", GroupArtistFormFields> {}
 
-interface AssistantStateBase<
-  FormType extends string,
-  SomeArtistFormState extends ArtistFormStateBase
-> {
-  formType: FormType;
-  artistForm: SomeArtistFormState;
+interface AssistantStateBase<FormType extends string, SomeArtistFormFields> {
+  // formType: FormType;
+  artistForm: FormState<SomeArtistFormFields>;
 }
 
-interface NewArtistFormState extends ArtistFormStateBase {}
+interface NewArtistFormFields extends BaseArtistFormFields {}
 
-interface SoloArtistFormState extends ArtistFormStateBase {}
+interface SoloArtistFormFields extends TypedArtistFormFields<"solo"> {}
 
-interface GroupArtistFormState extends ArtistFormStateBase {}
+interface GroupArtistFormFields extends TypedArtistFormFields<"group"> {}
 
-interface ArtistFormStateBase {
-  artistName: string;
-  artistType: AsyncValue<MusicArtistType>;
+interface TypedArtistFormFields<ArtistType extends string>
+  extends BaseArtistFormFields {
+  artistType: FormField<ArtistType>;
+  artistAlbums: FormField<Array<string>>;
+  artistMixtapes: FormField<Array<string>>;
+  artistEps: FormField<Array<string>>;
+  artistSingles: FormField<Array<string>>;
 }
 
-type MusicArtistType = "solo" | "group";
+interface BaseArtistFormFields {
+  artistName: FormField<string>;
+}
 
 interface NewArtistFormProps
   extends BaseArtistFormDataProps<NewArtistAssistantState> {}
@@ -176,13 +179,19 @@ function GroupTypedFormExtension(props: GroupTypedFormExtensionProps) {
 }
 
 interface TypedArtistFormProps<
-  SomeAssistantState extends AssistantStateBase<string, ArtistFormStateBase>,
+  SomeAssistantState extends AssistantStateBase<
+    string,
+    TypedArtistFormFields<string>
+  >,
   TypedFormExtensionProps extends Record<string, any>
 > extends TypedArtistFormDataProps<SomeAssistantState>,
     TypedArtistFormConfigProps<TypedFormExtensionProps> {}
 
 interface TypedArtistFormDataProps<
-  SomeAssistantState extends AssistantStateBase<string, ArtistFormStateBase>
+  SomeAssistantState extends AssistantStateBase<
+    string,
+    TypedArtistFormFields<string>
+  >
 > extends BaseArtistFormDataProps<SomeAssistantState> {}
 
 interface TypedArtistFormConfigProps<
@@ -190,7 +199,10 @@ interface TypedArtistFormConfigProps<
 > extends TypedBaseFormExtensionConfigProps<TypedFormExtensionProps> {}
 
 function TypedArtistForm<
-  SomeAssistantState extends AssistantStateBase<string, ArtistFormStateBase>,
+  SomeAssistantState extends AssistantStateBase<
+    string,
+    TypedArtistFormFields<string>
+  >,
   TypedFormExtensionProps extends Record<string, any>
 >(props: TypedArtistFormProps<SomeAssistantState, TypedFormExtensionProps>) {
   const {
@@ -243,13 +255,13 @@ function TypedBaseFormExtension<
 }
 
 interface BaseArtistFormProps<
-  SomeAssistantState extends AssistantStateBase<string, ArtistFormStateBase>,
+  SomeAssistantState extends AssistantStateBase<string, BaseArtistFormFields>,
   FormExtensionProps extends Record<string, any>
 > extends BaseArtistFormDataProps<SomeAssistantState>,
     BaseArtistFormConfigProps<FormExtensionProps> {}
 
 interface BaseArtistFormDataProps<
-  SomeAssistantState extends AssistantStateBase<string, ArtistFormStateBase>
+  SomeAssistantState extends AssistantStateBase<string, BaseArtistFormFields>
 > {
   assistantState: SomeAssistantState;
   updateArtistName: (nextArtistName: string) => void;
@@ -265,7 +277,7 @@ interface BaseArtistFormConfigProps<
 }
 
 function BaseArtistForm<
-  SomeAssistantState extends AssistantStateBase<string, ArtistFormStateBase>,
+  SomeAssistantState extends AssistantStateBase<string, BaseArtistFormFields>,
   FormExtensionProps extends Record<string, any>
 >(props: BaseArtistFormProps<SomeAssistantState, FormExtensionProps>) {
   const {
@@ -282,7 +294,7 @@ function BaseArtistForm<
         <div className={cssModule.fieldInputContainer}>
           <Input
             placeholder={"artist name"}
-            value={assistantState.artistForm.artistName}
+            value={assistantState.artistForm.formFields.artistName.fieldValue}
             onInput={(someInputEvent) => {
               updateArtistName(someInputEvent.currentTarget.value);
             }}
@@ -298,11 +310,13 @@ function BaseArtistForm<
         <div
           className={getCssClass(cssModule.fieldMessage, [
             cssModule.errorFieldMessage,
-            assistantState.artistForm.artistType.valueStatus === "error",
+            assistantState.artistForm.formFields.artistName.fieldStatus ===
+              "error",
           ])}
         >
-          {assistantState.artistForm.artistType.valueStatus === "error"
-            ? assistantState.artistForm.artistType.errorMessage
+          {assistantState.artistForm.formFields.artistName.fieldStatus ===
+          "error"
+            ? assistantState.artistForm.formFields.artistName.fieldError
             : null}
         </div>
       </div>
@@ -312,14 +326,12 @@ function BaseArtistForm<
           className={cssModule.submitButton}
           ariaLabel={"todo"}
           ariaDescription={"todo"}
-          disabled={
-            assistantState.artistForm.artistType.valueStatus === "loading"
-          }
+          disabled={assistantState.artistForm.formStatus === "submitting"}
           onSelect={() => {
             loadNextArtistForm();
           }}
         >
-          {assistantState.artistForm.artistType.valueStatus === "loading"
+          {assistantState.artistForm.formStatus === "submitting"
             ? "loading"
             : "next"}
         </Button>
@@ -330,104 +342,37 @@ function BaseArtistForm<
 
 function useAssistantApp() {
   const [assistantState, setAssistantState] = useState<AssistantState>({
-    formType: "newArtistForm",
     artistForm: {
-      artistName: "",
-      artistType: {
-        valueStatus: "none",
+      formStatus: "normal",
+      formFields: {
+        artistName: {
+          fieldStatus: "normal",
+          fieldKey: "artistName",
+          fieldValue: "",
+        },
       },
     },
   });
   const assistantApi = useMemo(() => {
     return {
-      updateArtistName: (nextArtistName: ArtistFormStateBase["artistName"]) => {
-        setAssistantState((currentAssistantState) => ({
-          ...currentAssistantState,
-          artistForm: {
-            ...currentAssistantState.artistForm,
-            artistName: nextArtistName,
-          },
-        }));
-      },
-      clearArtistName: () => {
-        setAssistantState((currentAssistantState) => ({
-          ...currentAssistantState,
-          artistForm: {
-            ...currentAssistantState.artistForm,
-            artistName: "",
-          },
-        }));
-      },
-      loadSoloArtistForm: () => {
-        setAssistantState((currentAssistantState) => ({
-          ...currentAssistantState,
-          formType: "soloArtistForm",
-          artistForm: {
-            ...currentAssistantState.artistForm,
-            artistType: {
-              valueStatus: "success",
-              value: "solo",
-            },
-          },
-        }));
-      },
-      loadGroupArtistForm: () => {
-        setAssistantState((currentAssistantState) => ({
-          ...currentAssistantState,
-          formType: "groupArtistForm",
-          artistForm: {
-            ...currentAssistantState.artistForm,
-            artistType: {
-              valueStatus: "success",
-              value: "group",
-            },
-          },
-        }));
-      },
-      setArtistNotFoundError: (
-        artistName: ArtistFormStateBase["artistName"]
+      updateArtistName: (
+        nextArtistName: BaseArtistFormFields["artistName"]["fieldValue"]
       ) => {
         setAssistantState((currentAssistantState) => ({
           ...currentAssistantState,
           artistForm: {
             ...currentAssistantState.artistForm,
-            artistType: {
-              valueStatus: "error",
-              errorMessage: `artist not found: ${artistName}`,
+            formFields: {
+              ...currentAssistantState.artistForm.formFields,
+              artistName: {
+                ...currentAssistantState.artistForm.formFields.artistName,
+                fieldValue: nextArtistName,
+              },
             },
           },
         }));
       },
-      setArtistTypeQueryError: (nextErrorMessage: string) => {
-        setAssistantState((currentAssistantState) => ({
-          ...currentAssistantState,
-          artistForm: {
-            ...currentAssistantState.artistForm,
-            artistType: {
-              valueStatus: "error",
-              errorMessage: nextErrorMessage,
-            },
-          },
-        }));
-      },
-      loadTypedArtistForm: () => {
-        setAssistantState((currentAssistantState) => ({
-          ...currentAssistantState,
-          artistForm: {
-            ...currentAssistantState.artistForm,
-            artistType: {
-              valueStatus: "loading",
-              valueWorker: __loadTypedArtistForm({
-                loadSoloArtistForm: assistantApi.loadSoloArtistForm,
-                loadGroupArtistForm: assistantApi.loadGroupArtistForm,
-                setArtistNotFoundError: assistantApi.setArtistNotFoundError,
-                setArtistTypeQueryError: assistantApi.setArtistTypeQueryError,
-                artistName: currentAssistantState.artistForm.artistName,
-              }),
-            },
-          },
-        }));
-      },
+      clearArtistName: () => {},
     };
   }, []);
   return { assistantState, assistantApi };
@@ -438,7 +383,7 @@ interface __LoadTypedArtistFormApi
   loadSoloArtistForm: () => void;
   loadGroupArtistForm: () => void;
   setArtistNotFoundError: (
-    artistName: ArtistFormStateBase["artistName"]
+    artistName: BaseArtistFormState["artistName"]
   ) => void;
   setArtistTypeQueryError: (nextErrorMessage: string) => void;
 }
@@ -452,7 +397,7 @@ async function __loadTypedArtistForm(api: __LoadTypedArtistFormApi) {
     setArtistTypeQueryError,
   } = api;
   try {
-    const gptMusicArtistData = await queryGptData({
+    const artistTypeGptData = await queryGptData({
       numberOfResults: 1,
       maxTokens: 256,
       temperature: 0,
@@ -464,14 +409,47 @@ async function __loadTypedArtistForm(api: __LoadTypedArtistFormApi) {
           Zod.literal("notAnArtist"),
         ]),
       }),
-      systemPrompt: musicArtistTypeSystemPrompt,
+      systemPrompt: artistTypeSystemPrompt,
       userQuery: `Calculate: ${artistName}`,
     });
-    if (gptMusicArtistData[0].artistType === "solo") {
-      loadSoloArtistForm();
-    } else if (gptMusicArtistData[0].artistType === "group") {
-      loadGroupArtistForm();
-    } else if (gptMusicArtistData[0].artistType === "notAnArtist") {
+
+    if (artistTypeGptData[0].artistType === "solo") {
+      const [
+        studioCollaborativeCompilationArtistAlbumsGptData,
+        liveArtistAlbumsGptData,
+        artistMixtapesGptData,
+        artistEpsGptData,
+        artistSinglesGptData,
+      ] = await queryTypedArtistGptData({
+        artistName,
+        additionalQueries: [],
+      });
+    } else if (artistTypeGptData[0].artistType === "group") {
+      // loadGroupArtistForm();
+      const [
+        studioCollaborativeCompilationArtistAlbumsGptData,
+        liveArtistAlbumsGptData,
+        artistMixtapesGptData,
+        artistEpsGptData,
+        artistSinglesGptData,
+        artistGroupMembersGptData,
+      ] = await queryTypedArtistGptData({
+        artistName,
+        additionalQueries: [
+          queryGptData({
+            numberOfResults: 2,
+            maxTokens: 1024,
+            temperature: 2,
+            topProbability: 0.1,
+            dataItemSchema: Zod.object({
+              groupMembers: Zod.array(Zod.string()),
+            }),
+            systemPrompt: artistGroupMembersSystemPrompt,
+            userQuery: `Calculate: ${artistName}`,
+          }),
+        ],
+      });
+    } else if (artistTypeGptData[0].artistType === "notAnArtist") {
       setArtistNotFoundError(artistName);
     } else {
       throwInvalidPathError("loadMusicArtistType");
@@ -480,4 +458,73 @@ async function __loadTypedArtistForm(api: __LoadTypedArtistFormApi) {
     console.error(someError);
     setArtistTypeQueryError("oops, something happened!!!");
   }
+}
+
+interface QueryTypedArtistGptDataApi<AdditionalQueries extends Array<any>>
+  extends Pick<__LoadTypedArtistFormApi, "artistName"> {
+  additionalQueries: AdditionalQueries;
+}
+
+function queryTypedArtistGptData<AdditionalQueries extends Array<any>>(
+  api: QueryTypedArtistGptDataApi<AdditionalQueries>
+) {
+  const { artistName, additionalQueries } = api;
+  return Promise.all([
+    queryGptData({
+      numberOfResults: 2,
+      maxTokens: 1024,
+      temperature: 2,
+      topProbability: 0.1,
+      dataItemSchema: Zod.object({
+        discographyAlbums: Zod.array(Zod.string()),
+      }),
+      systemPrompt: artistDiscographySystemPrompt,
+      userQuery: `Calculate: ${artistName} Studio, Collaborative, and Compilation Albums`,
+    }),
+    queryGptData({
+      numberOfResults: 2,
+      maxTokens: 1024,
+      temperature: 2,
+      topProbability: 0.1,
+      dataItemSchema: Zod.object({
+        discographyAlbums: Zod.array(Zod.string()),
+      }),
+      systemPrompt: artistDiscographySystemPrompt,
+      userQuery: `Calculate: ${artistName} Live Albums`,
+    }),
+    queryGptData({
+      numberOfResults: 2,
+      maxTokens: 1024,
+      temperature: 2,
+      topProbability: 0.1,
+      dataItemSchema: Zod.object({
+        discographyMixtapes: Zod.array(Zod.string()),
+      }),
+      systemPrompt: artistDiscographySystemPrompt,
+      userQuery: `Calculate: ${artistName} Mixtapes`,
+    }),
+    queryGptData({
+      numberOfResults: 2,
+      maxTokens: 1024,
+      temperature: 2,
+      topProbability: 0.1,
+      dataItemSchema: Zod.object({
+        discographyEps: Zod.array(Zod.string()),
+      }),
+      systemPrompt: artistDiscographySystemPrompt,
+      userQuery: `Calculate: ${artistName} Eps`,
+    }),
+    queryGptData({
+      numberOfResults: 2,
+      maxTokens: 1024,
+      temperature: 2,
+      topProbability: 0.1,
+      dataItemSchema: Zod.object({
+        discographySingles: Zod.array(Zod.string()),
+      }),
+      systemPrompt: artistDiscographySystemPrompt,
+      userQuery: `Calculate: ${artistName} Singles`,
+    }),
+    ...additionalQueries,
+  ]);
 }
