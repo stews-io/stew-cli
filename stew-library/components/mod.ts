@@ -10,6 +10,7 @@ export * from "./blocks/DisplayContainer/DisplayContainer.tsx";
 export * from "./blocks/Input/Input.tsx";
 export * from "./blocks/Page/Page.tsx";
 export * from "./blocks/Popover/Popover.tsx";
+export * from "./blocks/Select/BasicSelect.tsx";
 export * from "./blocks/Select/SelectBase.tsx";
 export * from "./blocks/Select/components/SelectButton.tsx";
 export * from "./blocks/Select/components/SelectMenuBase.tsx";

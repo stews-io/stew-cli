@@ -1,11 +1,5 @@
-import { ComponentProps } from "../../../../stew-library/deps/preact/mod.ts";
+import { BasicSelect } from "../../../../stew-library/components/mod.ts";
 import { useMemo } from "../../../../stew-library/deps/preact/hooks.ts";
-import {
-  CustomAnchorButtonProps,
-  SelectBase,
-  SelectBaseConfigProps,
-  SelectMenuBase,
-} from "../../../../stew-library/components/mod.ts";
 import { SegmentPageProps } from "./SegmentPage.tsx";
 // @deno-types="CssModule"
 import cssModule from "./ViewSortSelect.module.scss";
@@ -28,16 +22,15 @@ export function ViewSortSelect(props: ViewSortSelectProps) {
     };
   }, [stewConfig, stewSegmentState]);
   return (
-    <SelectBase
+    <BasicSelect
+      anchorBorderClassName={cssModule.viewSortSelectAnchorBorder}
+      fontSizeClassName={cssModule.viewSortSelectFontSize}
+      selectIconClassName={cssModule.viewSortSelectIcon}
       popoverAriaRole={"listbox"}
       anchorAriaLabel={"select view sort order"}
       anchorAriaDescription={`a button that displays a popover with the view sort order options`}
       optionTypeLabel={"view sort order"}
       optionLabelKey={"sortOptionLabel"}
-      SelectMenu={ViewSortSelectMenu}
-      anchorBorderClassName={cssModule.viewSortSelectAnchorBorder}
-      fontSizeClassName={cssModule.viewSortSelectFontSize}
-      selectIconClassName={cssModule.viewSortSelectIcon}
       optionList={sortedSegmentSortOptions}
       selectedOption={
         stewConfig.stewSegments[stewSegmentState.segmentKey].segmentSortOptions[
@@ -47,8 +40,6 @@ export function ViewSortSelect(props: ViewSortSelectProps) {
       selectOption={(nextSortOptionConfig) => {
         selectSegmentSortOption(nextSortOptionConfig.sortOptionKey);
       }}
-      customOptionActionItemProps={{}}
-      customMenuFooterProps={{}}
       customSelectAnchorButtonProps={{
         onFocus: (someFocusEvent) => {
           const approximateViewSortSelectDocumentTop = 59;
@@ -64,27 +55,6 @@ export function ViewSortSelect(props: ViewSortSelectProps) {
           }
         },
       }}
-    />
-  );
-}
-
-interface ViewSortSelectMenuProps
-  extends ComponentProps<
-    SelectBaseConfigProps<
-      ViewSortSelectProps["stewConfig"]["stewSegments"][string]["segmentSortOptions"][string],
-      "sortOptionLabel",
-      CustomAnchorButtonProps,
-      Record<string, unknown>,
-      Record<string, unknown>
-    >["SelectMenu"]
-  > {}
-
-function ViewSortSelectMenu(props: ViewSortSelectMenuProps) {
-  return (
-    <SelectMenuBase
-      OptionActionItem={() => null}
-      MenuFooter={() => null}
-      {...props}
     />
   );
 }
