@@ -47,7 +47,9 @@ interface AssistantFormConfig<
 > {
   formKey: string;
   formLabel: string;
-  FormComponent: AssistantFormComponent<AssistantFormFields>;
+  FormComponent: (
+    props: AssistantFormProps<AssistantFormFields>
+  ) => JSX.Element;
 }
 
 // type StringPermutation<SomeString extends string> = {
@@ -78,7 +80,7 @@ interface AssistantFormApi<
     initialFormFields: Record<string, AssistantFormField<any>>
   ) => void;
   setField: <FieldKey extends keyof FormFields>(
-    fieldKey: keyof FormFields,
+    fieldKey: FieldKey,
     nextField: FormFields[FieldKey]
   ) => void;
 }

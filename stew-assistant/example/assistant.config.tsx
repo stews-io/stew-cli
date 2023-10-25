@@ -1,5 +1,6 @@
-import { BasicSelect } from "stew/components/mod.ts";
+import { BasicSelect, Input } from "stew/components/mod.ts";
 import { useEffect } from "stew/deps/preact/hooks.ts";
+import { FunctionComponent, JSX, Fragment } from "stew/deps/preact/mod.ts";
 import {
   AssistantFormProps,
   assistantConfig,
@@ -13,8 +14,8 @@ export default assistantConfig({
     {
       formKey: "itemType",
       formLabel: "Hip-Hop",
-      FormComponent: ItemTypeForm,
-      getInitialFormFields: (): ItemTypeFormProps["formFields"] => ({
+      FormComponent: MusicEntryForm,
+      getInitialFormFields: (): MusicEntryFormProps["formFields"] => ({
         itemType: {
           fieldKey: "itemType",
           fieldStatus: "normal",
@@ -28,77 +29,125 @@ export default assistantConfig({
     {
       formKey: "artistType",
       formLabel: "Hip-Hop Artist",
-      FormComponent: ArtistTypeForm,
+      FormComponent: ArtistTypeEntryForm,
+    },
+    {
+      formKey: "artistName",
+      formLabel: "Hip-Hop Artist",
+      FormComponent: ArtistNameEntryForm,
     },
   ],
 });
 
-// type FormContext = ???
+interface MusicEntryFormProps extends AssistantFormProps<BaseEntryFormFields> {}
 
-interface ItemTypeFormProps extends AssistantFormProps<ItemTypeFormFields> {}
-
-type ItemTypeFormFields = {
-  itemType: FormField<{
-    optionLabel: string;
-    optionValue: string | null;
-  }>;
-};
-
-function ItemTypeForm(props: ItemTypeFormProps) {
-  const { formFields, formApi } = props;
-  useEffect(() => {
-    if (formFields.itemType.fieldValue.optionValue === "artist") {
-      formApi.replaceForm("artistType", {
-        ...formFields,
-        artistType: {
-          fieldStatus: "normal",
-          fieldKey: "artistType",
-          fieldValue: {
-            optionLabel: "select artist type",
-            optionValue: null,
-          },
-        },
-      });
-    }
-  }, [formFields.itemType]);
+function MusicEntryForm(props: MusicEntryFormProps) {
+  const { formApi, formFields } = props;
   return (
-    <div className={cssModule.formContainer}>
-      <div className={cssModule.fieldContainer}>
-        <BasicSelect
-          optionTypeLabel={"item type"}
-          optionLabelKey={"optionLabel"}
-          popoverAriaRole={"listbox"}
-          anchorAriaLabel={`todo`}
-          anchorAriaDescription={`todo`}
-          optionList={[
-            // {
-            //   optionLabel: "select item type",
-            //   optionValue: null,
-            // },
-            {
-              optionLabel: "artist",
-              optionValue: "artist",
-            },
-          ]}
-          selectedOption={formFields.itemType.fieldValue}
-          selectOption={(nextItemTypeOption) => {
-            formApi.setField("itemType", {
+    <BaseEntryForm
+      formApi={formApi}
+      formFields={formFields}
+      BaseFormExtension={MusicBaseFormExtension}
+      baseFormExtensionProps={{
+        formApi,
+        formFields,
+      }}
+    />
+  );
+}
+
+function MusicBaseFormExtension() {
+  return null;
+}
+
+interface ArtistTypeEntryFormProps
+  extends AssistantFormProps<ArtistTypeFormFields> {}
+
+type ArtistTypeFormFields = BaseArtistEntryFormFields;
+
+function ArtistTypeEntryForm(props: ArtistTypeEntryFormProps) {
+  const { formApi, formFields } = props;
+  return (
+    <BaseArtistEntryForm
+      formApi={formApi}
+      formFields={formFields}
+      ArtistFormExtension={() => null}
+      artistFormExtensionProps={{
+        formApi,
+        formFields,
+      }}
+    />
+  );
+}
+
+interface ArtistNameEntryFormProps
+  extends Pick<
+    BaseArtistEntryFormProps<ArtistNameFormFields, any>,
+    "formFields" | "formApi"
+  > {}
+
+type ArtistNameFormFields = Merge<
+  BaseArtistEntryFormFields,
+  {
+    artistName: FormField<string>;
+  }
+>;
+
+function ArtistNameEntryForm(props: ArtistNameEntryFormProps) {
+  const { formApi, formFields } = props;
+  return (
+    <BaseArtistEntryForm
+      formApi={formApi}
+      formFields={formFields}
+      ArtistFormExtension={NameArtistFormExtension}
+      artistFormExtensionProps={{
+        formApi,
+        formFields,
+      }}
+    />
+  );
+}
+
+function NameArtistFormExtension(props: any) {
+  const { formFields, formApi } = props;
+  return (
+    <div className={cssModule.fieldContainer}>
+      <Input
+        placeholder={"artist name"}
+        value={formFields.artistName.fieldValue}
+        onInput={(someInputEvent) => {
+          formApi.setField("artistName", {
+            fieldKey: "artistName",
+            fieldStatus: "normal",
+            fieldValue: someInputEvent.currentTarget.value,
+          });
+        }}
+        clearButtonProps={{
+          ariaLabel: "todo",
+          ariaDescription: "todo",
+          onSelect: () => {
+            formApi.setField("artistName", {
+              fieldKey: "artistName",
               fieldStatus: "normal",
-              fieldKey: "itemType",
-              fieldValue: nextItemTypeOption,
+              fieldValue: "",
             });
-          }}
-        />
-      </div>
+          },
+        }}
+      />
     </div>
   );
 }
 
-interface ArtistTypeFormProps
-  extends AssistantFormProps<ArtistTypeFormFields> {}
+interface BaseArtistEntryFormProps<
+  SomeEntryFormFields extends BaseArtistEntryFormFields,
+  ArtistFormExtensionProps extends AssistantFormProps<SomeEntryFormFields>
+> extends AssistantFormProps<BaseArtistEntryFormFields> {
+  ArtistFormExtension: FunctionComponent<ArtistFormExtensionProps>;
+  artistFormExtensionProps: ArtistFormExtensionProps;
+}
 
-type ArtistTypeFormFields = Merge<
-  ItemTypeFormFields,
+type BaseArtistEntryFormFields = Merge<
+  BaseEntryFormFields,
   {
     artistType: FormField<{
       optionLabel: string;
@@ -107,64 +156,54 @@ type ArtistTypeFormFields = Merge<
   }
 >;
 
-function ArtistTypeForm(props: ArtistTypeFormProps) {
-  const { formFields, formApi } = props;
+function BaseArtistEntryForm<
+  SomeEntryFormFields extends BaseArtistEntryFormFields,
+  ArtistFormExtensionProps extends AssistantFormProps<SomeEntryFormFields>
+>(
+  props: BaseArtistEntryFormProps<SomeEntryFormFields, ArtistFormExtensionProps>
+) {
+  const { formApi, formFields, ArtistFormExtension, artistFormExtensionProps } =
+    props;
   useEffect(() => {
-    if (formFields.itemType.fieldValue.optionValue === "artist") {
-      formApi.replaceForm("artistType", {
+    if (formFields.artistType.fieldValue.optionValue !== null) {
+      formApi.replaceForm("artistName", {
         ...formFields,
-        artistType: {
+        artistName: {
+          fieldKey: "artistName",
           fieldStatus: "normal",
-          fieldKey: "artistType",
-          fieldValue: {
-            optionLabel: "select artist type",
-            optionValue: null,
-          },
+          fieldValue: "",
         },
       });
     }
-  }, [formFields.itemType]);
+  }, [formFields.artistType]);
   return (
-    <div className={cssModule.formContainer}>
+    <BaseEntryForm
+      formApi={formApi}
+      formFields={formFields}
+      BaseFormExtension={ArtistBaseFormExtension}
+      baseFormExtensionProps={{
+        formApi,
+        formFields,
+        ArtistFormExtension,
+        artistFormExtensionProps,
+      }}
+    />
+  );
+}
+
+function ArtistBaseFormExtension(props: any) {
+  const { formFields, formApi, ArtistFormExtension, artistFormExtensionProps } =
+    props;
+  return (
+    <Fragment>
       <div className={cssModule.fieldContainer}>
         <BasicSelect
-          optionTypeLabel={"item type"}
+          optionTypeLabel={"artist type"}
           optionLabelKey={"optionLabel"}
           popoverAriaRole={"listbox"}
           anchorAriaLabel={`todo`}
           anchorAriaDescription={`todo`}
           optionList={[
-            // {
-            //   optionLabel: "select item type",
-            //   optionValue: null,
-            // },
-            {
-              optionLabel: "artist",
-              optionValue: "artist",
-            },
-          ]}
-          selectedOption={formFields.itemType.fieldValue}
-          selectOption={(nextItemTypeOption) => {
-            formApi.setField("itemType", {
-              fieldStatus: "normal",
-              fieldKey: "itemType",
-              fieldValue: nextItemTypeOption,
-            });
-          }}
-        />
-      </div>
-      <div className={cssModule.fieldContainer}>
-        <BasicSelect
-          optionTypeLabel={"item type"}
-          optionLabelKey={"optionLabel"}
-          popoverAriaRole={"listbox"}
-          anchorAriaLabel={`todo`}
-          anchorAriaDescription={`todo`}
-          optionList={[
-            // {
-            //   optionLabel: "select artist type",
-            //   optionValue: null,
-            // },
             {
               optionLabel: "solo",
               optionValue: "solo",
@@ -184,6 +223,73 @@ function ArtistTypeForm(props: ArtistTypeFormProps) {
           }}
         />
       </div>
+      <ArtistFormExtension {...artistFormExtensionProps} />
+    </Fragment>
+  );
+}
+
+interface BaseEntryFormProps<
+  SomeEntryFormFields extends BaseEntryFormFields,
+  BaseFormExtensionProps extends AssistantFormProps<SomeEntryFormFields>
+> extends AssistantFormProps<SomeEntryFormFields> {
+  BaseFormExtension: FunctionComponent<BaseFormExtensionProps>;
+  baseFormExtensionProps: BaseFormExtensionProps;
+}
+
+type BaseEntryFormFields = {
+  itemType: FormField<{
+    optionLabel: string;
+    optionValue: string | null;
+  }>;
+};
+
+function BaseEntryForm<
+  SomeEntryFormFields extends BaseEntryFormFields,
+  BaseFormExtensionProps extends AssistantFormProps<SomeEntryFormFields>
+>(props: BaseEntryFormProps<SomeEntryFormFields, BaseFormExtensionProps>) {
+  const { formApi, formFields, BaseFormExtension, baseFormExtensionProps } =
+    props;
+  useEffect(() => {
+    if (formFields.itemType.fieldValue.optionValue === "artist") {
+      formApi.replaceForm("artistType", {
+        ...formFields,
+        artistType: {
+          fieldStatus: "normal",
+          fieldKey: "artistType",
+          fieldValue: {
+            optionLabel: "select artist type",
+            optionValue: null,
+          },
+        },
+      });
+    }
+  }, [formFields.itemType]);
+  return (
+    <div className={cssModule.formContainer}>
+      <div className={cssModule.fieldContainer}>
+        <BasicSelect
+          optionTypeLabel={"item type"}
+          optionLabelKey={"optionLabel"}
+          popoverAriaRole={"listbox"}
+          anchorAriaLabel={`todo`}
+          anchorAriaDescription={`todo`}
+          optionList={[
+            {
+              optionLabel: "artist",
+              optionValue: "artist",
+            },
+          ]}
+          selectedOption={formFields.itemType.fieldValue}
+          selectOption={(nextItemTypeOption) => {
+            formApi.setField("itemType", {
+              fieldStatus: "normal",
+              fieldKey: "itemType",
+              fieldValue: nextItemTypeOption,
+            });
+          }}
+        />
+      </div>
+      <BaseFormExtension {...baseFormExtensionProps} />
     </div>
   );
 }
