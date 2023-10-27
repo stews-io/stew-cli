@@ -3,6 +3,7 @@ import {
   Button,
   ButtonProps,
 } from "../../../../stew-library/components/mod.ts";
+import { CssClass, getCssClass } from "stew/utilities/getCssClass.ts";
 // @deno-types="CssModule"
 import cssModule from "./Input.module.scss";
 
@@ -11,6 +12,8 @@ export interface InputProps
     JSX.IntrinsicElements["input"],
     "placeholder" | "value" | "onInput" | "onFocus"
   > {
+  inputContainerClassname?: CssClass;
+  textInputClassname?: CssClass;
   inputRef?: JSX.IntrinsicElements["input"]["ref"];
   clearButtonProps: Pick<
     ButtonProps,
@@ -19,12 +22,28 @@ export interface InputProps
 }
 
 export function Input(props: InputProps) {
-  const { inputRef, placeholder, value, onFocus, onInput, clearButtonProps } =
-    props;
+  const {
+    inputContainerClassname,
+    textInputClassname,
+    inputRef,
+    placeholder,
+    value,
+    onFocus,
+    onInput,
+    clearButtonProps,
+  } = props;
   return (
-    <div className={cssModule.inputContainer}>
+    <div
+      className={getCssClass(cssModule.inputContainer, [
+        inputContainerClassname,
+        Boolean(inputContainerClassname),
+      ])}
+    >
       <input
-        className={cssModule.textInput}
+        className={getCssClass(cssModule.textInput, [
+          textInputClassname,
+          Boolean(textInputClassname),
+        ])}
         type={"text"}
         autocomplete={"off"}
         autocorrect={"off"}

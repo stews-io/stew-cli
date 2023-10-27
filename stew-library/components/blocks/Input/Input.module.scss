@@ -7,7 +7,6 @@
   overflow: hidden;
   align-items: center;
   padding-inline: calc(1 / 2) * $themeSpacer;
-  font-size: 18px;
 
   &:has(.textInput:focus) {
     @extend .themeFocusOutline;

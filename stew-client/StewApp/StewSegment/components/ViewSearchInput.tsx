@@ -2,6 +2,8 @@ import { useMemo, useRef } from "../../../../stew-library/deps/preact/hooks.ts";
 import { Input } from "../../../../stew-library/components/mod.ts";
 import { throwInvalidPathError } from "../../../../stew-library/utilities/mod.ts";
 import { SegmentPageProps } from "./SegmentPage.tsx";
+// @deno-types="CssModule"
+import cssModule from "./ViewSearchInput.module.scss";
 
 export interface ViewSearchInputProps
   extends Pick<
@@ -40,6 +42,7 @@ export function ViewSearchInput(props: ViewSearchInputProps) {
   );
   return (
     <Input
+      inputContainerClassname={cssModule.searchInputContainer}
       inputRef={searchInputRef}
       value={stewSegmentState.viewSearchQuery}
       placeholder={`search ${

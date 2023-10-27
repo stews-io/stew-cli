@@ -9,7 +9,14 @@ import {
   useMemo,
   useState,
 } from "../../stew-library/deps/preact/hooks.ts";
-import { createElement } from "../../stew-library/deps/preact/mod.ts";
+import {
+  ComponentProps,
+  FunctionComponent,
+  createElement,
+} from "../../stew-library/deps/preact/mod.ts";
+import { throwInvalidPathError } from "stew/utilities/throwInvalidPathError.ts";
+// @deno-types="CssModule"
+import cssModule from "./AssistantApp.module.scss";
 
 export interface AssitantAppProps extends Pick<ClientAppProps, "appCss"> {
   assistantConfig: any;
@@ -20,46 +27,111 @@ export function AssistantApp(props: AssitantAppProps) {
   const { assistantState, assistantApi } = useAssistantApp({ assistantConfig });
   const activeFormState =
     assistantState.formStack[assistantState.formStack.length - 1];
+  const ActiveForm =
+    activeFormState.formConfig.formSubmit.submitType === "progressive"
+      ? ProgressiveAssistantForm
+      : activeFormState.formConfig.formSubmit.submitType === "explicit"
+      ? ExplicitAssistantForm
+      : throwInvalidPathError("AssistantApp.ActiveForm");
   return (
     <ClientApp appCss={appCss}>
       <Page pageAriaHeader={"stew assistant"}>
-        {activeFormState.formConfig.formFields.map((itemFieldConfig: any) => (
-          <FormFieldItem
-            key={itemFieldConfig.fieldKey}
-            itemFieldConfig={itemFieldConfig}
-            formFields={activeFormState.formFields}
-            formApi={assistantApi.formApi}
-          />
-        ))}
-        {activeFormState.formConfig.formSubmit.submitType === "explicit" ? (
-          <div>
-            <Button
-              ariaLabel="todo"
-              ariaDescription="todo"
-              onSelect={() => {
-                activeFormState.formConfig.formSubmit.submitForm();
-              }}
-            >
-              {activeFormState.formConfig.formSubmit.submitLabel}
-            </Button>
-          </div>
-        ) : null}
+        <ActiveForm
+          formApi={assistantApi.formApi}
+          formState={activeFormState}
+        />
       </Page>
     </ClientApp>
   );
 }
 
+interface ProgressiveAssistantFormProps
+  extends Pick<AssistantFormBaseProps, "formApi" | "formState"> {}
+
+function ProgressiveAssistantForm(props: ProgressiveAssistantFormProps) {
+  const { formApi, formState } = props;
+  return (
+    <AssistantFormBase
+      FormFooter={ProgressiveFormFooter}
+      formApi={formApi}
+      formState={formState}
+    />
+  );
+}
+
+function ProgressiveFormFooter() {
+  return null;
+}
+
+interface ExplicitAssistantFormProps
+  extends Pick<AssistantFormBaseProps, "formApi" | "formState"> {}
+
+function ExplicitAssistantForm(props: ExplicitAssistantFormProps) {
+  const { formApi, formState } = props;
+  return (
+    <AssistantFormBase
+      FormFooter={ExplicitFormFooter}
+      formApi={formApi}
+      formState={formState}
+    />
+  );
+}
+
+interface ExplicitFormFooterProps
+  extends ComponentProps<AssistantFormBaseProps["FormFooter"]> {}
+
+function ExplicitFormFooter(props: ExplicitFormFooterProps) {
+  const { formState } = props;
+  return (
+    <div className={cssModule.formFooterContainer}>
+      <Button
+        className={cssModule.submitButton}
+        ariaLabel="todo"
+        ariaDescription="todo"
+        onSelect={() => {
+          formState.formConfig.formSubmit.submitForm();
+        }}
+      >
+        {formState.formConfig.formSubmit.submitLabel}
+      </Button>
+    </div>
+  );
+}
+
+interface AssistantFormBaseProps {
+  formApi: any;
+  formState: any;
+  FormFooter: FunctionComponent<{ formApi: any; formState: any }>;
+}
+
+function AssistantFormBase(props: AssistantFormBaseProps) {
+  const { formApi, formState, FormFooter } = props;
+  return (
+    <div className={cssModule.formContainer}>
+      {formState.formConfig.formFields.map((someFieldConfig: any) => (
+        <FormFieldItem
+          key={someFieldConfig.fieldKey}
+          formApi={formApi}
+          someFieldConfig={someFieldConfig}
+          formFields={formState.formFields}
+        />
+      ))}
+      <FormFooter formState={formState} formApi={formApi} />
+    </div>
+  );
+}
+
 function FormFieldItem(props: any) {
-  const { itemFieldConfig, formApi, formFields } = props;
+  const { someFieldConfig, formApi, formFields } = props;
   useEffect(() => {
-    if (itemFieldConfig.fieldOnChange) {
-      itemFieldConfig.fieldOnChange({
+    if (someFieldConfig.fieldOnChange) {
+      someFieldConfig.fieldOnChange({
         formApi,
         formFields,
       });
     }
-  }, [formFields[itemFieldConfig.fieldKey]]);
-  return createElement(itemFieldConfig.FieldDisplay, {
+  }, [formFields[someFieldConfig.fieldKey]]);
+  return createElement(someFieldConfig.FieldDisplay, {
     formApi,
     formFields,
   });
@@ -81,12 +153,6 @@ function useAssistantApp(api: UseAssistantAppApi) {
   });
   const assistantApi = useMemo(() => {
     return {
-      clearFieldChangeHandlers: () => {
-        setAssistantState((currentAssistantState) => ({
-          ...currentAssistantState,
-          fieldChangeHandlers: [],
-        }));
-      },
       formApi: {
         replaceForm: (
           nextFormKey: string,
