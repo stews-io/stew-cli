@@ -1,123 +1,121 @@
+import { useEffect, useMemo } from "stew/deps/preact/hooks.ts";
 import { BasicSelect, Input } from "stew/components/mod.ts";
-import { useEffect } from "stew/deps/preact/hooks.ts";
-import { FunctionComponent, JSX, Fragment } from "stew/deps/preact/mod.ts";
-import {
-  AssistantFormProps,
-  assistantConfig,
-} from "../library/AssistantConfig.ts";
-import { FormField } from "../library/FormState.ts";
+import { Zod } from "stew/deps/zod/mod.ts";
 // @deno-types="CssModule"
-import cssModule from "./MusicItemTypeForm.module.scss";
+import cssModule from "./MusicAssistantConfig.module.scss";
 
-export default assistantConfig({
+export default {
   assistantForms: [
-    {
-      formKey: "itemType",
-      formLabel: "Hip-Hop",
-      FormComponent: MusicEntryForm,
-      getInitialFormFields: (): MusicEntryFormProps["formFields"] => ({
-        itemType: {
-          fieldKey: "itemType",
-          fieldStatus: "normal",
-          fieldValue: {
-            optionLabel: "select item type",
-            optionValue: null,
-          },
-        },
-      }),
-    },
-    {
-      formKey: "artistType",
-      formLabel: "Hip-Hop Artist",
-      FormComponent: ArtistTypeEntryForm,
-    },
-    {
-      formKey: "artistName",
-      formLabel: "Hip-Hop Artist",
-      FormComponent: ArtistNameEntryForm,
-    },
+    itemTypeStartForm(),
+    artistTypeStartForm(),
+    artistNameStartForm(),
   ],
-});
+};
 
-interface MusicEntryFormProps extends AssistantFormProps<BaseEntryFormFields> {}
-
-function MusicEntryForm(props: MusicEntryFormProps) {
-  const { formApi, formFields } = props;
-  return (
-    <BaseEntryForm
-      formApi={formApi}
-      formFields={formFields}
-      BaseFormExtension={MusicBaseFormExtension}
-      baseFormExtensionProps={{
-        formApi,
-        formFields,
-      }}
-    />
-  );
+function itemTypeStartForm() {
+  return baseStartForm({
+    formType: "entry",
+    formKey: "itemTypeStartForm",
+    formSubmit: {
+      submitType: "progressive",
+    },
+    formFields: [],
+    getInitialFormFields: () => ({
+      musicItemType: {
+        fieldKey: "musicItemType",
+        fieldStatus: "normal",
+        fieldValue: null,
+      },
+    }),
+  });
 }
 
-function MusicBaseFormExtension() {
-  return null;
+function artistTypeStartForm() {
+  return baseArtistStartForm({
+    formType: "secondary",
+    formKey: "artistTypeStartForm",
+    formSubmit: {
+      submitType: "progressive",
+    },
+    formFields: [],
+  });
 }
 
-interface ArtistTypeEntryFormProps
-  extends AssistantFormProps<ArtistTypeFormFields> {}
-
-type ArtistTypeFormFields = BaseArtistEntryFormFields;
-
-function ArtistTypeEntryForm(props: ArtistTypeEntryFormProps) {
-  const { formApi, formFields } = props;
-  return (
-    <BaseArtistEntryForm
-      formApi={formApi}
-      formFields={formFields}
-      ArtistFormExtension={() => null}
-      artistFormExtensionProps={{
-        formApi,
-        formFields,
-      }}
-    />
-  );
+function artistNameStartForm() {
+  return baseArtistStartForm({
+    formType: "secondary",
+    formKey: "artistNameStartForm",
+    formSubmit: {
+      submitType: "explicit",
+      submitLabel: "next",
+      submitForm: () => {
+        console.log("todo: submit artistNameStartForm");
+      },
+    },
+    formFields: [
+      {
+        FieldDisplay: MusicArtistNameField,
+        fieldType: "simple",
+        fieldKey: "musicArtistName",
+        fieldLabel: "music artist name",
+        fieldSubmitSchema: Zod.string(),
+      },
+    ],
+  });
 }
 
-interface ArtistNameEntryFormProps
-  extends Pick<
-    BaseArtistEntryFormProps<ArtistNameFormFields, any>,
-    "formFields" | "formApi"
-  > {}
-
-type ArtistNameFormFields = Merge<
-  BaseArtistEntryFormFields,
-  {
-    artistName: FormField<string>;
-  }
->;
-
-function ArtistNameEntryForm(props: ArtistNameEntryFormProps) {
-  const { formApi, formFields } = props;
-  return (
-    <BaseArtistEntryForm
-      formApi={formApi}
-      formFields={formFields}
-      ArtistFormExtension={NameArtistFormExtension}
-      artistFormExtensionProps={{
-        formApi,
-        formFields,
-      }}
-    />
-  );
+function baseArtistStartForm(formConfig: any) {
+  const { formFields, ...remainingFormConfig } = formConfig;
+  return baseStartForm({
+    ...remainingFormConfig,
+    formFields: [
+      {
+        FieldDisplay: MusicArtistTypeField,
+        fieldType: "simple",
+        fieldKey: "musicArtistType",
+        fieldLabel: "music artist type",
+        fieldSubmitSchema: Zod.union([
+          Zod.literal("solo"),
+          Zod.literal("group"),
+        ]),
+      },
+      ...formFields,
+    ],
+  });
 }
 
-function NameArtistFormExtension(props: any) {
+function baseStartForm(formConfig: any) {
+  const { formFields, ...remainingFormConfig } = formConfig;
+  return {
+    ...remainingFormConfig,
+    formFields: [
+      {
+        FieldDisplay: MusicItemTypeField,
+        fieldType: "simple",
+        fieldKey: "musicItemType",
+        fieldLabel: "music item type",
+        fieldSubmitSchema: Zod.union([
+          Zod.literal("artist"),
+          Zod.literal("content"),
+        ]),
+      },
+      ...formFields,
+    ],
+  };
+}
+
+interface MusicArtistNameFieldProps {}
+
+function MusicArtistNameField(props: any) {
   const { formFields, formApi } = props;
   return (
     <div className={cssModule.fieldContainer}>
       <Input
-        placeholder={"artist name"}
-        value={formFields.artistName.fieldValue}
-        onInput={(someInputEvent) => {
-          formApi.setField("artistName", {
-            fieldKey: "artistName",
+        placeholder={"music artist name"}
+        value={formFields.musicArtistName.fieldValue}
+        onInput={(someInputEvent: any) => {
+          formApi.setField("musicArtistName", {
+            fieldKey: "musicArtistName",
             fieldStatus: "normal",
             fieldValue: someInputEvent.currentTarget.value,
           });
@@ -126,8 +124,8 @@ function NameArtistFormExtension(props: any) {
           ariaLabel: "todo",
           ariaDescription: "todo",
           onSelect: () => {
-            formApi.setField("artistName", {
-              fieldKey: "artistName",
+            formApi.setField("musicArtistName", {
+              fieldKey: "musicArtistName",
               fieldStatus: "normal",
               fieldValue: "",
             });
@@ -138,160 +136,142 @@ function NameArtistFormExtension(props: any) {
   );
 }
 
-interface BaseArtistEntryFormProps<
-  SomeEntryFormFields extends BaseArtistEntryFormFields,
-  ArtistFormExtensionProps extends AssistantFormProps<SomeEntryFormFields>
-> extends AssistantFormProps<BaseArtistEntryFormFields> {
-  ArtistFormExtension: FunctionComponent<ArtistFormExtensionProps>;
-  artistFormExtensionProps: ArtistFormExtensionProps;
-}
+interface MusicArtistTypeFieldProps {}
 
-type BaseArtistEntryFormFields = Merge<
-  BaseEntryFormFields,
-  {
-    artistType: FormField<{
-      optionLabel: string;
-      optionValue: string;
-    }>;
-  }
->;
-
-function BaseArtistEntryForm<
-  SomeEntryFormFields extends BaseArtistEntryFormFields,
-  ArtistFormExtensionProps extends AssistantFormProps<SomeEntryFormFields>
->(
-  props: BaseArtistEntryFormProps<SomeEntryFormFields, ArtistFormExtensionProps>
-) {
-  const { formApi, formFields, ArtistFormExtension, artistFormExtensionProps } =
-    props;
+function MusicArtistTypeField(props: any) {
+  const { formFields, formApi } = props;
+  const { artistTypeOptionList, artistTypeSelectOption } = useMemo(
+    () => ({
+      artistTypeOptionList: [
+        {
+          optionLabel: "solo",
+          optionValue: "solo",
+        },
+        {
+          optionLabel: "group",
+          optionValue: "group",
+        },
+      ],
+      artistTypeSelectOption: (nextMusicArtistTypeOption: any) => {
+        formApi.setField("musicArtistType", {
+          fieldKey: "musicArtistType",
+          fieldStatus: "normal",
+          fieldValue: nextMusicArtistTypeOption.optionValue,
+        });
+      },
+    }),
+    []
+  );
+  const { artistTypeSelectedOption } = useMemo(
+    () => ({
+      artistTypeSelectedOption: artistTypeOptionList.find(
+        (someArtistTypeOption) =>
+          someArtistTypeOption.optionValue ===
+          formFields.musicArtistType.fieldValue
+      ) ?? {
+        optionLabel: "select artist type",
+        optionValue: null,
+      },
+    }),
+    [formFields.musicArtistType.fieldValue]
+  );
   useEffect(() => {
-    if (formFields.artistType.fieldValue.optionValue !== null) {
-      formApi.replaceForm("artistName", {
+    if (
+      formFields.musicArtistType.fieldValue === "solo" ||
+      formFields.musicArtistType.fieldValue === "group"
+    ) {
+      formApi.replaceForm("artistNameStartForm", {
         ...formFields,
-        artistName: {
-          fieldKey: "artistName",
+        musicArtistName: {
+          fieldKey: "musicArtistName",
           fieldStatus: "normal",
           fieldValue: "",
         },
       });
     }
-  }, [formFields.artistType]);
+  }, [formFields.musicArtistType]);
   return (
-    <BaseEntryForm
-      formApi={formApi}
-      formFields={formFields}
-      BaseFormExtension={ArtistBaseFormExtension}
-      baseFormExtensionProps={{
-        formApi,
-        formFields,
-        ArtistFormExtension,
-        artistFormExtensionProps,
-      }}
-    />
-  );
-}
-
-function ArtistBaseFormExtension(props: any) {
-  const { formFields, formApi, ArtistFormExtension, artistFormExtensionProps } =
-    props;
-  return (
-    <Fragment>
-      <div className={cssModule.fieldContainer}>
-        <BasicSelect
-          optionTypeLabel={"artist type"}
-          optionLabelKey={"optionLabel"}
-          popoverAriaRole={"listbox"}
-          anchorAriaLabel={`todo`}
-          anchorAriaDescription={`todo`}
-          optionList={[
-            {
-              optionLabel: "solo",
-              optionValue: "solo",
-            },
-            {
-              optionLabel: "group",
-              optionValue: "group",
-            },
-          ]}
-          selectedOption={formFields.artistType.fieldValue}
-          selectOption={(nextItemTypeOption) => {
-            formApi.setField("artistType", {
-              fieldStatus: "normal",
-              fieldKey: "artistType",
-              fieldValue: nextItemTypeOption,
-            });
-          }}
-        />
-      </div>
-      <ArtistFormExtension {...artistFormExtensionProps} />
-    </Fragment>
-  );
-}
-
-interface BaseEntryFormProps<
-  SomeEntryFormFields extends BaseEntryFormFields,
-  BaseFormExtensionProps extends AssistantFormProps<SomeEntryFormFields>
-> extends AssistantFormProps<SomeEntryFormFields> {
-  BaseFormExtension: FunctionComponent<BaseFormExtensionProps>;
-  baseFormExtensionProps: BaseFormExtensionProps;
-}
-
-type BaseEntryFormFields = {
-  itemType: FormField<{
-    optionLabel: string;
-    optionValue: string | null;
-  }>;
-};
-
-function BaseEntryForm<
-  SomeEntryFormFields extends BaseEntryFormFields,
-  BaseFormExtensionProps extends AssistantFormProps<SomeEntryFormFields>
->(props: BaseEntryFormProps<SomeEntryFormFields, BaseFormExtensionProps>) {
-  const { formApi, formFields, BaseFormExtension, baseFormExtensionProps } =
-    props;
-  useEffect(() => {
-    if (formFields.itemType.fieldValue.optionValue === "artist") {
-      formApi.replaceForm("artistType", {
-        ...formFields,
-        artistType: {
-          fieldStatus: "normal",
-          fieldKey: "artistType",
-          fieldValue: {
-            optionLabel: "select artist type",
-            optionValue: null,
-          },
-        },
-      });
-    }
-  }, [formFields.itemType]);
-  return (
-    <div className={cssModule.formContainer}>
-      <div className={cssModule.fieldContainer}>
-        <BasicSelect
-          optionTypeLabel={"item type"}
-          optionLabelKey={"optionLabel"}
-          popoverAriaRole={"listbox"}
-          anchorAriaLabel={`todo`}
-          anchorAriaDescription={`todo`}
-          optionList={[
-            {
-              optionLabel: "artist",
-              optionValue: "artist",
-            },
-          ]}
-          selectedOption={formFields.itemType.fieldValue}
-          selectOption={(nextItemTypeOption) => {
-            formApi.setField("itemType", {
-              fieldStatus: "normal",
-              fieldKey: "itemType",
-              fieldValue: nextItemTypeOption,
-            });
-          }}
-        />
-      </div>
-      <BaseFormExtension {...baseFormExtensionProps} />
+    <div className={cssModule.fieldContainer}>
+      <BasicSelect
+        optionTypeLabel={"music artist type"}
+        optionLabelKey={"optionLabel"}
+        popoverAriaRole={"listbox"}
+        anchorAriaLabel={`todo`}
+        anchorAriaDescription={`todo`}
+        optionList={artistTypeOptionList}
+        selectOption={artistTypeSelectOption}
+        selectedOption={artistTypeSelectedOption}
+      />
     </div>
   );
 }
 
-type Merge<T, V> = T & V;
+interface MusicItemTypeFieldProps {}
+
+function MusicItemTypeField(props: any) {
+  const { formFields, formApi } = props;
+  const { itemTypeOptionList, itemTypeSelectOption } = useMemo(
+    () => ({
+      itemTypeOptionList: [
+        {
+          optionLabel: "artist",
+          optionValue: "artist",
+        },
+        // {
+        //   optionLabel: "content",
+        //   optionValue: "content",
+        // },
+      ],
+      itemTypeSelectOption: (nextMusicItemTypeOption: any) => {
+        formApi.setField("musicItemType", {
+          fieldKey: "musicItemType",
+          fieldStatus: "normal",
+          fieldValue: nextMusicItemTypeOption.optionValue,
+        });
+      },
+    }),
+    []
+  );
+  const { itemTypeSelectedOption } = useMemo(
+    () => ({
+      itemTypeSelectedOption: itemTypeOptionList.find(
+        (someArtistTypeOption) =>
+          someArtistTypeOption.optionValue ===
+          formFields.musicItemType.fieldValue
+      ) ?? {
+        optionLabel: "select item type",
+        optionValue: null,
+      },
+    }),
+    [formFields.musicItemType.fieldValue]
+  );
+  useEffect(() => {
+    if (formFields.musicItemType.fieldValue === "artist") {
+      formApi.replaceForm("artistTypeStartForm", {
+        ...formFields,
+        musicArtistType: {
+          fieldKey: "musicArtistType",
+          fieldStatus: "normal",
+          fieldValue: null,
+        },
+      });
+    }
+    // else if (formFields.musicItemType.fieldValue === "content") {
+    //   // todo
+    // }
+  }, [formFields.musicItemType]);
+  return (
+    <div className={cssModule.fieldContainer}>
+      <BasicSelect
+        optionTypeLabel={"music item type"}
+        optionLabelKey={"optionLabel"}
+        popoverAriaRole={"listbox"}
+        anchorAriaLabel={`todo`}
+        anchorAriaDescription={`todo`}
+        optionList={itemTypeOptionList}
+        selectOption={itemTypeSelectOption}
+        selectedOption={itemTypeSelectedOption}
+      />
+    </div>
+  );
+}

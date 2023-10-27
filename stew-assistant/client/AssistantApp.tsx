@@ -1,19 +1,15 @@
 import {
+  Button,
   ClientApp,
   ClientAppProps,
   Page,
 } from "../../stew-library/components/mod.ts";
-import { useMemo, useState } from "stew/deps/preact/hooks.ts";
-//
-import {
-  AssistantFormComponent,
-  AssistantFormField,
-  BuildAssistantConfig,
-} from "../library/AssistantConfig.ts";
+import { useMemo, useState } from "../../stew-library/deps/preact/hooks.ts";
+import { createElement } from "../../stew-library/deps/preact/mod.ts";
 // @deno-types="CssModule"
 
 export interface AssitantAppProps extends Pick<ClientAppProps, "appCss"> {
-  assistantConfig: BuildAssistantConfig;
+  assistantConfig: any;
 }
 
 export function AssistantApp(props: AssitantAppProps) {
@@ -24,10 +20,26 @@ export function AssistantApp(props: AssitantAppProps) {
   return (
     <ClientApp appCss={appCss}>
       <Page pageAriaHeader={"stew assistant"}>
-        <activeFormState.FormComponent
-          formFields={activeFormState.formFields}
-          formApi={assistantApi.formApi}
-        />
+        {activeFormState.formConfig.formFields.map((someFieldConfig: any) =>
+          createElement(someFieldConfig.FieldDisplay, {
+            key: someFieldConfig.fieldKey,
+            formFields: activeFormState.formFields,
+            formApi: assistantApi.formApi,
+          })
+        )}
+        {activeFormState.formConfig.formSubmit.submitType === "explicit" ? (
+          <div>
+            <Button
+              ariaLabel="todo"
+              ariaDescription="todo"
+              onSelect={() => {
+                activeFormState.formConfig.formSubmit.submitForm();
+              }}
+            >
+              {activeFormState.formConfig.formSubmit.submitLabel}
+            </Button>
+          </div>
+        ) : null}
       </Page>
     </ClientApp>
   );
@@ -41,7 +53,7 @@ function useAssistantApp(api: UseAssistantAppApi) {
   const [assistantState, setAssistantState] = useState<AssistantState>({
     formStack: [
       {
-        FormComponent: assistantConfig.assistantEntryFormConfig.FormComponent,
+        formConfig: assistantConfig.assistantEntryFormConfig,
         formFields:
           assistantConfig.assistantEntryFormConfig.getInitialFormFields(),
       },
@@ -52,7 +64,7 @@ function useAssistantApp(api: UseAssistantAppApi) {
       formApi: {
         replaceForm: (
           nextFormKey: string,
-          initialFormFields: Record<string, AssistantFormField<any>>
+          initialFormFields: Record<string, any>
         ) => {
           setAssistantState((currentAssistantState) => {
             const [activeFormState, ...reversedOtherFormStates] = [
@@ -63,18 +75,14 @@ function useAssistantApp(api: UseAssistantAppApi) {
               formStack: [
                 ...reversedOtherFormStates.reverse(),
                 {
-                  FormComponent:
-                    assistantConfig.assistantForms[nextFormKey].FormComponent,
+                  formConfig: assistantConfig.assistantForms[nextFormKey],
                   formFields: initialFormFields,
                 },
               ],
             };
           });
         },
-        setField: (
-          fieldKey: string,
-          nextField: AssistantFormField<unknown>
-        ) => {
+        setField: (fieldKey: string, nextField: any) => {
           setAssistantState((currentAssistantState) => {
             const [activeFormState, ...reversedOtherFormStates] = [
               ...currentAssistantState.formStack,
@@ -105,9 +113,7 @@ function useAssistantApp(api: UseAssistantAppApi) {
 
 interface AssistantState {
   formStack: Array<{
-    FormComponent: AssistantFormComponent<
-      Record<string, AssistantFormField<unknown>>
-    >;
-    formFields: Record<string, AssistantFormField<unknown>>;
+    formConfig: any;
+    formFields: Record<string, any>;
   }>;
 }

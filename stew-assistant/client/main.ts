@@ -1,8 +1,8 @@
 import { loadClientApp } from "../../stew-library/components/blocks/Client/loadClientApp.ts";
 import { throwInvalidPathError } from "../../stew-library/utilities/mod.ts";
-import exampleSourceAssistantConfig from "../example/assistant.config.tsx";
-import { BuildAssistantConfig } from "../library/AssistantConfig.ts";
 import { AssistantApp } from "./AssistantApp.tsx";
+//
+import exampleSourceAssistantConfig from "../example/assistant.config.tsx";
 
 loadClientApp({
   appGlobals: {},
@@ -20,13 +20,11 @@ async function loadAssistantResources() {
   return {
     appCss,
     assistantConfig: {
-      assistantEntryFormConfig: exampleSourceAssistantConfig
-        .assistantForms[0] as unknown as BuildAssistantConfig["assistantEntryFormConfig"],
+      assistantEntryFormConfig: exampleSourceAssistantConfig.assistantForms[0],
       assistantForms: exampleSourceAssistantConfig.assistantForms.reduce<
-        BuildAssistantConfig["assistantForms"]
+        Record<string, any>
       >((result, someFormConfig) => {
-        result[someFormConfig.formKey] =
-          someFormConfig as unknown as BuildAssistantConfig["assistantForms"][string];
+        result[someFormConfig.formKey] = someFormConfig;
         return result;
       }, {}),
     },
