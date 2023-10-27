@@ -20,26 +20,17 @@ export function AssistantApp(props: AssitantAppProps) {
   const { assistantState, assistantApi } = useAssistantApp({ assistantConfig });
   const activeFormState =
     assistantState.formStack[assistantState.formStack.length - 1];
-  useEffect(() => {
-    if (assistantState.fieldChangeHandlers.length > 0) {
-      assistantState.fieldChangeHandlers.forEach((someFieldChangeHandler) => {
-        someFieldChangeHandler({
-          formApi: assistantApi.formApi,
-          formFields: activeFormState.formFields,
-        });
-      });
-    }
-  }, [assistantState.fieldChangeHandlers]);
   return (
     <ClientApp appCss={appCss}>
       <Page pageAriaHeader={"stew assistant"}>
-        {activeFormState.formConfig.formFields.map((someFieldConfig: any) =>
-          createElement(someFieldConfig.FieldDisplay, {
-            key: someFieldConfig.fieldKey,
-            formFields: activeFormState.formFields,
-            formApi: assistantApi.formApi,
-          })
-        )}
+        {activeFormState.formConfig.formFields.map((itemFieldConfig: any) => (
+          <FormFieldItem
+            key={itemFieldConfig.fieldKey}
+            itemFieldConfig={itemFieldConfig}
+            formFields={activeFormState.formFields}
+            formApi={assistantApi.formApi}
+          />
+        ))}
         {activeFormState.formConfig.formSubmit.submitType === "explicit" ? (
           <div>
             <Button
@@ -58,13 +49,28 @@ export function AssistantApp(props: AssitantAppProps) {
   );
 }
 
+function FormFieldItem(props: any) {
+  const { itemFieldConfig, formApi, formFields } = props;
+  useEffect(() => {
+    if (itemFieldConfig.fieldOnChange) {
+      itemFieldConfig.fieldOnChange({
+        formApi,
+        formFields,
+      });
+    }
+  }, [formFields[itemFieldConfig.fieldKey]]);
+  return createElement(itemFieldConfig.FieldDisplay, {
+    formApi,
+    formFields,
+  });
+}
+
 interface UseAssistantAppApi
   extends Pick<AssitantAppProps, "assistantConfig"> {}
 
 function useAssistantApp(api: UseAssistantAppApi) {
   const { assistantConfig } = api;
   const [assistantState, setAssistantState] = useState<AssistantState>({
-    fieldChangeHandlers: [],
     formStack: [
       {
         formConfig: assistantConfig.assistantEntryFormConfig,
@@ -107,18 +113,8 @@ function useAssistantApp(api: UseAssistantAppApi) {
             const [activeFormState, ...reversedOtherFormStates] = [
               ...currentAssistantState.formStack,
             ].reverse();
-            const targetFieldOnChange =
-              activeFormState.formConfig.formFields.find(
-                (someFieldConfig: any) => someFieldConfig.fieldKey === fieldKey
-              ).fieldOnChange;
             return {
               ...currentAssistantState,
-              fieldChangeHandlers: targetFieldOnChange
-                ? [
-                    ...currentAssistantState.fieldChangeHandlers,
-                    targetFieldOnChange,
-                  ]
-                : currentAssistantState.fieldChangeHandlers,
               formStack: [
                 ...reversedOtherFormStates.reverse(),
                 {
@@ -142,7 +138,6 @@ function useAssistantApp(api: UseAssistantAppApi) {
 }
 
 interface AssistantState {
-  fieldChangeHandlers: Array<(api: any) => void>;
   formStack: Array<{
     formConfig: any;
     formFields: Record<string, any>;
