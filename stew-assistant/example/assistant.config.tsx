@@ -78,6 +78,21 @@ function baseArtistStartForm(formConfig: any) {
           Zod.literal("solo"),
           Zod.literal("group"),
         ]),
+        fieldOnChange: ({ formFields, formApi }: any) => {
+          if (
+            formFields.musicArtistType.fieldValue === "solo" ||
+            formFields.musicArtistType.fieldValue === "group"
+          ) {
+            formApi.replaceForm("artistNameStartForm", {
+              ...formFields,
+              musicArtistName: {
+                fieldKey: "musicArtistName",
+                fieldStatus: "normal",
+                fieldValue: formFields["musicArtistName"]?.fieldValue ?? "",
+              },
+            });
+          }
+        },
       },
       ...formFields,
     ],
@@ -98,6 +113,18 @@ function baseStartForm(formConfig: any) {
           Zod.literal("artist"),
           Zod.literal("content"),
         ]),
+        fieldOnChange: ({ formFields, formApi }: any) => {
+          if (formFields.musicItemType.fieldValue === "artist") {
+            formApi.replaceForm("artistTypeStartForm", {
+              ...formFields,
+              musicArtistType: {
+                fieldKey: "musicArtistType",
+                fieldStatus: "normal",
+                fieldValue: null,
+              },
+            });
+          }
+        },
       },
       ...formFields,
     ],
@@ -175,21 +202,6 @@ function MusicArtistTypeField(props: any) {
     }),
     [formFields.musicArtistType.fieldValue]
   );
-  useEffect(() => {
-    if (
-      formFields.musicArtistType.fieldValue === "solo" ||
-      formFields.musicArtistType.fieldValue === "group"
-    ) {
-      formApi.replaceForm("artistNameStartForm", {
-        ...formFields,
-        musicArtistName: {
-          fieldKey: "musicArtistName",
-          fieldStatus: "normal",
-          fieldValue: "",
-        },
-      });
-    }
-  }, [formFields.musicArtistType]);
   return (
     <div className={cssModule.fieldContainer}>
       <BasicSelect
@@ -210,7 +222,7 @@ interface MusicItemTypeFieldProps {}
 
 function MusicItemTypeField(props: any) {
   const { formFields, formApi } = props;
-  const { itemTypeOptionList, itemTypeSelectOption } = useMemo(
+  const { itemTypeOptionList } = useMemo(
     () => ({
       itemTypeOptionList: [
         {
@@ -222,18 +234,23 @@ function MusicItemTypeField(props: any) {
         //   optionValue: "content",
         // },
       ],
-      itemTypeSelectOption: (nextMusicItemTypeOption: any) => {
-        formApi.setField("musicItemType", {
-          fieldKey: "musicItemType",
-          fieldStatus: "normal",
-          fieldValue: nextMusicItemTypeOption.optionValue,
-        });
-      },
     }),
     []
   );
-  const { itemTypeSelectedOption } = useMemo(
+  const { itemTypeSelectOption, itemTypeSelectedOption } = useMemo(
     () => ({
+      itemTypeSelectOption: (nextMusicItemTypeOption: any) => {
+        if (
+          nextMusicItemTypeOption.optionValue !==
+          formFields.musicItemType.fieldValue
+        ) {
+          formApi.setField("musicItemType", {
+            fieldKey: "musicItemType",
+            fieldStatus: "normal",
+            fieldValue: nextMusicItemTypeOption.optionValue,
+          });
+        }
+      },
       itemTypeSelectedOption: itemTypeOptionList.find(
         (someArtistTypeOption) =>
           someArtistTypeOption.optionValue ===
@@ -245,21 +262,6 @@ function MusicItemTypeField(props: any) {
     }),
     [formFields.musicItemType.fieldValue]
   );
-  useEffect(() => {
-    if (formFields.musicItemType.fieldValue === "artist") {
-      formApi.replaceForm("artistTypeStartForm", {
-        ...formFields,
-        musicArtistType: {
-          fieldKey: "musicArtistType",
-          fieldStatus: "normal",
-          fieldValue: null,
-        },
-      });
-    }
-    // else if (formFields.musicItemType.fieldValue === "content") {
-    //   // todo
-    // }
-  }, [formFields.musicItemType]);
   return (
     <div className={cssModule.fieldContainer}>
       <BasicSelect
