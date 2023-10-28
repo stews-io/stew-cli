@@ -7,3 +7,9 @@
 .fieldContainer {
   @extend .rowContainer;
 }
+
+.submitButton {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: $themeButtonTextColor;
+}

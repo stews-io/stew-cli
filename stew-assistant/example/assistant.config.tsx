@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from "stew/deps/preact/hooks.ts";
-import { BasicSelect, Input } from "stew/components/mod.ts";
+import { useMemo } from "stew/deps/preact/hooks.ts";
+import { BasicSelect, Button, Input } from "stew/components/mod.ts";
 import { Zod } from "stew/deps/zod/mod.ts";
 // @deno-types="CssModule"
 import cssModule from "./MusicAssistantConfig.module.scss";
@@ -47,10 +47,7 @@ function artistNameStartForm() {
     formKey: "artistNameStartForm",
     formSubmit: {
       submitType: "explicit",
-      submitLabel: "next",
-      submitForm: () => {
-        console.log("todo: submit artistNameStartForm");
-      },
+      SubmitButton: MusicEntrySubmitButton,
     },
     formFields: [
       {
@@ -275,5 +272,25 @@ function MusicItemTypeField(props: any) {
         selectedOption={itemTypeSelectedOption}
       />
     </div>
+  );
+}
+
+interface MusicEntrySubmitButtonProps {
+  formState: any;
+}
+
+function MusicEntrySubmitButton(props: MusicEntrySubmitButtonProps) {
+  const { formState } = props;
+  return (
+    <Button
+      className={cssModule.submitButton}
+      ariaLabel="todo"
+      ariaDescription="todo"
+      onSelect={() => {
+        console.log(formState.formFields);
+      }}
+    >
+      next
+    </Button>
   );
 }
