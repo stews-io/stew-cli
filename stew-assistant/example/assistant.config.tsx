@@ -1,4 +1,4 @@
-import { useMemo } from "stew/deps/preact/hooks.ts";
+import { useEffect, useMemo } from "../../stew-library/deps/preact/hooks.ts";
 import { BasicSelect, Button, Input } from "stew/components/mod.ts";
 import { Zod } from "stew/deps/zod/mod.ts";
 // @deno-types="CssModule"
@@ -14,145 +14,162 @@ export default {
 
 function itemTypeStartForm() {
   return baseStartForm({
-    formType: "entry",
     formKey: "itemTypeStartForm",
-    formSubmit: {
-      submitType: "progressive",
-    },
-    formFields: [],
-    getInitialFormFields: () => ({
-      musicItemType: {
-        fieldKey: "musicItemType",
-        fieldStatus: "normal",
-        fieldValue: null,
-      },
+    formFieldsExtension: [],
+    FormFooter: () => null,
+    getInitialFieldValues: () => ({
+      musicItemType: null,
     }),
   });
 }
 
 function artistTypeStartForm() {
   return baseArtistStartForm({
-    formType: "secondary",
     formKey: "artistTypeStartForm",
-    formSubmit: {
-      submitType: "progressive",
-    },
-    formFields: [],
+    formFieldsExtension: [],
+    FormFooter: () => null,
   });
 }
 
 function artistNameStartForm() {
   return baseArtistStartForm({
-    formType: "secondary",
     formKey: "artistNameStartForm",
-    formSubmit: {
-      submitType: "explicit",
-      SubmitButton: MusicEntrySubmitButton,
-    },
-    formFields: [
+    FormFooter: ArtistNameStartFormFooter,
+    formFieldsExtension: [
       {
-        FieldDisplay: MusicArtistNameField,
-        fieldType: "simple",
         fieldKey: "musicArtistName",
-        fieldLabel: "music artist name",
-        fieldSubmitSchema: Zod.string(),
+        FieldDisplay: MusicArtistNameField,
+        validateField: (someFieldValue: any) => {
+          const zodValidationResult = Zod.string()
+            .min(1)
+            .safeParse(someFieldValue);
+          return zodValidationResult.success === true
+            ? { validationStatus: "valid" }
+            : {
+                validationStatus: "error",
+                errorMessage: `invalid value: ${someFieldValue}`,
+              };
+        },
       },
     ],
+    formOnValidated: ({ formState, formApi }: any) => {
+      console.log(formState.fieldValues);
+    },
   });
 }
 
 function baseArtistStartForm(formConfig: any) {
-  const { formFields, ...remainingFormConfig } = formConfig;
+  const { formFieldsExtension, ...remainingFormConfig } = formConfig;
   return baseStartForm({
     ...remainingFormConfig,
-    formFields: [
+    formFieldsExtension: [
       {
-        FieldDisplay: MusicArtistTypeField,
-        fieldType: "simple",
         fieldKey: "musicArtistType",
-        fieldLabel: "music artist type",
-        fieldSubmitSchema: Zod.union([
-          Zod.literal("solo"),
-          Zod.literal("group"),
-        ]),
-        fieldOnChange: ({ formFields, formApi }: any) => {
+        FieldDisplay: MusicArtistTypeField,
+        validateField: (someFieldValue: any) => {
+          const zodValidationResult = Zod.union([
+            Zod.literal("solo"),
+            Zod.literal("group"),
+          ]).safeParse(someFieldValue);
+          return zodValidationResult.success === true
+            ? { validationStatus: "valid" }
+            : {
+                validationStatus: "error",
+                errorMessage: `invalid value: ${someFieldValue}`,
+              };
+        },
+        fieldOnChange: ({ formState, formApi }: any) => {
           if (
-            formFields.musicArtistType.fieldValue === "solo" ||
-            formFields.musicArtistType.fieldValue === "group"
+            formState.fieldValues.musicArtistType === "solo" ||
+            formState.fieldValues.musicArtistType === "group"
           ) {
             formApi.replaceForm("artistNameStartForm", {
-              ...formFields,
-              musicArtistName: {
-                fieldKey: "musicArtistName",
-                fieldStatus: "normal",
-                fieldValue: formFields["musicArtistName"]?.fieldValue ?? "",
-              },
+              ...formState.fieldValues,
+              musicArtistName:
+                formState.fieldValues["musicArtistName"]?.fieldValue ?? "",
             });
           }
         },
       },
-      ...formFields,
+      ...formFieldsExtension,
     ],
   });
 }
 
 function baseStartForm(formConfig: any) {
-  const { formFields, ...remainingFormConfig } = formConfig;
+  const { formFieldsExtension, ...remainingFormConfig } = formConfig;
   return {
     ...remainingFormConfig,
     formFields: [
       {
-        FieldDisplay: MusicItemTypeField,
-        fieldType: "simple",
         fieldKey: "musicItemType",
-        fieldLabel: "music item type",
-        fieldSubmitSchema: Zod.union([
-          Zod.literal("artist"),
-          Zod.literal("content"),
-        ]),
-        fieldOnChange: ({ formFields, formApi }: any) => {
-          if (formFields.musicItemType.fieldValue === "artist") {
+        FieldDisplay: MusicItemTypeField,
+        validateField: (someFieldValue: any) => {
+          const zodValidationResult = Zod.union([
+            Zod.literal("artist"),
+            Zod.literal("content"),
+          ]).safeParse(someFieldValue);
+          return zodValidationResult.success === true
+            ? { validationStatus: "valid" }
+            : {
+                validationStatus: "error",
+                errorMessage: `invalid value: ${someFieldValue}`,
+              };
+        },
+        fieldOnChange: ({ formState, formApi }: any) => {
+          if (formState.fieldValues.musicItemType === "artist") {
             formApi.replaceForm("artistTypeStartForm", {
-              ...formFields,
-              musicArtistType: {
-                fieldKey: "musicArtistType",
-                fieldStatus: "normal",
-                fieldValue: null,
-              },
+              ...formState.fieldValues,
+              musicArtistType: null,
             });
           }
         },
       },
-      ...formFields,
+      ...formFieldsExtension,
     ],
   };
+}
+
+interface ArtistNameStartFormFooterProps {}
+
+function ArtistNameStartFormFooter(props: any) {
+  const { formApi, formState } = props;
+  return (
+    <div className={cssModule.formFooterContainer}>
+      <Button
+        className={cssModule.submitButton}
+        ariaLabel={"todo"}
+        ariaDescription={"todo"}
+        onSelect={() => {
+          formApi.validateForm();
+        }}
+      >
+        next
+      </Button>
+    </div>
+  );
 }
 
 interface MusicArtistNameFieldProps {}
 
 function MusicArtistNameField(props: any) {
-  const { formFields, formApi } = props;
+  const { formState, formApi } = props;
   return (
     <div className={cssModule.fieldContainer}>
       <Input
         placeholder={"music artist name"}
-        value={formFields.musicArtistName.fieldValue}
+        value={formState.fieldValues.musicArtistName}
         onInput={(someInputEvent: any) => {
-          formApi.setField("musicArtistName", {
-            fieldKey: "musicArtistName",
-            fieldStatus: "normal",
-            fieldValue: someInputEvent.currentTarget.value,
-          });
+          formApi.setFieldValue(
+            "musicArtistName",
+            someInputEvent.currentTarget.value
+          );
         }}
         clearButtonProps={{
           ariaLabel: "todo",
           ariaDescription: "todo",
           onSelect: () => {
-            formApi.setField("musicArtistName", {
-              fieldKey: "musicArtistName",
-              fieldStatus: "normal",
-              fieldValue: "",
-            });
+            formApi.setFieldValue("musicArtistName", "");
           },
         }}
       />
@@ -163,7 +180,7 @@ function MusicArtistNameField(props: any) {
 interface MusicArtistTypeFieldProps {}
 
 function MusicArtistTypeField(props: any) {
-  const { formFields, formApi } = props;
+  const { formState, formApi } = props;
   const { artistTypeOptionList, artistTypeSelectOption } = useMemo(
     () => ({
       artistTypeOptionList: [
@@ -177,11 +194,10 @@ function MusicArtistTypeField(props: any) {
         },
       ],
       artistTypeSelectOption: (nextMusicArtistTypeOption: any) => {
-        formApi.setField("musicArtistType", {
-          fieldKey: "musicArtistType",
-          fieldStatus: "normal",
-          fieldValue: nextMusicArtistTypeOption.optionValue,
-        });
+        formApi.setFieldValue(
+          "musicArtistType",
+          nextMusicArtistTypeOption.optionValue
+        );
       },
     }),
     []
@@ -191,13 +207,13 @@ function MusicArtistTypeField(props: any) {
       artistTypeSelectedOption: artistTypeOptionList.find(
         (someArtistTypeOption) =>
           someArtistTypeOption.optionValue ===
-          formFields.musicArtistType.fieldValue
+          formState.fieldValues.musicArtistType
       ) ?? {
         optionLabel: "select artist type",
         optionValue: null,
       },
     }),
-    [formFields.musicArtistType.fieldValue]
+    [formState.fieldValues.musicArtistType]
   );
   return (
     <div className={cssModule.fieldContainer}>
@@ -218,7 +234,7 @@ function MusicArtistTypeField(props: any) {
 interface MusicItemTypeFieldProps {}
 
 function MusicItemTypeField(props: any) {
-  const { formFields, formApi } = props;
+  const { formState, formApi } = props;
   const { itemTypeOptionList } = useMemo(
     () => ({
       itemTypeOptionList: [
@@ -226,10 +242,6 @@ function MusicItemTypeField(props: any) {
           optionLabel: "artist",
           optionValue: "artist",
         },
-        // {
-        //   optionLabel: "content",
-        //   optionValue: "content",
-        // },
       ],
     }),
     []
@@ -239,25 +251,24 @@ function MusicItemTypeField(props: any) {
       itemTypeSelectOption: (nextMusicItemTypeOption: any) => {
         if (
           nextMusicItemTypeOption.optionValue !==
-          formFields.musicItemType.fieldValue
+          formState.fieldValues.musicItemType
         ) {
-          formApi.setField("musicItemType", {
-            fieldKey: "musicItemType",
-            fieldStatus: "normal",
-            fieldValue: nextMusicItemTypeOption.optionValue,
-          });
+          formApi.setFieldValue(
+            "musicItemType",
+            nextMusicItemTypeOption.optionValue
+          );
         }
       },
       itemTypeSelectedOption: itemTypeOptionList.find(
         (someArtistTypeOption) =>
           someArtistTypeOption.optionValue ===
-          formFields.musicItemType.fieldValue
+          formState.fieldValues.musicItemType
       ) ?? {
         optionLabel: "select item type",
         optionValue: null,
       },
     }),
-    [formFields.musicItemType.fieldValue]
+    [formState.fieldValues.musicItemType]
   );
   return (
     <div className={cssModule.fieldContainer}>
@@ -272,25 +283,5 @@ function MusicItemTypeField(props: any) {
         selectedOption={itemTypeSelectedOption}
       />
     </div>
-  );
-}
-
-interface MusicEntrySubmitButtonProps {
-  formState: any;
-}
-
-function MusicEntrySubmitButton(props: MusicEntrySubmitButtonProps) {
-  const { formState } = props;
-  return (
-    <Button
-      className={cssModule.submitButton}
-      ariaLabel="todo"
-      ariaDescription="todo"
-      onSelect={() => {
-        console.log(formState.formFields);
-      }}
-    >
-      next
-    </Button>
   );
 }

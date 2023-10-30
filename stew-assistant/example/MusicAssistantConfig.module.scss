@@ -8,6 +8,11 @@
   @extend .rowContainer;
 }
 
+.formFooterContainer {
+  @extend .rowContainer;
+  justify-content: flex-end;
+}
+
 .submitButton {
   font-weight: 700;
   font-size: 1.05rem;

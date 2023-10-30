@@ -4,8 +4,3 @@
   @extend .columnContainer;
   padding: $themeSpacer;
 }
-
-.formFooterContainer {
-  @extend .rowContainer;
-  justify-content: flex-end;
-}

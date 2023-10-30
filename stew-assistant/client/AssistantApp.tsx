@@ -1,5 +1,4 @@
 import {
-  Button,
   ClientApp,
   ClientAppProps,
   Page,
@@ -9,14 +8,11 @@ import {
   useMemo,
   useState,
 } from "../../stew-library/deps/preact/hooks.ts";
-import {
-  ComponentProps,
-  FunctionComponent,
-  createElement,
-} from "../../stew-library/deps/preact/mod.ts";
+import { createElement } from "../../stew-library/deps/preact/mod.ts";
 import { throwInvalidPathError } from "stew/utilities/throwInvalidPathError.ts";
 // @deno-types="CssModule"
 import cssModule from "./AssistantApp.module.scss";
+import { underline } from "https://deno.land/std@0.83.0/fmt/colors.ts";
 
 export interface AssitantAppProps extends Pick<ClientAppProps, "appCss"> {
   assistantConfig: any;
@@ -25,50 +21,68 @@ export interface AssitantAppProps extends Pick<ClientAppProps, "appCss"> {
 export function AssistantApp(props: AssitantAppProps) {
   const { appCss, assistantConfig } = props;
   const { assistantState, assistantApi } = useAssistantApp({ assistantConfig });
-  const activeFormState =
-    assistantState.formStack[assistantState.formStack.length - 1];
   return (
     <ClientApp appCss={appCss}>
       <Page pageAriaHeader={"stew assistant"}>
-        <div className={cssModule.formContainer}>
-          {activeFormState.formConfig.formFields.map((someFieldConfig: any) => (
-            <FormFieldItem
-              key={someFieldConfig.fieldKey}
-              formApi={assistantApi.formApi}
-              someFieldConfig={someFieldConfig}
-              formFields={activeFormState.formFields}
-            />
-          ))}
-          <div className={cssModule.formFooterContainer}>
-            {activeFormState.formConfig.formSubmit.submitType === "explicit"
-              ? createElement(
-                  activeFormState.formConfig.formSubmit.SubmitButton,
-                  {
-                    formState: activeFormState,
-                    formApi: assistantApi.formApi,
-                  }
-                )
-              : null}
-          </div>
-        </div>
+        <AssistantForm
+          formState={assistantState.formState}
+          formApi={assistantApi.formApi}
+        />
       </Page>
     </ClientApp>
   );
 }
 
-function FormFieldItem(props: any) {
-  const { someFieldConfig, formApi, formFields } = props;
+function AssistantForm(props: any) {
+  const { formState, formApi } = props;
+  return (
+    <div className={cssModule.formContainer}>
+      {formState.formConfig.formFields.map((someFieldConfig: any) => (
+        <AssistantFormField
+          key={someFieldConfig.fieldKey}
+          someFieldConfig={someFieldConfig}
+          formState={formState}
+          formApi={formApi}
+        />
+      ))}
+      <AssistantFormFooter formState={formState} formApi={formApi} />
+    </div>
+  );
+}
+
+function AssistantFormField(props: any) {
+  const { someFieldConfig, formState, formApi } = props;
   useEffect(() => {
     if (someFieldConfig.fieldOnChange) {
       someFieldConfig.fieldOnChange({
         formApi,
-        formFields,
+        formState,
       });
     }
-  }, [formFields[someFieldConfig.fieldKey]]);
+  }, [formState.fieldValues[someFieldConfig.fieldKey]]);
   return createElement(someFieldConfig.FieldDisplay, {
+    someFieldConfig,
+    formState,
     formApi,
-    formFields,
+  });
+}
+
+function AssistantFormFooter(props: any) {
+  const { formState, formApi } = props;
+  useEffect(() => {
+    if (
+      formState.formStatus === "validated" &&
+      formState.formConfig.formOnValidated
+    ) {
+      formState.formConfig.formOnValidated({
+        formState,
+        formApi,
+      });
+    }
+  }, [formState.formStatus]);
+  return createElement(formState.formConfig.FormFooter, {
+    formState,
+    formApi,
   });
 }
 
@@ -78,54 +92,56 @@ interface UseAssistantAppApi
 function useAssistantApp(api: UseAssistantAppApi) {
   const { assistantConfig } = api;
   const [assistantState, setAssistantState] = useState<AssistantState>({
-    formStack: [
-      {
-        formConfig: assistantConfig.assistantEntryFormConfig,
-        formFields:
-          assistantConfig.assistantEntryFormConfig.getInitialFormFields(),
-      },
-    ],
+    formState: {
+      formStatus: "normal",
+      formConfig: assistantConfig.assistantEntryFormConfig,
+      fieldErrors: {},
+      fieldValues:
+        assistantConfig.assistantEntryFormConfig.getInitialFieldValues(),
+    },
   });
   const assistantApi = useMemo(() => {
     return {
       formApi: {
+        validateForm: () => {
+          setAssistantState((currentAssistantState) => ({
+            ...currentAssistantState,
+            formState: {
+              ...currentAssistantState.formState,
+              formStatus: "validating",
+              formValidationWorker: runFormValidationWorker({
+                setAssistantState,
+                currentAssistantState,
+              }),
+            },
+          }));
+        },
         replaceForm: (
           nextFormKey: string,
-          initialFormFields: Record<string, any>
+          initialFieldValues: Record<string, any>,
+          initialFieldErrors: Record<string, string> = {}
         ) => {
-          setAssistantState((currentAssistantState) => {
-            const [activeFormState, ...reversedOtherFormStates] = [
-              ...currentAssistantState.formStack,
-            ].reverse();
-            return {
-              ...currentAssistantState,
-              formStack: [
-                ...reversedOtherFormStates.reverse(),
-                {
-                  formConfig: assistantConfig.assistantForms[nextFormKey],
-                  formFields: initialFormFields,
-                },
-              ],
-            };
-          });
+          setAssistantState((currentAssistantState) => ({
+            ...currentAssistantState,
+            formState: {
+              formStatus: "normal",
+              formConfig: assistantConfig.assistantForms[nextFormKey],
+              fieldValues: initialFieldValues,
+              fieldErrors: initialFieldErrors,
+            },
+          }));
         },
-        setField: (fieldKey: string, nextField: any) => {
+        setFieldValue: (fieldKey: string, nextFieldValue: any) => {
           setAssistantState((currentAssistantState) => {
-            const [activeFormState, ...reversedOtherFormStates] = [
-              ...currentAssistantState.formStack,
-            ].reverse();
             return {
               ...currentAssistantState,
-              formStack: [
-                ...reversedOtherFormStates.reverse(),
-                {
-                  ...activeFormState,
-                  formFields: {
-                    ...activeFormState.formFields,
-                    [fieldKey]: nextField,
-                  },
+              formState: {
+                ...currentAssistantState.formState,
+                fieldValues: {
+                  ...currentAssistantState.formState.fieldValues,
+                  [fieldKey]: nextFieldValue,
                 },
-              ],
+              },
             };
           });
         },
@@ -139,8 +155,66 @@ function useAssistantApp(api: UseAssistantAppApi) {
 }
 
 interface AssistantState {
-  formStack: Array<{
+  formState: {
+    formStatus: string;
     formConfig: any;
-    formFields: Record<string, any>;
-  }>;
+    fieldValues: Record<string, any>;
+    fieldErrors: Record<string, string>;
+    formValidationWorker?: any;
+  };
+}
+
+async function runFormValidationWorker(api: any) {
+  const { currentAssistantState, setAssistantState } = api;
+  const nextFieldErrors =
+    currentAssistantState.formState.formConfig.formFields.reduce(
+      (result: any, someFieldConfig: any) => {
+        const validateFieldResult = someFieldConfig.validateField(
+          currentAssistantState.formState.fieldValues[someFieldConfig.fieldKey]
+        );
+        if (validateFieldResult instanceof Promise) {
+          // result[someFieldConfig.fieldKey] = {
+          //   validationStatus: "validating",
+          //   validationWorker: runFieldValidationWorker({
+          //     validateFieldResult
+          //   }),
+          // };
+        } else if (validateFieldResult.validationStatus === "error") {
+          result[someFieldConfig.fieldKey] = validateFieldResult;
+        }
+        return result;
+      },
+      {}
+    );
+  await Promise.all(
+    Object.values(nextFieldErrors).reduce<any>(
+      (result: any, someValidationResult: any) => {
+        if (someValidationResult.validationStatus === "validating") {
+          result.push(someValidationResult.validationWorker);
+        }
+        return result;
+      },
+      []
+    )
+  );
+  setAssistantState((newerCurrentAssistantState: any) => {
+    return {
+      ...newerCurrentAssistantState,
+      formState: {
+        ...newerCurrentAssistantState.formState,
+        fieldErrors: nextFieldErrors,
+        formStatus:
+          Object.keys(nextFieldErrors).length === 0
+            ? "validated"
+            : Object.keys(nextFieldErrors).length > 0
+            ? "error"
+            : throwInvalidPathError("runFormValidationWorker"),
+        formValidationWorker: undefined,
+      },
+    };
+  });
+}
+
+async function runFieldValidationWorker(api: any) {
+  const {} = api;
 }
