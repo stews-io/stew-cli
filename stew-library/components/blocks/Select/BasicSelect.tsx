@@ -9,7 +9,7 @@ import {
 } from "./SelectBase.tsx";
 import { SelectMenuBase } from "./components/SelectMenuBase.tsx";
 
-interface BasicSelectProps<
+export interface BasicSelectProps<
   MenuOption extends object,
   OptionLabelKey extends VerifiedOptionLabelKey<MenuOption>,
   CustomSelectAnchorButtonProps extends CustomAnchorButtonProps
@@ -28,7 +28,6 @@ interface BasicSelectProps<
       | "fontSizeClassName"
       | "optionLabelKey"
       | "optionTypeLabel"
-      | "popoverAriaRole"
       | "selectIconClassName"
     > {
   customSelectAnchorButtonProps?: CustomSelectAnchorButtonProps;
@@ -48,6 +47,7 @@ export function BasicSelect<
   const __staticObjectProp = useMemo(() => ({}), []);
   return (
     <SelectBase
+      popoverAriaRole={"listbox"}
       SelectMenu={BasicViewSelectMenu<MenuOption, OptionLabelKey>}
       customOptionActionItemProps={__staticObjectProp}
       customMenuFooterProps={__staticObjectProp}

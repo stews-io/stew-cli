@@ -1,16 +1,14 @@
 @import "../../stew-library/styles/theme.scss";
 
-.formContainer {
-  @extend .columnContainer;
-}
-
 .fieldContainer {
   @extend .rowContainer;
+  padding: $themeSpacer;
 }
 
 .formFooterContainer {
   @extend .rowContainer;
   justify-content: flex-end;
+  padding: $themeSpacer;
 }
 
 .submitButton {

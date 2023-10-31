@@ -17,9 +17,9 @@
   },
   "imports": {
     "CssModule": "./declaration.d.ts",
-    "preact": "https://esm.sh/preact@10.17.1",
-    "preact/hooks": "https://esm.sh/preact@10.17.1/hooks",
-    "preact/jsx-runtime": "https://esm.sh/preact@10.17.1/jsx-runtime",
+    "preact": "https://esm.sh/preact@10.18.0",
+    "preact/hooks": "https://esm.sh/preact@10.18.0/hooks",
+    "preact/jsx-runtime": "https://esm.sh/preact@10.18.0/jsx-runtime",
     "stew/": "./stew-library/"
   },
   "tasks": {

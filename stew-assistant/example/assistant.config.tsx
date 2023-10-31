@@ -1,6 +1,12 @@
+import {
+  BasicSelect,
+  BasicSelectProps,
+  Button,
+  CustomAnchorButtonProps,
+  Input,
+} from "stew/components/mod.ts";
 import { useEffect, useMemo } from "../../stew-library/deps/preact/hooks.ts";
-import { BasicSelect, Button, Input } from "stew/components/mod.ts";
-import { Zod } from "stew/deps/zod/mod.ts";
+import { Zod } from "../../stew-library/deps/zod/mod.ts";
 // @deno-types="CssModule"
 import cssModule from "./MusicAssistantConfig.module.scss";
 
@@ -47,12 +53,12 @@ function artistNameStartForm() {
             ? { validationStatus: "valid" }
             : {
                 validationStatus: "error",
-                errorMessage: `invalid value: ${someFieldValue}`,
+                errorMessage: `invalid value: "${someFieldValue}"`,
               };
         },
       },
     ],
-    formOnValidated: ({ formState, formApi }: any) => {
+    formOnSubmit: ({ formState, formApi }: any) => {
       console.log(formState.fieldValues);
     },
   });
@@ -66,18 +72,7 @@ function baseArtistStartForm(formConfig: any) {
       {
         fieldKey: "musicArtistType",
         FieldDisplay: MusicArtistTypeField,
-        validateField: (someFieldValue: any) => {
-          const zodValidationResult = Zod.union([
-            Zod.literal("solo"),
-            Zod.literal("group"),
-          ]).safeParse(someFieldValue);
-          return zodValidationResult.success === true
-            ? { validationStatus: "valid" }
-            : {
-                validationStatus: "error",
-                errorMessage: `invalid value: ${someFieldValue}`,
-              };
-        },
+        validateField: () => ({ validationStatus: "valid" }),
         fieldOnChange: ({ formState, formApi }: any) => {
           if (
             formState.fieldValues.musicArtistType === "solo" ||
@@ -104,18 +99,7 @@ function baseStartForm(formConfig: any) {
       {
         fieldKey: "musicItemType",
         FieldDisplay: MusicItemTypeField,
-        validateField: (someFieldValue: any) => {
-          const zodValidationResult = Zod.union([
-            Zod.literal("artist"),
-            Zod.literal("content"),
-          ]).safeParse(someFieldValue);
-          return zodValidationResult.success === true
-            ? { validationStatus: "valid" }
-            : {
-                validationStatus: "error",
-                errorMessage: `invalid value: ${someFieldValue}`,
-              };
-        },
+        validateField: () => ({ validationStatus: "valid" }),
         fieldOnChange: ({ formState, formApi }: any) => {
           if (formState.fieldValues.musicItemType === "artist") {
             formApi.replaceForm("artistTypeStartForm", {
@@ -133,7 +117,15 @@ function baseStartForm(formConfig: any) {
 interface ArtistNameStartFormFooterProps {}
 
 function ArtistNameStartFormFooter(props: any) {
-  const { formApi, formState } = props;
+  const { formState, formApi } = props;
+  useEffect(() => {
+    if (formState.submitStatus === "validationSuccess") {
+      formState.formConfig.formOnSubmit({
+        formState,
+        formApi,
+      });
+    }
+  }, [formState.submitStatus]);
   return (
     <div className={cssModule.formFooterContainer}>
       <Button
@@ -141,12 +133,42 @@ function ArtistNameStartFormFooter(props: any) {
         ariaLabel={"todo"}
         ariaDescription={"todo"}
         onSelect={() => {
-          formApi.validateForm();
+          formApi.submitForm(validateArtistNameStartForm);
         }}
       >
         next
       </Button>
     </div>
+  );
+}
+
+async function validateArtistNameStartForm(api: any) {
+  const { formState } = api;
+  const fieldValidationResults = await Promise.all(
+    formState.formConfig.formFields.map((someFieldConfig: any) => {
+      const someValidateFieldResult = someFieldConfig.validateField(
+        formState.fieldValues[someFieldConfig.fieldKey]
+      );
+      return someValidateFieldResult instanceof Promise
+        ? someValidateFieldResult.then((someFieldValidationResult) => ({
+            ...someFieldValidationResult,
+            fieldKey: someFieldConfig.fieldKey,
+          }))
+        : {
+            ...someValidateFieldResult,
+            fieldKey: someFieldConfig.fieldKey,
+          };
+    })
+  );
+  return fieldValidationResults.reduce(
+    (nextFieldErrorsResult, someFieldValidationResult) => {
+      if (someFieldValidationResult.validationStatus === "error") {
+        nextFieldErrorsResult[someFieldValidationResult.fieldKey] =
+          someFieldValidationResult.errorMessage;
+      }
+      return nextFieldErrorsResult;
+    },
+    {}
   );
 }
 
@@ -173,6 +195,7 @@ function MusicArtistNameField(props: any) {
           },
         }}
       />
+      <div>{formState.fieldErrors.musicArtistName}</div>
     </div>
   );
 }
@@ -180,10 +203,19 @@ function MusicArtistNameField(props: any) {
 interface MusicArtistTypeFieldProps {}
 
 function MusicArtistTypeField(props: any) {
-  const { formState, formApi } = props;
-  const { artistTypeOptionList, artistTypeSelectOption } = useMemo(
-    () => ({
-      artistTypeOptionList: [
+  const { formState, formApi, someFieldConfig } = props;
+  useFieldEvents({
+    formState,
+    formApi,
+    someFieldConfig,
+  });
+  return (
+    <SelectField
+      formState={formState}
+      formApi={formApi}
+      someFieldConfig={someFieldConfig}
+      optionTypeLabel={"music artist name"}
+      optionList={[
         {
           optionLabel: "solo",
           optionValue: "solo",
@@ -192,96 +224,106 @@ function MusicArtistTypeField(props: any) {
           optionLabel: "group",
           optionValue: "group",
         },
-      ],
-      artistTypeSelectOption: (nextMusicArtistTypeOption: any) => {
-        formApi.setFieldValue(
-          "musicArtistType",
-          nextMusicArtistTypeOption.optionValue
-        );
-      },
-    }),
-    []
-  );
-  const { artistTypeSelectedOption } = useMemo(
-    () => ({
-      artistTypeSelectedOption: artistTypeOptionList.find(
-        (someArtistTypeOption) =>
-          someArtistTypeOption.optionValue ===
-          formState.fieldValues.musicArtistType
-      ) ?? {
-        optionLabel: "select artist type",
-        optionValue: null,
-      },
-    }),
-    [formState.fieldValues.musicArtistType]
-  );
-  return (
-    <div className={cssModule.fieldContainer}>
-      <BasicSelect
-        optionTypeLabel={"music artist type"}
-        optionLabelKey={"optionLabel"}
-        popoverAriaRole={"listbox"}
-        anchorAriaLabel={`todo`}
-        anchorAriaDescription={`todo`}
-        optionList={artistTypeOptionList}
-        selectOption={artistTypeSelectOption}
-        selectedOption={artistTypeSelectedOption}
-      />
-    </div>
+      ]}
+    />
   );
 }
 
 interface MusicItemTypeFieldProps {}
 
 function MusicItemTypeField(props: any) {
-  const { formState, formApi } = props;
-  const { itemTypeOptionList } = useMemo(
-    () => ({
-      itemTypeOptionList: [
+  const { formState, formApi, someFieldConfig } = props;
+  useFieldEvents({
+    formState,
+    formApi,
+    someFieldConfig,
+  });
+  return (
+    <SelectField
+      formState={formState}
+      formApi={formApi}
+      someFieldConfig={someFieldConfig}
+      optionTypeLabel={"music item type"}
+      optionList={[
         {
           optionLabel: "artist",
           optionValue: "artist",
         },
-      ],
-    }),
-    []
+      ]}
+    />
   );
-  const { itemTypeSelectOption, itemTypeSelectedOption } = useMemo(
+}
+
+interface SelectFieldProps
+  extends Pick<
+    BasicSelectProps<
+      { optionLabel: string; optionValue: string },
+      "optionLabel",
+      CustomAnchorButtonProps
+    >,
+    "optionTypeLabel" | "optionList"
+  > {
+  someFieldConfig: any;
+  formState: any;
+  formApi: any;
+}
+
+function SelectField(props: SelectFieldProps) {
+  const { formState, someFieldConfig, formApi, optionList, optionTypeLabel } =
+    props;
+  const { fieldSelectOption, fieldSelectedOption } = useMemo(
     () => ({
-      itemTypeSelectOption: (nextMusicItemTypeOption: any) => {
+      fieldSelectOption: (nextFieldOption: any) => {
         if (
-          nextMusicItemTypeOption.optionValue !==
-          formState.fieldValues.musicItemType
+          nextFieldOption.optionValue !==
+          formState.fieldValues[someFieldConfig.fieldKey]
         ) {
           formApi.setFieldValue(
-            "musicItemType",
-            nextMusicItemTypeOption.optionValue
+            someFieldConfig.fieldKey,
+            nextFieldOption.optionValue
           );
         }
       },
-      itemTypeSelectedOption: itemTypeOptionList.find(
-        (someArtistTypeOption) =>
-          someArtistTypeOption.optionValue ===
-          formState.fieldValues.musicItemType
+      fieldSelectedOption: optionList.find(
+        (someFieldOption) =>
+          someFieldOption.optionValue ===
+          formState.fieldValues[someFieldConfig.fieldKey]
       ) ?? {
         optionLabel: "select item type",
         optionValue: null,
       },
     }),
-    [formState.fieldValues.musicItemType]
+    [formState.fieldValues[someFieldConfig.fieldKey]]
   );
   return (
     <div className={cssModule.fieldContainer}>
       <BasicSelect
-        optionTypeLabel={"music item type"}
-        optionLabelKey={"optionLabel"}
-        popoverAriaRole={"listbox"}
         anchorAriaLabel={`todo`}
         anchorAriaDescription={`todo`}
-        optionList={itemTypeOptionList}
-        selectOption={itemTypeSelectOption}
-        selectedOption={itemTypeSelectedOption}
+        optionLabelKey={"optionLabel"}
+        optionList={optionList}
+        optionTypeLabel={optionTypeLabel}
+        selectOption={fieldSelectOption}
+        selectedOption={fieldSelectedOption}
       />
     </div>
   );
+}
+
+interface UseFieldEventsApi {
+  someFieldConfig: any;
+  formState: any;
+  formApi: any;
+}
+
+function useFieldEvents(api: UseFieldEventsApi) {
+  const { someFieldConfig, formState, formApi } = api;
+  useEffect(() => {
+    if (someFieldConfig.fieldOnChange) {
+      someFieldConfig.fieldOnChange({
+        formState,
+        formApi,
+      });
+    }
+  }, [formState.fieldValues[someFieldConfig.fieldKey]]);
 }

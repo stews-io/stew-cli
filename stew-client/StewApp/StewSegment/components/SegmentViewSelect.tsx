@@ -38,7 +38,6 @@ export function SegmentViewSelect(props: SegmentViewSelectProps) {
         fontSizeClassName={cssModule.viewSelectFontSize}
         optionTypeLabel={"view"}
         optionLabelKey={"viewLabel"}
-        popoverAriaRole={"listbox"}
         anchorAriaLabel={`select ${activeSegmentConfig.segmentLabel} view`}
         anchorAriaDescription={`${activeSegmentConfig.segmentLabel} view`}
         optionList={activeSegmentViewOptions}

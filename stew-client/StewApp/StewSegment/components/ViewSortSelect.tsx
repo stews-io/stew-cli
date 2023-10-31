@@ -26,7 +26,6 @@ export function ViewSortSelect(props: ViewSortSelectProps) {
       anchorBorderClassName={cssModule.viewSortSelectAnchorBorder}
       fontSizeClassName={cssModule.viewSortSelectFontSize}
       selectIconClassName={cssModule.viewSortSelectIcon}
-      popoverAriaRole={"listbox"}
       anchorAriaLabel={"select view sort order"}
       anchorAriaDescription={`a button that displays a popover with the view sort order options`}
       optionTypeLabel={"view sort order"}
