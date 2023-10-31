@@ -82,10 +82,7 @@ function useAssistantApp(api: UseAssistantAppApi) {
                     formConfig: currentAssistantState.formState.formConfig,
                     fieldValues: currentAssistantState.formState.fieldValues,
                     fieldErrors: nextFieldErrors,
-                    submitStatus:
-                      Object.keys(nextFieldErrors).length === 0
-                        ? "validationSuccess"
-                        : "validationError",
+                    submitStatus: "validationComplete",
                   },
                 }));
               }),

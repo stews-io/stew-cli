@@ -1,8 +1,14 @@
 @import "../../stew-library/styles/theme.scss";
 
-.fieldContainer {
-  @extend .rowContainer;
-  padding: $themeSpacer;
+.fieldMessage {
+  padding-block-start: calc(1 / 2) * $themeSpacer;
+  padding-inline: calc(1 / 2) * $themeSpacer;
+  font-size: 0.675rem;
+  font-weight: 700;
+}
+
+.fieldErrorMessage {
+  color: red;
 }
 
 .formFooterContainer {

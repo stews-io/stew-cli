@@ -1,0 +1,11 @@
+@import "../../stew-library/styles/theme.scss";
+
+.fieldContainer {
+  @extend .columnContainer;
+  padding: $themeSpacer;
+}
+
+.selectFieldBorder {
+  @extend .themeBorder;
+  width: 100%;
+}
