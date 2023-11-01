@@ -1,4 +1,13 @@
-@import "../../stew-library/styles/theme.scss";
+@import "../../../stew-library/styles/theme.scss";
+
+.fieldInputContainer {
+  border-bottom: $themeBorder;
+
+  &:has(input:focus) {
+    border: none;
+    margin-bottom: $themeBorderWidth;
+  }
+}
 
 .fieldMessage {
   padding-block-start: calc(1 / 2) * $themeSpacer;

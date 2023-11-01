@@ -416,7 +416,7 @@
 //       dataItemSchema: Zod.object({
 //         discographyAlbums: Zod.array(Zod.string()),
 //       }),
-//       systemPrompt: artistDiscographySystemPrompt,
+//       systemPrompt: ARTIST_DISCOGRAPHY_SYSTEM_PROMPT,
 //       userQuery: `Calculate: ${artistName} Studio, Collaborative, and Compilation Albums`,
 //     }),
 //     queryGptData({
@@ -427,7 +427,7 @@
 //       dataItemSchema: Zod.object({
 //         discographyAlbums: Zod.array(Zod.string()),
 //       }),
-//       systemPrompt: artistDiscographySystemPrompt,
+//       systemPrompt: ARTIST_DISCOGRAPHY_SYSTEM_PROMPT,
 //       userQuery: `Calculate: ${artistName} Live Albums`,
 //     }),
 //     queryGptData({
@@ -438,7 +438,7 @@
 //       dataItemSchema: Zod.object({
 //         discographyMixtapes: Zod.array(Zod.string()),
 //       }),
-//       systemPrompt: artistDiscographySystemPrompt,
+//       systemPrompt: ARTIST_DISCOGRAPHY_SYSTEM_PROMPT,
 //       userQuery: `Calculate: ${artistName} Mixtapes`,
 //     }),
 //     queryGptData({
@@ -449,7 +449,7 @@
 //       dataItemSchema: Zod.object({
 //         discographyEps: Zod.array(Zod.string()),
 //       }),
-//       systemPrompt: artistDiscographySystemPrompt,
+//       systemPrompt: ARTIST_DISCOGRAPHY_SYSTEM_PROMPT,
 //       userQuery: `Calculate: ${artistName} Eps`,
 //     }),
 //     queryGptData({
@@ -460,7 +460,7 @@
 //       dataItemSchema: Zod.object({
 //         discographySingles: Zod.array(Zod.string()),
 //       }),
-//       systemPrompt: artistDiscographySystemPrompt,
+//       systemPrompt: ARTIST_DISCOGRAPHY_SYSTEM_PROMPT,
 //       userQuery: `Calculate: ${artistName} Singles`,
 //     }),
 //     ...additionalQueries,

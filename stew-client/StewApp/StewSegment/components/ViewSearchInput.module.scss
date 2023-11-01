@@ -1,3 +1,17 @@
+@import "../../../../stew-library/styles/theme.scss";
+
 .searchInputContainer {
+  @extend .themeBorder;
   font-size: 18px;
+}
+
+.clearInputIcon {
+  width: 0.9em;
+  height: 0.9em;
+}
+
+.iconOutlineCircle {
+  fill: transparent;
+  stroke: black;
+  stroke-width: 1.75;
 }

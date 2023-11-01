@@ -1,12 +1,12 @@
-import { useEffect, useMemo } from "stew/deps/preact/hooks.ts";
-import { ComponentChildren } from "stew/deps/preact/mod.ts";
 import {
   BasicSelect,
   BasicSelectProps,
   CustomAnchorButtonProps,
-} from "stew/components/mod.ts";
+} from "../../../stew-library/components/mod.ts";
+import { useMemo } from "../../../stew-library/deps/preact/hooks.ts";
+import { FieldContainer } from "./FieldContainer.tsx";
 // @deno-types="CssModule"
-import cssModule from "./general.module.scss";
+import cssModule from "./SelectField.module.scss";
 
 export interface SelectFieldProps
   extends Pick<
@@ -17,14 +17,21 @@ export interface SelectFieldProps
     >,
     "optionTypeLabel" | "optionList"
   > {
+  optionPlaceholder: string;
   someFieldConfig: any;
   formState: any;
   formApi: any;
 }
 
 export function SelectField(props: SelectFieldProps) {
-  const { formState, someFieldConfig, formApi, optionList, optionTypeLabel } =
-    props;
+  const {
+    formState,
+    someFieldConfig,
+    formApi,
+    optionList,
+    optionPlaceholder,
+    optionTypeLabel,
+  } = props;
   const { fieldSelectOption, fieldSelectedOption } = useMemo(
     () => ({
       fieldSelectOption: (nextFieldOption: any) => {
@@ -43,7 +50,7 @@ export function SelectField(props: SelectFieldProps) {
           someFieldOption.optionValue ===
           formState.fieldValues[someFieldConfig.fieldKey]
       ) ?? {
-        optionLabel: "select item type",
+        optionLabel: optionPlaceholder,
         optionValue: null,
       },
     }),
@@ -63,31 +70,4 @@ export function SelectField(props: SelectFieldProps) {
       />
     </FieldContainer>
   );
-}
-
-export interface UseFieldEventsApi {
-  someFieldConfig: any;
-  formState: any;
-  formApi: any;
-}
-
-export function useFieldEvents(api: UseFieldEventsApi) {
-  const { someFieldConfig, formState, formApi } = api;
-  useEffect(() => {
-    if (someFieldConfig.fieldOnChange) {
-      someFieldConfig.fieldOnChange({
-        formState,
-        formApi,
-      });
-    }
-  }, [formState.fieldValues[someFieldConfig.fieldKey]]);
-}
-
-export interface FieldContainerProps {
-  children: ComponentChildren;
-}
-
-export function FieldContainer(props: FieldContainerProps) {
-  const { children } = props;
-  return <div className={cssModule.fieldContainer}>{children}</div>;
 }

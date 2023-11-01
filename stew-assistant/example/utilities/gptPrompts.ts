@@ -6,7 +6,7 @@ interface GptMusicArtistType {
 }`,
 });
 
-export const artistDiscographySystemPrompt = getGptSystemPrompt({
+export const ARTIST_DISCOGRAPHY_SYSTEM_PROMPT = getGptSystemPrompt({
   queryTypeDefinitions: `
 interface GptDiscographyAlbums {
   // the complete list, with zero omissions, of every album title in the artist's discography
@@ -46,7 +46,7 @@ interface GetGptSystemPromptApi {
 function getGptSystemPrompt(api: GetGptSystemPromptApi) {
   const { queryTypeDefinitions } = api;
   return `
-the hip-hop community considers you the foremost expert on hip-hop.
+the music community considers you the foremost expert on music.
 
 your responses are categorized as complete, comprehensive, exhaustive, accurate, accessible, accountable, calculated, deterministic, semantic, direct, explicit, and forthcoming.
 

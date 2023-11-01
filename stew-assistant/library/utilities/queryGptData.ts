@@ -1,4 +1,4 @@
-import { Zod } from "../../stew-library/deps/zod/mod.ts";
+import { Zod } from "../../../stew-library/deps/zod/mod.ts";
 
 export interface QueryGptDataApi<GptMessageData> {
   numberOfResults: number;

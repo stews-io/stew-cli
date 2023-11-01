@@ -1,0 +1,28 @@
+@import "../../../stew-library/styles/theme.scss";
+
+.listFieldHeaderContainer {
+  @extend .rowContainer;
+  align-items: baseline;
+  border-bottom: solid 0.5px #bbbbbb;
+}
+
+.listFieldLabel {
+  font-weight: 700;
+}
+
+.listFieldQueryStatus {
+  margin-left: $themeSpacer;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 0.65rem;
+}
+
+.listFieldItemsContainer {
+  @extend .rowContainer;
+  flex-wrap: wrap;
+}
+
+.listFieldItemContainer {
+  padding-inline-end: $themeSpacer;
+  padding-block-start: $themeSpacer;
+}

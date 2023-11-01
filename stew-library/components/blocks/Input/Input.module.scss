@@ -2,7 +2,6 @@
 
 .inputContainer {
   @extend .rowContainer;
-  @extend .themeBorder;
   flex-grow: 1;
   overflow: hidden;
   align-items: center;
@@ -25,15 +24,4 @@
   &::placeholder {
     color: $themeInteractiveGrey;
   }
-}
-
-.clearInputIcon {
-  width: 0.9em;
-  height: 0.9em;
-}
-
-.iconOutlineCircle {
-  fill: transparent;
-  stroke: black;
-  stroke-width: 1.75;
 }
