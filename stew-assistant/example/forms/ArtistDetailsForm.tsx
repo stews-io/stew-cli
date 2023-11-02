@@ -1,9 +1,9 @@
-import { BadgeList, BadgeListItem, TextBadge } from "stew/components/mod.ts";
+import { Button, TextBadge } from "stew/components/mod.ts";
 import { useEffect, useState } from "stew/deps/preact/hooks.ts";
 import { Zod } from "stew/deps/zod/mod.ts";
-import { FieldContainer } from "../../library/components/FieldContainer.tsx";
 import { queryGptData } from "../../library/utilities/queryGptData.ts";
 import { ARTIST_DISCOGRAPHY_SYSTEM_PROMPT } from "../utilities/gptPrompts.ts";
+import { CompactListField } from "../../library/components/CompactListField.tsx";
 // @deno-types="CssModule"
 import cssModule from "./ArtistDetailsForm.module.scss";
 
@@ -39,15 +39,6 @@ function ArtistAlbumsField(props: any) {
   const [artistAlbumsQueryState, setArtistAlbumsQueryState] = useState<any>({
     queryStatus: "idle",
   });
-  // useEffect(() => {
-  //   setArtistAlbumsQueryState({
-  //     queryStatus: "in-progress",
-  //     queryWorker: queryArtistAlbums({
-  //       formState,
-  //       setArtistAlbumsQueryState,
-  //     }),
-  //   });
-  // }, []);
   useEffect(() => {
     if (artistAlbumsQueryState.queryStatus === "success") {
       formApi.setFieldValue(
@@ -57,23 +48,53 @@ function ArtistAlbumsField(props: any) {
     }
   }, [artistAlbumsQueryState]);
   return (
-    <FieldContainer>
-      <div className={cssModule.listFieldHeaderContainer}>
-        <div className={cssModule.listFieldLabel}>artist albums</div>
-        <div className={cssModule.listFieldQueryStatus}>
-          {artistAlbumsQueryState.queryStatus === "in-progress"
-            ? "querying gpt..."
-            : ""}
-        </div>
-      </div>
-      <BadgeList ariaLabel="todo">
-        {formState.fieldValues.musicArtistAlbums.map((someArtistAlbum: any) => (
-          <BadgeListItem>
-            <TextBadge badgeLabel={someArtistAlbum.toLowerCase()} />
-          </BadgeListItem>
-        ))}
-      </BadgeList>
-    </FieldContainer>
+    <CompactListField
+      FieldItemBadge={({ fieldItem }) => (
+        <TextBadge badgeLabel={fieldItem.toLowerCase()} />
+      )}
+      FieldHeaderAddon={ArtistAlbumsHeaderAddon}
+      fieldHeaderAddonProps={{
+        setArtistAlbumsQueryState,
+        artistAlbumsQueryState,
+        formState,
+      }}
+      EmptyContentAddon={() => null}
+      emptyContentAddonProps={{}}
+      emptyContentMessage={"no artist albums"}
+      fieldLabel={"artist albums"}
+      fieldItems={formState.fieldValues.musicArtistAlbums as Array<string>}
+    />
+  );
+}
+
+interface ArtistAlbumsHeaderAddonProps {
+  artistAlbumsQueryState: any;
+  setArtistAlbumsQueryState: any;
+  formState: any;
+}
+
+function ArtistAlbumsHeaderAddon(props: ArtistAlbumsHeaderAddonProps) {
+  const { artistAlbumsQueryState, setArtistAlbumsQueryState, formState } =
+    props;
+  return (
+    <Button
+      ariaLabel="todo"
+      ariaDescription="todo"
+      disabled={artistAlbumsQueryState.queryStatus === "in-progress"}
+      onSelect={() => {
+        setArtistAlbumsQueryState({
+          queryStatus: "in-progress",
+          queryWorker: queryArtistAlbums({
+            formState,
+            setArtistAlbumsQueryState,
+          }),
+        });
+      }}
+    >
+      {artistAlbumsQueryState.queryStatus === "in-progress"
+        ? "loading..."
+        : "assist"}
+    </Button>
   );
 }
 

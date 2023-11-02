@@ -1,0 +1,25 @@
+@import "../../../stew-library/styles/theme.scss";
+
+.fieldHeaderContainer {
+  @extend .rowContainer;
+  border-bottom: 0.5px solid #cccccc;
+}
+
+.fieldLabel {
+  flex-grow: 1;
+  font-weight: 700;
+}
+
+.emptyContentContainer {
+  @extend .columnContainer;
+  align-items: center;
+  padding: 2 * $themeSpacer;
+}
+
+.emptyContentMessage {
+  padding: $themeSpacer;
+  font-weight: 700;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: $themeDisabledColor;
+}
