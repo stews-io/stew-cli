@@ -143,26 +143,37 @@ function runAsyncWorker<
   FetchAsyncDataApi extends Record<string, any>
 >(api: RunAsyncWorkerApi<AsyncData, FetchAsyncDataApi>): Promise<AsyncData> {
   const { asyncTimestamp, fetchAsyncData, fetchAsyncDataApi } = api;
+  const rejectAsyncWorkerRef: {
+    current: null | ((rejectReason: unknown) => void);
+  } = {
+    current: null,
+  };
+  const cancelWorkerEventId = getCancelWorkerEventId({
+    someAsyncTimestamp: asyncTimestamp,
+  });
+  const cancelWorkerEventHandler = (someCancelWorkerEvent: Event) => {
+    if (
+      rejectAsyncWorkerRef.current &&
+      someCancelWorkerEvent instanceof CustomEvent &&
+      someCancelWorkerEvent.detail.cancelReason
+    ) {
+      rejectAsyncWorkerRef.current(
+        new DOMException(
+          someCancelWorkerEvent.detail.cancelReason,
+          "AbortError"
+        )
+      );
+    } else {
+      globalThis.removeEventListener(
+        cancelWorkerEventId,
+        cancelWorkerEventHandler
+      );
+      throwInvalidPathError("runAsyncWorker.cancelWorkerEventHandler");
+    }
+  };
+  globalThis.addEventListener(cancelWorkerEventId, cancelWorkerEventHandler);
   return new Promise((resolveAsyncWorker, rejectAsyncWorker) => {
-    const cancelWorkerEventId = getCancelWorkerEventId({
-      someAsyncTimestamp: asyncTimestamp,
-    });
-    const cancelWorkerEventHandler = (someCancelWorkerEvent: Event) => {
-      if (
-        someCancelWorkerEvent instanceof CustomEvent &&
-        someCancelWorkerEvent.detail.cancelReason
-      ) {
-        rejectAsyncWorker(
-          new DOMException(
-            someCancelWorkerEvent.detail.cancelReason,
-            "AbortError"
-          )
-        );
-      } else {
-        throwInvalidPathError("runAsyncWorker.cancelWorkerEventHandler");
-      }
-    };
-    globalThis.addEventListener(cancelWorkerEventId, cancelWorkerEventHandler);
+    rejectAsyncWorkerRef.current = rejectAsyncWorker;
     return fetchAsyncData(fetchAsyncDataApi)
       .then((fetchAsyncDataResult) => {
         resolveAsyncWorker(fetchAsyncDataResult);
