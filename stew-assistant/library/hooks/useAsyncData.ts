@@ -68,8 +68,13 @@ export function useAsyncData<
                 );
               })
               .catch((someWorkerError) => {
-                console.log("bbb");
                 if (
+                  someWorkerError instanceof DOMException &&
+                  someWorkerError.name === "AbortError" &&
+                  someWorkerError.message === "refetching"
+                ) {
+                  // no-op
+                } else if (
                   someWorkerError instanceof DOMException &&
                   someWorkerError.name === "AbortError"
                 ) {
@@ -84,16 +89,17 @@ export function useAsyncData<
                       : currentAsyncDataState
                   );
                 } else {
-                  setAsyncDataState((currentAsyncDataState) =>
-                    currentAsyncDataState.asyncStatus === "fetching" &&
-                    currentAsyncDataState.asyncTimestamp === nextAsyncTimestamp
+                  setAsyncDataState((currentAsyncDataState) => {
+                    return currentAsyncDataState.asyncStatus === "fetching" &&
+                      currentAsyncDataState.asyncTimestamp ===
+                        nextAsyncTimestamp
                       ? {
                           asyncStatus: "error",
                           asyncTimestamp: nextAsyncTimestamp,
                           asyncError: someWorkerError,
                         }
-                      : currentAsyncDataState
-                  );
+                      : currentAsyncDataState;
+                  });
                 }
               }),
           };
@@ -157,9 +163,12 @@ function runAsyncWorker<
       }
     };
     globalThis.addEventListener(cancelWorkerEventId, cancelWorkerEventHandler);
-    fetchAsyncData(fetchAsyncDataApi)
+    return fetchAsyncData(fetchAsyncDataApi)
       .then((fetchAsyncDataResult) => {
         resolveAsyncWorker(fetchAsyncDataResult);
+      })
+      .catch((someFetchAsyncDataError) => {
+        rejectAsyncWorker(someFetchAsyncDataError);
       })
       .finally(() => {
         globalThis.removeEventListener(
