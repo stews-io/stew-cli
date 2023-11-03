@@ -1,21 +1,21 @@
 @import "../../../stew-library/styles/theme.scss";
 
-.openaiContainer {
+.headerAddonContainer {
   @extend .itemContainer;
   align-items: flex-end;
   padding-block-end: calc(1 / 4) * $themeSpacer;
 }
 
-.openaiButton {
+.assistButton {
   padding: calc(1 / 4) * $themeSpacer;
 }
 
-.openaiIcon {
+.assistIcon {
   width: 0.85em;
   height: 0.85em;
 }
 
-.inprogressOpenaiIcon {
+.inprogressAssistIcon {
   animation: spin 2s linear infinite;
   @keyframes spin {
     0% {

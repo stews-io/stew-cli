@@ -31,12 +31,14 @@ interface CompactListFieldConfigProps<
 > {
   FieldHeaderAddon: FunctionComponent<FieldHeaderAddonProps>;
   fieldHeaderAddonProps: FieldHeaderAddonProps;
-  FieldItemBadge: FunctionComponent<{
-    fieldItem: FieldItem;
-  }>;
+  FieldItemBadge: FunctionComponent<FieldItemBadgeProps<FieldItem>>;
   EmptyContentAddon: FunctionComponent<EmptyContentAddonProps>;
   emptyContentAddonProps: EmptyContentAddonProps;
   emptyContentMessage: string;
+}
+
+export interface FieldItemBadgeProps<FieldItem> {
+  someFieldItem: FieldItem;
 }
 
 export function CompactListField<
@@ -135,7 +137,7 @@ function BasicCompactListFieldContent<FieldItem>(
     <BadgeList ariaLabel="todo">
       {fieldItems.map((someFieldItem) => (
         <BadgeListItem>
-          <FieldItemBadge fieldItem={someFieldItem} />
+          <FieldItemBadge someFieldItem={someFieldItem} />
         </BadgeListItem>
       ))}
     </BadgeList>

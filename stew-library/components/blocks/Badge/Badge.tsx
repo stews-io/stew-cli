@@ -1,14 +1,24 @@
-import { ComponentChildren, FunctionComponent } from "stew/deps/preact/mod.ts";
-import { LinkButton, LinkButtonProps } from "../../mod.ts";
+import {
+  ComponentChildren,
+  FunctionComponent,
+} from "../../../../stew-library/deps/preact/mod.ts";
+import { getCssClass } from "../../../../stew-library/utilities/mod.ts";
 import { CoreAriaOrnaments } from "../../../hooks/mod.ts";
+import { LinkButton, LinkButtonProps } from "../../mod.ts";
 // @deno-types="CssModule"
 import cssModule from "./Badge.module.scss";
 
 export interface TextBadgeProps extends BadgeBaseDataProps {}
 
 export function TextBadge(props: TextBadgeProps) {
-  const { badgeLabel } = props;
-  return <BadgeBase BadgeIcon={NullIcon} badgeLabel={badgeLabel} />;
+  const { badgeClassname, badgeLabel } = props;
+  return (
+    <BadgeBase
+      BadgeIcon={NullIcon}
+      badgeClassname={badgeClassname}
+      badgeLabel={badgeLabel}
+    />
+  );
 }
 
 function NullIcon() {
@@ -22,7 +32,8 @@ export interface LinkBadgeProps
 }
 
 export function LinkBadge(props: LinkBadgeProps) {
-  const { badgeHref, ariaLabel, ariaDescription, badgeLabel } = props;
+  const { badgeHref, ariaLabel, ariaDescription, badgeClassname, badgeLabel } =
+    props;
   return (
     <LinkButton
       className={cssModule.badgeLinkButton}
@@ -31,7 +42,11 @@ export function LinkBadge(props: LinkBadgeProps) {
       ariaDescription={ariaDescription}
       target={"_blank"}
     >
-      <BadgeBase BadgeIcon={LinkBadgeIcon} badgeLabel={badgeLabel} />
+      <BadgeBase
+        BadgeIcon={LinkBadgeIcon}
+        badgeClassname={badgeClassname}
+        badgeLabel={badgeLabel}
+      />
     </LinkButton>
   );
 }
@@ -52,6 +67,7 @@ interface BadgeBaseProps extends BadgeBaseDataProps, BadgeBaseConfigProps {}
 
 interface BadgeBaseDataProps {
   badgeLabel: string;
+  badgeClassname?: string;
 }
 
 interface BadgeBaseConfigProps {
@@ -59,9 +75,14 @@ interface BadgeBaseConfigProps {
 }
 
 function BadgeBase(props: BadgeBaseProps) {
-  const { badgeLabel, BadgeIcon } = props;
+  const { badgeLabel, badgeClassname, BadgeIcon } = props;
   return (
-    <div className={cssModule.badgeBase}>
+    <div
+      className={getCssClass(cssModule.badgeBase, [
+        badgeClassname,
+        Boolean(badgeClassname),
+      ])}
+    >
       <div className={cssModule.badgeLabel}>{badgeLabel}</div>
       <BadgeIcon />
     </div>
