@@ -2,7 +2,7 @@ import { Button, TextBadge } from "../../../stew-library/components/mod.ts";
 import { useEffect } from "../../../stew-library/deps/preact/hooks.ts";
 import { Zod } from "../../../stew-library/deps/zod/mod.ts";
 import { getCssClass } from "../../../stew-library/utilities/getCssClass.ts";
-import { useAsyncData } from "../hooks/useAsyncData.ts";
+import { TaskApi, TaskState, useTask } from "../hooks/useTask.ts";
 import { queryGptData } from "../utilities/queryGptData.ts";
 import {
   CompactListField,
@@ -38,8 +38,9 @@ export function AssistedCompactListField<FieldItem>(
 ) {
   const { gptUserQueries, gptSettings, setFieldValue, fieldLabel, fieldItems } =
     props;
-  const [queryGptDataState, queryGptDataApi] = useAsyncData({
-    fetchAsyncData: async () => {
+  const [queryGptTaskState, queryGptTaskApi] = useTask({
+    taskDescriptionApi: {},
+    taskDescription: async () => {
       const gptQueriesData = await Promise.all(
         gptUserQueries.map((someGptUserQuery) =>
           queryGptData({
@@ -65,13 +66,12 @@ export function AssistedCompactListField<FieldItem>(
         )
       );
     },
-    fetchAsyncDataApi: {},
   });
   useEffect(() => {
-    if (queryGptDataState.asyncStatus === "success") {
-      setFieldValue(queryGptDataState.asyncData);
+    if (queryGptTaskState.taskStatus === "success") {
+      setFieldValue(queryGptTaskState.taskResult);
     }
-  }, [queryGptDataState]);
+  }, [queryGptTaskState]);
   return (
     <CompactListField
       FieldItemBadge={AssistedFieldItemBadge}
@@ -81,8 +81,8 @@ export function AssistedCompactListField<FieldItem>(
       fieldLabel={fieldLabel}
       fieldItems={fieldItems}
       fieldHeaderAddonProps={{
-        queryGptDataState,
-        queryGptDataApi,
+        queryGptTaskState,
+        queryGptTaskApi,
       }}
       emptyContentAddonProps={{}}
     />
@@ -100,12 +100,12 @@ function AssistedFieldItemBadge<FieldItem>(
 }
 
 interface AssistedFieldHeaderAddonProps {
-  queryGptDataState: any;
-  queryGptDataApi: any;
+  queryGptTaskState: TaskState<unknown>;
+  queryGptTaskApi: TaskApi;
 }
 
 function AssistedFieldHeaderAddon(props: AssistedFieldHeaderAddonProps) {
-  const { queryGptDataApi, queryGptDataState } = props;
+  const { queryGptTaskApi, queryGptTaskState } = props;
   return (
     <div className={cssModule.headerAddonContainer}>
       <Button
@@ -113,15 +113,15 @@ function AssistedFieldHeaderAddon(props: AssistedFieldHeaderAddonProps) {
         ariaLabel="todo"
         ariaDescription="todo"
         onSelect={() => {
-          queryGptDataApi.runWorker();
+          queryGptTaskApi.runTask();
         }}
       >
         <svg
           className={getCssClass(cssModule.assistIcon, [
             cssModule.inprogressAssistIcon,
-            queryGptDataState.asyncStatus === "fetching",
+            queryGptTaskState.taskStatus === "fetching",
           ])}
-          viewBox={"-10 -10 340 340"}
+          viewBox={"-5 -5 330 330"}
         >
           <path
             d={
