@@ -20,11 +20,11 @@ async function loadAssistantResources() {
   return {
     appCss,
     assistantConfig: {
-      assistantEntryFormConfig: exampleSourceAssistantConfig.assistantForms[0],
-      assistantForms: exampleSourceAssistantConfig.assistantForms.reduce<
+      initialViewConfig: exampleSourceAssistantConfig.assistantViews[0],
+      assistantViews: exampleSourceAssistantConfig.assistantViews.reduce<
         Record<string, any>
-      >((result, someFormConfig) => {
-        result[someFormConfig.formKey] = someFormConfig;
+      >((result, someViewConfig) => {
+        result[someViewConfig.viewKey] = someViewConfig;
         return result;
       }, {}),
     },

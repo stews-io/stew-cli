@@ -3,39 +3,29 @@ import {
   ClientAppProps,
   Page,
 } from "../../stew-library/components/mod.ts";
-import { createElement } from "../../stew-library/deps/preact/mod.ts";
-import { useAssistantView } from "../library/hooks/useAssistantView.ts";
 import {
-  BuildAssistantConfig,
-  RequiredAssistantViewConfig,
-  RequiredViewSectionConfig,
-} from "../library/types/AssistantConfig.ts";
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "stew/deps/preact/hooks.ts";
+import { createElement } from "../../stew-library/deps/preact/mod.ts";
 // @deno-types="CssModule"
 import cssModule from "./AssistantApp.module.scss";
 
 export interface AssitantAppProps extends Pick<ClientAppProps, "appCss"> {
-  assistantConfig: BuildAssistantConfig<
-    string,
-    string,
-    Record<
-      string,
-      RequiredAssistantViewConfig<
-        string,
-        Array<RequiredViewSectionConfig<string>>
-      >
-    >
-  >;
+  assistantConfig: any;
 }
 
 export function AssistantApp(props: AssitantAppProps) {
   const { appCss, assistantConfig } = props;
-  const { viewState, viewApi } = useAssistantView({
+  const { viewStack, viewState, viewApi } = useAssistantView({
     assistantConfig,
   });
   return (
     <ClientApp appCss={appCss}>
       <Page pageAriaHeader={"stew assistant"}>
-        {viewState.viewConfig.viewSections.map((someSectionConfig) =>
+        {viewStack[0].viewConfig.viewSections.map((someSectionConfig: any) =>
           createElement(someSectionConfig.SectionDisplay, {
             viewState,
             viewApi,
@@ -48,154 +38,69 @@ export function AssistantApp(props: AssitantAppProps) {
   );
 }
 
-// function AssistantForm(props: any) {
-//   const { formState, formApi } = props;
-//   return (
-//     <div className={cssModule.formContainer}>
-//       {formState.formConfig.formFields.map((someFieldConfig: any) =>
-//         createElement(someFieldConfig.FieldDisplay, {
-//           someFieldConfig,
-//           formState,
-//           formApi,
-//         })
-//       )}
-//       {createElement(formState.formConfig.FormFooter, {
-//         formState,
-//         formApi,
-//       })}
-//     </div>
-//   );
-// }
+interface UseAssistantViewApi {
+  assistantConfig: any;
+}
 
-// interface UseAssistantAppApi
-//   extends Pick<AssitantAppProps, "assistantConfig"> {}
+function useAssistantView(api: UseAssistantViewApi) {
+  const { assistantConfig } = api;
+  const [viewStack, setViewStack] = useState([
+    {
+      viewConfig: assistantConfig.initialViewConfig,
+      viewSectionStates:
+        assistantConfig.initialViewConfig.getInitialViewSectionStates(),
+    },
+  ]);
+  // const viewApiDependenciesRef = useRef({
+  //   viewStack,
+  //   setViewStack,
+  // });
+  // useEffect(() => {
+  //   viewApiDependenciesRef.current = {
+  //     viewStack,
+  //     setViewStack,
+  //   };
+  // }, [viewStack, setViewStack]);
+  const viewApi = useMemo(
+    () => ({
+      setSectionState: (someSectionKey: string, getNextSectionState: any) => {
+        setViewStack((currentViewStack) => {
+          const activeViewState = topViewState(currentViewStack);
+          return [
+            ...currentViewStack.slice(0, -1),
+            {
+              ...activeViewState,
+              viewSectionStates: {
+                ...activeViewState.viewSectionStates,
+                [someSectionKey]: getNextSectionState(
+                  activeViewState.viewSectionStates[someSectionKey]
+                ),
+              },
+            },
+          ];
+        });
+      },
+      replaceView: (nextViewKey: string, nextViewSectionStates: any) => {
+        setViewStack((currentViewStack) => {
+          return [
+            ...currentViewStack.slice(0, -1),
+            {
+              viewConfig: assistantConfig.assistantViews[nextViewKey],
+              viewSectionStates: nextViewSectionStates,
+            },
+          ];
+        });
+      },
+    }),
+    []
+  );
+  return {
+    viewStack,
+    viewApi,
+    viewState: topViewState(viewStack),
+  };
+}
 
-// function useAssistantApp(api: UseAssistantAppApi) {
-//   const { assistantConfig } = api;
-//   const [assistantState, setAssistantState] = useState<AssistantState>({
-//     formState: {
-//       submitStatus: "idle",
-//       fieldErrors: {},
-//       formConfig: assistantConfig.assistantEntryFormConfig,
-//       fieldValues:
-//         assistantConfig.assistantEntryFormConfig.getInitialFieldValues(),
-//     },
-//   });
-//   const assistantApi = useMemo(() => {
-//     return {
-//       formApi: {
-//         submitForm: (
-//           validateForm: (api: {
-//             formState: any;
-//           }) => Promise<Record<string, string>>
-//         ) => {
-//           setAssistantState((currentAssistantState) => ({
-//             ...currentAssistantState,
-//             formState: {
-//               ...currentAssistantState.formState,
-//               submitStatus: "validationInProgress",
-//               submitValidationWorker: validateForm({
-//                 formState: currentAssistantState.formState,
-//               }).then((nextFieldErrors: Record<string, string>) => {
-//                 setAssistantState((currentAssistantState) => ({
-//                   ...currentAssistantState,
-//                   formState: {
-//                     formConfig: currentAssistantState.formState.formConfig,
-//                     fieldValues: currentAssistantState.formState.fieldValues,
-//                     fieldErrors: nextFieldErrors,
-//                     submitStatus: "validationComplete",
-//                   },
-//                 }));
-//               }),
-//             },
-//           }));
-//         },
-//         replaceForm: (
-//           nextFormKey: string,
-//           initialFieldValues: Record<string, any>,
-//           initialFieldErrors: Record<string, string> = {}
-//         ) => {
-//           setAssistantState((currentAssistantState) => ({
-//             ...currentAssistantState,
-//             formState: {
-//               submitStatus: "idle",
-//               formConfig: assistantConfig.assistantForms[nextFormKey],
-//               fieldValues: initialFieldValues,
-//               fieldErrors: initialFieldErrors,
-//             },
-//           }));
-//         },
-//         setFieldValue: (fieldKey: string, nextFieldValue: any) => {
-//           setAssistantState((currentAssistantState) => {
-//             return {
-//               ...currentAssistantState,
-//               formState: {
-//                 ...currentAssistantState.formState,
-//                 fieldValues: {
-//                   ...currentAssistantState.formState.fieldValues,
-//                   [fieldKey]: nextFieldValue,
-//                 },
-//               },
-//             };
-//           });
-//         },
-//         setFieldValues: (someFieldValues: Record<string, any>) => {
-//           setAssistantState((currentAssistantState) => {
-//             return {
-//               ...currentAssistantState,
-//               formState: {
-//                 ...currentAssistantState.formState,
-//                 fieldValues: {
-//                   ...currentAssistantState.formState.fieldValues,
-//                   ...someFieldValues,
-//                 },
-//               },
-//             };
-//           });
-//         },
-//         setFieldError: (fieldKey: string, nextFieldError: string) => {
-//           setAssistantState((currentAssistantState) => {
-//             return {
-//               ...currentAssistantState,
-//               formState: {
-//                 ...currentAssistantState.formState,
-//                 fieldErrors: {
-//                   ...currentAssistantState.formState.fieldErrors,
-//                   [fieldKey]: nextFieldError,
-//                 },
-//               },
-//             };
-//           });
-//         },
-//         setFieldErrors: (someFieldErrors: Record<string, string>) => {
-//           setAssistantState((currentAssistantState) => {
-//             return {
-//               ...currentAssistantState,
-//               formState: {
-//                 ...currentAssistantState.formState,
-//                 fieldErrors: {
-//                   ...currentAssistantState.formState.fieldErrors,
-//                   ...someFieldErrors,
-//                 },
-//               },
-//             };
-//           });
-//         },
-//       },
-//     };
-//   }, [setAssistantState]);
-//   return {
-//     assistantState,
-//     assistantApi,
-//   };
-// }
-
-// interface AssistantState {
-//   formState: {
-//     formConfig: any;
-//     fieldValues: Record<string, any>;
-//     fieldErrors: Record<string, string>;
-//     submitStatus: string;
-//     submitValidationWorker?: Promise<void>;
-//   };
-// }
+function topViewState(someViewStack: any) {
+  return someViewStack[someViewStack.length - 1];
+}
