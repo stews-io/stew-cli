@@ -1,5 +1,6 @@
 import { loadClientApp } from "../../stew-library/components/blocks/Client/loadClientApp.ts";
 import { throwInvalidPathError } from "../../stew-library/utilities/mod.ts";
+import { BuildAssistantConfig } from "../library/types/AssistantConfig.ts";
 import { AssistantApp } from "./AssistantApp.tsx";
 //
 import exampleSourceAssistantConfig from "../example/assistant.config.tsx";
@@ -22,10 +23,10 @@ async function loadAssistantResources() {
     assistantConfig: {
       initialViewConfig: exampleSourceAssistantConfig.assistantViews[0],
       assistantViews: exampleSourceAssistantConfig.assistantViews.reduce<
-        Record<string, any>
-      >((result, someViewConfig) => {
-        result[someViewConfig.viewKey] = someViewConfig;
-        return result;
+        BuildAssistantConfig["assistantViews"]
+      >((assistantViewsResult, someViewConfig) => {
+        assistantViewsResult[someViewConfig.viewKey] = someViewConfig;
+        return assistantViewsResult;
       }, {}),
     },
   };

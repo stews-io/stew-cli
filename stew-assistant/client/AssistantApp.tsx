@@ -1,36 +1,35 @@
+import { useMemo, useState } from "stew/deps/preact/hooks.ts";
 import {
   ClientApp,
   ClientAppProps,
   Page,
 } from "../../stew-library/components/mod.ts";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "stew/deps/preact/hooks.ts";
 import { createElement } from "../../stew-library/deps/preact/mod.ts";
+import {
+  BuildAssistantConfig,
+  ViewApi,
+} from "../library/types/AssistantConfig.ts";
 // @deno-types="CssModule"
-import cssModule from "./AssistantApp.module.scss";
 
 export interface AssitantAppProps extends Pick<ClientAppProps, "appCss"> {
-  assistantConfig: any;
+  assistantConfig: BuildAssistantConfig;
 }
 
 export function AssistantApp(props: AssitantAppProps) {
   const { appCss, assistantConfig } = props;
-  const { viewStack, viewState, viewApi } = useAssistantView({
+  const { viewStack, viewApi } = useAssistantView({
     assistantConfig,
   });
+  const activeStackView = getActiveStackView(viewStack);
   return (
     <ClientApp appCss={appCss}>
       <Page pageAriaHeader={"stew assistant"}>
-        {viewStack[0].viewConfig.viewSections.map((someSectionConfig: any) =>
+        {activeStackView.viewConfig.viewSections.map((someSectionConfig) =>
           createElement(someSectionConfig.SectionDisplay, {
-            viewState,
-            viewApi,
-            someSectionConfig,
             key: someSectionConfig.sectionKey,
+            sectionConfig: someSectionConfig,
+            viewState: activeStackView.viewState,
+            viewApi,
           })
         )}
       </Page>
@@ -38,55 +37,38 @@ export function AssistantApp(props: AssitantAppProps) {
   );
 }
 
-interface UseAssistantViewApi {
-  assistantConfig: any;
-}
+interface UseAssistantViewApi
+  extends Pick<AssitantAppProps, "assistantConfig"> {}
 
 function useAssistantView(api: UseAssistantViewApi) {
   const { assistantConfig } = api;
-  const [viewStack, setViewStack] = useState([
+  const [viewStack, setViewStack] = useState<ViewStack>([
     {
       viewConfig: assistantConfig.initialViewConfig,
-      viewSectionStates:
-        assistantConfig.initialViewConfig.getInitialViewSectionStates(),
+      viewState: assistantConfig.initialViewConfig.getInitialViewState(),
     },
   ]);
-  // const viewApiDependenciesRef = useRef({
-  //   viewStack,
-  //   setViewStack,
-  // });
-  // useEffect(() => {
-  //   viewApiDependenciesRef.current = {
-  //     viewStack,
-  //     setViewStack,
-  //   };
-  // }, [viewStack, setViewStack]);
-  const viewApi = useMemo(
+  const viewApi = useMemo<InternalViewApi>(
     () => ({
-      setSectionState: (someSectionKey: string, getNextSectionState: any) => {
+      setViewState: (getNextViewState) => {
         setViewStack((currentViewStack) => {
-          const activeViewState = topViewState(currentViewStack);
+          const activeStackView = getActiveStackView(currentViewStack);
           return [
             ...currentViewStack.slice(0, -1),
             {
-              ...activeViewState,
-              viewSectionStates: {
-                ...activeViewState.viewSectionStates,
-                [someSectionKey]: getNextSectionState(
-                  activeViewState.viewSectionStates[someSectionKey]
-                ),
-              },
+              ...activeStackView,
+              viewState: getNextViewState(activeStackView.viewState),
             },
           ];
         });
       },
-      replaceView: (nextViewKey: string, nextViewSectionStates: any) => {
+      replaceView: ({ nextViewKey, nextViewState }) => {
         setViewStack((currentViewStack) => {
           return [
             ...currentViewStack.slice(0, -1),
             {
               viewConfig: assistantConfig.assistantViews[nextViewKey],
-              viewSectionStates: nextViewSectionStates,
+              viewState: nextViewState,
             },
           ];
         });
@@ -97,10 +79,22 @@ function useAssistantView(api: UseAssistantViewApi) {
   return {
     viewStack,
     viewApi,
-    viewState: topViewState(viewStack),
   };
 }
 
-function topViewState(someViewStack: any) {
+function getActiveStackView(someViewStack: ViewStack) {
   return someViewStack[someViewStack.length - 1];
 }
+
+type ViewStack = Array<StackView>;
+
+interface StackView {
+  viewConfig: BuildAssistantConfig["assistantViews"][string];
+  viewState: unknown;
+}
+
+interface InternalViewApi
+  extends ViewApi<
+    (getNextViewState: (currentViewState: unknown) => unknown) => void,
+    (api: { nextViewKey: string; nextViewState: unknown }) => void
+  > {}
