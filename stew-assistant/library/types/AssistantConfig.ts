@@ -1,17 +1,11 @@
 import { FunctionComponent } from "../../../stew-library/deps/preact/mod.ts";
 
 export interface SourceAssistantConfig<
-  SomeViewKey,
-  SomeSectionDataConfig,
-  SomeViewSections extends Array<
-    ViewSectionConfig<SomeSectionDataConfig, unknown, unknown, unknown>
-  >
-> extends AssistantConfigBase<
-    [
-      InitialViewConfig<SomeViewKey, SomeViewSections, () => unknown>,
-      ...Array<SecondaryViewConfig<SomeViewKey, SomeViewSections>>
-    ]
-  > {}
+  ThisViewsConfig extends [
+    InitialViewConfig<any, any, () => any>,
+    ...Array<SecondaryViewConfig<any, any>>
+  ]
+> extends AssistantConfigBase<ThisViewsConfig> {}
 
 export interface BuildAssistantConfig
   extends AssistantConfigBase<
@@ -25,12 +19,7 @@ export interface BuildAssistantConfig
 }
 
 interface BuildViewSectionConfig
-  extends ViewSectionConfig<
-    ViewSectionDataConfig<string>,
-    unknown,
-    unknown,
-    unknown
-  > {}
+  extends ViewSectionConfig<ViewSectionDataConfig<string>, unknown> {}
 
 interface AssistantConfigBase<AssistantViewsConfig> {
   assistantViews: AssistantViewsConfig;
@@ -47,50 +36,36 @@ export interface InitialViewConfig<
 export interface SecondaryViewConfig<ThisViewKey, ThisViewSections>
   extends ViewConfigBase<ThisViewKey, ThisViewSections> {}
 
-interface ViewConfigBase<ThisViewKey, ThisViewSections> {
+export interface ViewConfigBase<ThisViewKey, ThisViewSections> {
   viewKey: ThisViewKey;
   viewSections: ThisViewSections;
 }
 
-export type ViewSectionConfig<
-  ThisSectionConfig,
-  ThisViewState,
-  SomeViewKey,
-  SomeViewState
-> = ThisSectionConfig & {
-  SectionDisplay: FunctionComponent<
-    SectionDisplayProps<
-      ThisSectionConfig,
-      ThisViewState,
-      SomeViewKey,
-      SomeViewState
-    >
-  >;
-};
+export type ViewSectionConfig<ThisViewState, ThisSectionDataConfig> =
+  ThisSectionDataConfig & {
+    SectionDisplay: FunctionComponent<
+      SectionDisplayProps<ThisViewState, ThisSectionDataConfig>
+    >;
+  };
 
 export interface ViewSectionDataConfig<ThisSectionKey> {
   sectionKey: ThisSectionKey;
 }
 
-export interface SectionDisplayProps<
-  ThisSectionConfig,
-  ThisViewState,
-  SomeViewKey,
-  SomeViewState
-> {
+export interface SectionDisplayProps<ThisViewState, ThisSectionConfig> {
   sectionConfig: ThisSectionConfig;
   viewState: ThisViewState;
-  viewApi: ViewApi<ThisViewState, SomeViewKey, SomeViewState>;
+  viewApi: ViewApi<ThisViewState>;
 }
 
-export interface ViewApi<ThisViewState, SomeViewKey, SomeViewState> {
+export interface ViewApi<ThisViewState> {
   setViewState: (
     getNextViewState: (currentViewState: ThisViewState) => ThisViewState
   ) => void;
-  replaceView: (api: ReplaceViewApi<SomeViewKey, SomeViewState>) => void;
+  replaceView: (api: ReplaceViewApi) => void;
 }
 
-interface ReplaceViewApi<SomeViewKey, SomeViewState> {
-  nextViewKey: SomeViewKey;
-  nextViewState: SomeViewState;
+interface ReplaceViewApi {
+  nextViewKey: string;
+  nextViewState: unknown;
 }
