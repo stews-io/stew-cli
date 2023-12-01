@@ -9,7 +9,6 @@ import {
   BuildAssistantConfig,
   ViewApi,
 } from "../library/types/AssistantConfig.ts";
-// @deno-types="CssModule"
 
 export interface AssitantAppProps extends Pick<ClientAppProps, "appCss"> {
   assistantConfig: BuildAssistantConfig;
@@ -48,7 +47,7 @@ function useAssistantView(api: UseAssistantViewApi) {
       viewState: assistantConfig.initialViewConfig.getInitialViewState(),
     },
   ]);
-  const viewApi = useMemo<InternalViewApi>(
+  const viewApi = useMemo<ViewApi<unknown>>(
     () => ({
       setViewState: (getNextViewState) => {
         setViewStack((currentViewStack) => {
@@ -92,9 +91,3 @@ interface StackView {
   viewConfig: BuildAssistantConfig["assistantViews"][string];
   viewState: unknown;
 }
-
-interface InternalViewApi
-  extends ViewApi<
-    (getNextViewState: (currentViewState: unknown) => unknown) => void,
-    (api: { nextViewKey: string; nextViewState: unknown }) => void
-  > {}

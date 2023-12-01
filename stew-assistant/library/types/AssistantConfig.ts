@@ -19,7 +19,7 @@ export interface BuildAssistantConfig
 }
 
 interface BuildViewSectionConfig
-  extends ViewSectionConfig<ViewSectionDataConfig<string>, unknown> {}
+  extends ViewSectionConfig<unknown, ViewSectionDataConfig<string>> {}
 
 interface AssistantConfigBase<AssistantViewsConfig> {
   assistantViews: AssistantViewsConfig;
