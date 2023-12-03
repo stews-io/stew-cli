@@ -2,10 +2,12 @@ import { ComponentProps, FunctionComponent } from "stew/deps/preact/mod.ts";
 
 const exampleConfig = tupleConfig([
   {
-    itemKey: "aaa",
     ItemDisplay: AaaDisplay,
+    itemKey: "aaa",
     itemDisplayConfig: {
       aaaThang: 2,
+      // bbbThing: "Asdfas",
+      // cccThing: "Asdfsafasdf"
     },
   },
   {
@@ -13,9 +15,8 @@ const exampleConfig = tupleConfig([
     ItemDisplay: BbbDisplay,
     itemDisplayConfig: {
       bbbThing: "asdf",
-      // thang: 3,
     },
-    // thang: 3,
+    // thang: 2,
   },
 ]);
 
@@ -23,11 +24,13 @@ const verifiedExampleConfig: VerifyTuple<typeof exampleConfig> = exampleConfig;
 
 interface AaaDisplayConfig {
   aaaThang: number;
+  // aaaThong: string;
 }
 
 interface AaaDisplayProps extends ItemDisplayProps<AaaDisplayConfig> {}
 
 function AaaDisplay(props: AaaDisplayProps) {
+  props.itemKey;
   return null;
 }
 
@@ -67,20 +70,22 @@ type VerifyTuple<
           keyof ItemConfig<unknown, unknown>
         > extends never
           ? CurrentElement extends {
-              itemKey: infer SomeItemKey;
+              itemKey: infer ProvidedItemKey;
+              itemDisplayConfig: infer ProvidedItemDisplayConfig;
               ItemDisplay: FunctionComponent<
                 ItemDisplayProps<infer DefinedItemDisplayConfig>
               >;
-              itemDisplayConfig: infer ProvidedItemDisplayConfig;
             }
             ? ItemConfig<
-                SomeItemKey,
+                ProvidedItemKey extends ResultElements[number]["itemKey"]
+                  ? `error: duplicate 'itemKey'`
+                  : ProvidedItemKey,
                 DefinedItemDisplayConfig extends ProvidedItemDisplayConfig
                   ? DefinedItemDisplayConfig
-                  : `error: SomeItemDisplayConfig extends ProvidedItemDisplayConfig`
+                  : `error: `
               >
-            : `error: CurrentElement extends { itemKey: infer SomeItemKey; ItemDisplay: infer SomeItemDisplay; itemDisplayConfig: infer MaybeItemDisplayConfig; }`
-          : `error: Exclude<keyof CurrentElement, keyof ItemConfig<unknown, unknown>> extends never`
+            : `invalid path: CurrentElement extends 'ItemConfig'`
+          : `error: properties provided beyond those in 'ItemConfig'`
       ]
     >
   : ResultElements;
@@ -92,5 +97,6 @@ interface ItemConfig<ThisItemKey, ThisItemDisplayConfig> {
 }
 
 interface ItemDisplayProps<ThisItemDisplayConfig> {
+  itemKey: string;
   itemDisplayConfig: ThisItemDisplayConfig;
 }

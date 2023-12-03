@@ -1,275 +1,228 @@
-import {
-  ComponentProps,
-  Fragment,
-  FunctionComponent,
-  createElement,
-} from "stew/deps/preact/mod.ts";
-import {
-  InitialViewConfig,
-  SectionDisplayProps,
-  ViewApi,
-  ViewSectionConfig,
-  ViewSectionDataConfig,
-} from "../library/types/AssistantConfig.ts";
-import { VerifiedAssistantConfig } from "../library/types/VerifiedAssistantConfig.ts";
-import {
-  assistantConfig,
-  sectionConfig,
-} from "../library/utilities/assistantConfig.ts";
+import { FunctionComponent } from "stew/deps/preact/mod.ts";
 
 const exampleConfig = assistantConfig([
-  formView({
-    viewKey: "fooFormView",
-    FormHeader: FooFormHeader,
-    FormFooter: FooFormFooter,
-    formFields: [
-      fieldConfig({
-        fieldKey: "fieldAaa",
-        FieldDisplay: AaaFieldDisplay,
-        aaaThing: 2,
-      }),
+  {
+    viewKey: "fooView",
+    viewSections: [
+      {
+        sectionKey: "aaaSection",
+        SectionDisplay: AaaDisplay,
+        sectionConfig: {
+          aaaThang: 3,
+        },
+      },
     ],
     getInitialViewState: () => ({
-      fooThing: 2,
-      fieldValues: {},
-      fieldErrors: {},
+      fooThing: "asdf",
     }),
-  }),
-  // {
-  //   viewKey: "bazView",
-  //   viewSections: [
-  //     sectionConfig({
-  //       sectionKey: "bazSection",
-  //       SectionDisplay: BazDisplay,
-  //       foo: 2,
-  //     }),
-  //   ],
-  // },
+  },
+  {
+    viewKey: "bazView",
+    viewSections: [
+      {
+        sectionKey: "bbbSection",
+        SectionDisplay: BbbDisplay,
+        sectionConfig: {
+          bbbThong: 3,
+        },
+      },
+    ],
+  },
 ]);
 
-const verifiedExampleConfig: VerifiedAssistantConfig<typeof exampleConfig> =
+const verifiedExampleConfig: StrictAssistantConfig<typeof exampleConfig> =
   exampleConfig;
 
-export default verifiedExampleConfig;
-
-interface FooFormViewState extends FormViewStateBase {
-  fooThing: number;
+interface FooViewState {
+  fooThing: string;
 }
 
-interface FooFormHeaderProps extends FormHeaderProps<FooFormViewState> {}
-
-function FooFormHeader(props: FooFormHeaderProps) {
-  return <div>foo form header</div>;
+interface AaaConfig {
+  aaaThang: number;
 }
 
-interface AaaFieldConfig extends FieldDataConfig<"fieldAaa"> {
-  aaaThing: number;
+interface AaaDisplayProps
+  extends SectionDisplayProps<"aaaSection", AaaConfig, FooViewState> {}
+
+function AaaDisplay(props: AaaDisplayProps) {
+  props.sectionKey;
+  props.sectionConfig.aaaThang;
+  props.viewState.fooThing;
+  return null;
 }
 
-interface AaaFieldDisplayProps
-  extends FieldDisplayProps<FooFormViewState, AaaFieldConfig> {}
-
-function AaaFieldDisplay(props: AaaFieldDisplayProps) {
-  return <div>aaa field</div>;
+interface BazViewState {
+  bazThingy: number;
 }
 
-interface FooFormFooterProps extends FormFooterProps<FooFormViewState> {}
+interface BbbConfig {
+  bbbThong: number;
+}
 
-function FooFormFooter(props: FooFormFooterProps) {
-  return <div>foo form footer</div>;
+interface BbbDisplayProps
+  extends SectionDisplayProps<"bbbSection", BbbConfig, BazViewState> {}
+
+function BbbDisplay(props: BbbDisplayProps) {
+  return null;
 }
 
 ///
-
-interface InitialFormViewApi<
-  ThisViewKey,
-  ThisViewState,
-  SomeFieldKey extends string,
-  SomeFieldDataConfig extends FieldDataConfig<SomeFieldKey>,
-  ThisFieldForms extends [
-    FieldConfig<ThisViewState, SomeFieldDataConfig>,
-    ...Array<FieldConfig<ThisViewState, SomeFieldDataConfig>>
+///
+function assistantConfig<
+  SomeViewKey extends string,
+  SomeSectionKey extends string,
+  SomeViewSections extends [
+    SectionItem<SomeSectionKey, any, any>,
+    ...Array<SectionItem<SomeSectionKey, any, any>>
+  ],
+  ThisAssistantViews extends [
+    InitialViewItem<SomeViewKey, SomeViewSections, any>,
+    ...Array<SecondaryViewItem<SomeViewKey, SomeViewSections>>
   ]
-> extends Pick<
-      InitialViewConfig<ThisViewKey, unknown, () => ThisViewState>,
-      "viewKey" | "getInitialViewState"
-    >,
-    Pick<
-      FormViewSections<
-        ThisViewState,
-        SomeFieldKey,
-        SomeFieldDataConfig,
-        ThisFieldForms
-      >["0"],
-      "FormHeader"
-    >,
-    Pick<
-      FormViewSections<
-        ThisViewState,
-        SomeFieldKey,
-        SomeFieldDataConfig,
-        ThisFieldForms
-      >["1"],
-      "formFields"
-    >,
-    Pick<
-      FormViewSections<
-        ThisViewState,
-        SomeFieldKey,
-        SomeFieldDataConfig,
-        ThisFieldForms
-      >["2"],
-      "FormFooter"
-    > {}
-
-type FormViewSections<
-  ThisViewState,
-  SomeFieldKey extends string,
-  SomeFieldDataConfig extends FieldDataConfig<SomeFieldKey>,
-  ThisFieldForms extends [
-    FieldConfig<ThisViewState, SomeFieldDataConfig>,
-    ...Array<FieldConfig<ThisViewState, SomeFieldDataConfig>>
-  ]
-> = [
-  ViewSectionConfig<ThisViewState, __FormHeaderConfig<ThisViewState>>,
-  ViewSectionConfig<ThisViewState, __FormBodyConfig<ThisFieldForms>>,
-  ViewSectionConfig<ThisViewState, __FormFooterConfig<ThisViewState>>
-];
-
-function formView(api: any) {
-  const { viewKey, getInitialViewState, FormHeader, formFields, FormFooter } =
-    api;
+>(
+  thisAssistantViews: ThisAssistantViews
+): SourceAssistantConfig<ThisAssistantViews> {
   return {
-    viewKey,
-    getInitialViewState,
-    viewSections: [
-      {
-        sectionKey: "__formHeader",
-        SectionDisplay: __FormHeader,
-        FormHeader,
-      },
-      {
-        sectionKey: "__formBody",
-        SectionDisplay: __FormBody,
-        formFields,
-      },
-      {
-        sectionKey: "__formFooter",
-        SectionDisplay: __FormFooter,
-        FormFooter,
-      },
-    ],
+    assistantViews: thisAssistantViews,
   };
 }
 
-interface FormViewStateBase {
-  fieldValues: Record<string, any>;
-  fieldErrors: Record<string, string>;
+type StrictAssistantConfig<ThisAssistantConfig> =
+  ThisAssistantConfig extends SourceAssistantConfig<infer ThisAssistantViews>
+    ? SourceAssistantConfig<StrictAssistantViews<ThisAssistantViews>>
+    : never;
+
+type StrictAssistantViews<
+  RemainingViewItems,
+  ResultViewItems extends Array<any> = []
+> = RemainingViewItems extends [
+  infer CurrentViewItem,
+  ...infer NextRemainingViewItems
+]
+  ? StrictAssistantViews<
+      NextRemainingViewItems,
+      [
+        ...ResultViewItems,
+        ResultViewItems extends []
+          ? StrictInitialViewItem<CurrentViewItem>
+          : StrictSecondaryViewItem<CurrentViewItem>
+      ]
+    >
+  : ResultViewItems;
+
+type StrictInitialViewItem<CurrentViewItem> =
+  CurrentViewItem extends InitialViewItem<
+    infer ThisViewKey,
+    infer ThisViewSections,
+    infer ThisViewState
+  >
+    ? FirstDefinedViewState<ThisViewSections> extends infer ThisFirstDefinedViewState
+      ? InitialViewItem<
+          ThisViewKey,
+          StrictViewSections<ThisFirstDefinedViewState, ThisViewSections>,
+          ThisFirstDefinedViewState
+        >
+      : never
+    : never;
+
+type StrictSecondaryViewItem<CurrentViewItem> =
+  CurrentViewItem extends SecondaryViewItem<
+    infer ThisViewKey,
+    infer ThisViewSections
+  >
+    ? SecondaryViewItem<
+        ThisViewKey,
+        StrictViewSections<
+          FirstDefinedViewState<ThisViewSections>,
+          ThisViewSections
+        >
+      >
+    : never;
+
+type StrictViewSections<
+  ThisFirstDefinedViewState,
+  RemainingSectionItems,
+  ResultSectionItems extends Array<any> = []
+> = RemainingSectionItems extends [
+  infer CurrentSectionItem,
+  ...infer NextRemainingSectionItems
+]
+  ? StrictViewSections<
+      ThisFirstDefinedViewState,
+      NextRemainingSectionItems,
+      [
+        ...ResultSectionItems,
+        CurrentSectionItem extends {
+          SectionDisplay: FunctionComponent<infer ThisDefinedSectionProps>;
+        }
+          ? ThisDefinedSectionProps extends SectionDisplayProps<
+              infer ThisDefinedSectionKey,
+              infer ThisDefinedSectionConfig,
+              infer ThisDefinedViewState
+            >
+            ? SectionItem<
+                ThisDefinedSectionKey,
+                ThisDefinedSectionConfig,
+                SectionDisplayProps<
+                  ThisDefinedSectionKey,
+                  ThisDefinedSectionConfig,
+                  ThisFirstDefinedViewState
+                >
+              >
+            : never
+          : never
+      ]
+    >
+  : ResultSectionItems;
+
+type FirstDefinedViewState<ThisViewSections> = ThisViewSections extends [
+  {
+    SectionDisplay: FunctionComponent<
+      SectionDisplayProps<any, any, infer ThisFirstDefinedViewState>
+    >;
+  },
+  ...Array<any>
+]
+  ? ThisFirstDefinedViewState
+  : never;
+
+interface SourceAssistantConfig<ThisAssistantViews extends [any, ...Array<any>]>
+  extends AssistantConfigBase<ThisAssistantViews> {}
+
+interface AssistantConfigBase<ThisAssistantViews> {
+  assistantViews: ThisAssistantViews;
 }
 
-interface __FormHeaderConfig<ThisFormViewState>
-  extends ViewSectionDataConfig<"__formHeader"> {
-  FormHeader: FunctionComponent<FormHeaderProps<ThisFormViewState>>;
+interface InitialViewItem<ThisViewKey, ThisViewSections, ThisViewState>
+  extends ViewItemBase<ThisViewKey, ThisViewSections> {
+  getInitialViewState: () => ThisViewState;
 }
 
-interface FormHeaderProps<ThisFormViewState> {
-  viewState: ThisFormViewState;
-  viewApi: ViewApi<ThisFormViewState>;
+interface SecondaryViewItem<ThisViewKey, ThisViewSections>
+  extends ViewItemBase<ThisViewKey, ThisViewSections> {}
+
+interface ViewItemBase<ThisViewKey, ThisViewSections> {
+  viewKey: ThisViewKey;
+  viewSections: ThisViewSections;
 }
 
-interface __FormHeaderProps<ThisFormViewState>
-  extends SectionDisplayProps<
-    ThisFormViewState,
-    __FormHeaderConfig<ThisFormViewState>
-  > {}
-
-function __FormHeader<ThisFormViewState>(
-  props: __FormHeaderProps<ThisFormViewState>
-) {
-  const { sectionConfig, viewState, viewApi } = props;
-  return createElement(sectionConfig.FormHeader, {
-    viewState,
-    viewApi,
-  });
+interface SectionItem<
+  ThisSectionKey,
+  ThisSectionConfig,
+  ThisSectionDisplayProps
+> extends Pick<
+    SectionDisplayProps<ThisSectionKey, ThisSectionConfig, unknown>,
+    "sectionKey" | "sectionConfig"
+  > {
+  SectionDisplay: FunctionComponent<ThisSectionDisplayProps>;
 }
 
-interface __FormBodyConfig<ThisFormFields>
-  extends ViewSectionDataConfig<"__formBody"> {
-  formFields: ThisFormFields;
-}
-
-function fieldConfig<
-  ThisViewState,
-  ThisFieldKey extends string,
-  ThisFieldDataConfig extends FieldDataConfig<ThisFieldKey>
->(thisFieldConfig: FieldConfig<ThisViewState, ThisFieldDataConfig>) {
-  return thisFieldConfig;
-}
-
-type FieldConfig<ThisViewState, ThisFieldDataConfig> = ThisFieldDataConfig & {
-  FieldDisplay: FunctionComponent<
-    FieldDisplayProps<ThisViewState, ThisFieldDataConfig>
-  >;
-};
-
-interface FieldDisplayProps<ThisViewState, ThisFieldDataConfig> {
-  fieldConfig: ThisFieldDataConfig;
+interface SectionDisplayProps<
+  ThisSectionKey,
+  ThisSectionConfig,
+  ThisViewState
+> {
+  sectionKey: ThisSectionKey;
+  sectionConfig: ThisSectionConfig;
   viewState: ThisViewState;
-  viewApi: ViewApi<ThisViewState>;
-}
-
-interface FieldDataConfig<ThisFieldKey> {
-  fieldKey: ThisFieldKey;
-}
-
-interface __FormBodyProps<ThisViewState, ThisFormFields>
-  extends SectionDisplayProps<
-    ThisViewState,
-    __FormBodyConfig<ThisFormFields>
-  > {}
-
-function __FormBody<
-  ThisViewState,
-  ThisFormFields extends [
-    FieldConfig<ThisViewState, any>,
-    ...Array<FieldConfig<ThisViewState, any>>
-  ]
->(props: __FormBodyProps<ThisViewState, ThisFormFields>) {
-  const { sectionConfig } = props;
-  return (
-    <Fragment>
-      {sectionConfig.formFields.map((someFieldConfig) =>
-        createElement(someFieldConfig.FieldDisplay, {
-          key: someFieldConfig.fieldKey,
-          fieldConfig: someFieldConfig,
-        })
-      )}
-    </Fragment>
-  );
-}
-
-interface __FormFooterConfig<ThisFormViewState>
-  extends ViewSectionDataConfig<"__formFooter"> {
-  FormFooter: FunctionComponent<FormFooterProps<ThisFormViewState>>;
-}
-
-interface FormFooterProps<ThisFormViewState> {
-  viewState: ThisFormViewState;
-  viewApi: ViewApi<ThisFormViewState>;
-}
-
-interface __FormFooterProps<ThisFormViewState>
-  extends SectionDisplayProps<
-    ThisFormViewState,
-    __FormFooterConfig<ThisFormViewState>
-  > {}
-
-function __FormFooter<ThisFormViewState>(
-  props: __FormFooterProps<ThisFormViewState>
-) {
-  const { sectionConfig, viewState, viewApi } = props;
-  return createElement(sectionConfig.FormFooter, {
-    viewState,
-    viewApi,
-  });
 }
