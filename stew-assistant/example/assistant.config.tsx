@@ -30,7 +30,10 @@ const exampleConfig = assistantConfig([
   },
 ]);
 
-const verifiedExampleConfig: StrictAssistantConfig<typeof exampleConfig> =
+const strictExampleConfig: StrictAssistantConfig<typeof exampleConfig> =
+  exampleConfig;
+
+const stricterExampleConfig: StricterAssistantConfig<typeof exampleConfig> =
   exampleConfig;
 
 interface FooViewState {
@@ -86,6 +89,150 @@ function assistantConfig<
     assistantViews: thisAssistantViews,
   };
 }
+
+type StricterAssistantConfig<ThisAssistantConfig> =
+  ThisAssistantConfig extends SourceAssistantConfig<infer ThisAssistantViews>
+    ? SourceAssistantConfig<StricterAssistantViews<ThisAssistantViews>>
+    : never;
+
+type StricterAssistantViews<
+  RemainingViewItems,
+  ResultViewItems extends Array<any> = []
+> = RemainingViewItems extends [
+  infer CurrentViewItem,
+  ...infer NextRemainingViewItems
+]
+  ? StricterAssistantViews<
+      NextRemainingViewItems,
+      [
+        ...ResultViewItems,
+        ExactKeys<
+          ResultViewItems extends []
+            ? keyof InitialViewItem<unknown, unknown, unknown>
+            : keyof SecondaryViewItem<unknown, unknown>,
+          keyof CurrentViewItem
+        > extends true
+          ? UniqueViewKey<CurrentViewItem, ResultViewItems> extends true
+            ? ResultViewItems extends []
+              ? StricterInitialViewItem<CurrentViewItem>
+              : StricterSecondaryViewItem<CurrentViewItem>
+            : never
+          : never
+      ]
+    >
+  : ResultViewItems;
+
+type ExactKeys<ThisDefinedKeys, ThisProvidedKeys> = Exclude<
+  ThisProvidedKeys,
+  ThisDefinedKeys
+> extends never
+  ? true
+  : false;
+
+type UniqueViewKey<CurrentViewItem, ResultViewItems> = CurrentViewItem extends {
+  viewKey: infer CurrentViewKey;
+}
+  ? ResultViewItems extends []
+    ? true
+    : ResultViewItems extends Array<{ viewKey: infer SomeResultViewKey }>
+    ? CurrentViewKey extends SomeResultViewKey
+      ? false
+      : true
+    : never
+  : never;
+
+type StricterInitialViewItem<CurrentViewItem> =
+  CurrentViewItem extends InitialViewItem<
+    infer ThisViewKey,
+    infer ThisViewSections,
+    infer ThisViewState
+  >
+    ? FirstDefinedViewState<ThisViewSections> extends infer ThisFirstDefinedViewState
+      ? InitialViewItem<
+          ThisViewKey,
+          StricterViewSections<ThisFirstDefinedViewState, ThisViewSections>,
+          ThisFirstDefinedViewState
+        >
+      : never
+    : never;
+
+type StricterSecondaryViewItem<CurrentViewItem> =
+  CurrentViewItem extends SecondaryViewItem<
+    infer ThisViewKey,
+    infer ThisViewSections
+  >
+    ? SecondaryViewItem<
+        ThisViewKey,
+        StricterViewSections<
+          FirstDefinedViewState<ThisViewSections>,
+          ThisViewSections
+        >
+      >
+    : never;
+
+type StricterViewSections<
+  ThisFirstDefinedViewState,
+  RemainingSectionItems,
+  ResultSectionItems extends Array<any> = []
+> = RemainingSectionItems extends [
+  infer CurrentSectionItem,
+  ...infer NextRemainingSectionItems
+]
+  ? UniqueSectionKey<CurrentSectionItem, ResultSectionItems> extends true
+    ? ExactKeys<
+        keyof SectionItem<unknown, unknown, unknown>,
+        keyof CurrentSectionItem
+      > extends true
+      ? StricterViewSections<
+          ThisFirstDefinedViewState,
+          NextRemainingSectionItems,
+          [
+            ...ResultSectionItems,
+            CurrentSectionItem extends {
+              SectionDisplay: FunctionComponent<infer ThisDefinedSectionProps>;
+              sectionConfig: infer ThisProvidedSectionConfig;
+            }
+              ? ThisDefinedSectionProps extends SectionDisplayProps<
+                  infer ThisDefinedSectionKey,
+                  infer ThisDefinedSectionConfig,
+                  infer ThisDefinedViewState
+                >
+                ? SectionItem<
+                    ThisDefinedSectionKey,
+                    ExactKeys<
+                      keyof ThisDefinedSectionConfig,
+                      keyof ThisProvidedSectionConfig
+                    > extends true
+                      ? ThisDefinedSectionConfig
+                      : never,
+                    SectionDisplayProps<
+                      ThisDefinedSectionKey,
+                      ThisDefinedSectionConfig,
+                      ThisFirstDefinedViewState
+                    >
+                  >
+                : never
+              : never
+          ]
+        >
+      : never
+    : never
+  : ResultSectionItems;
+
+type UniqueSectionKey<CurrentSectionItem, ResultSectionItems> =
+  CurrentSectionItem extends {
+    sectionKey: infer CurrentSectionKey;
+  }
+    ? ResultSectionItems extends []
+      ? true
+      : ResultSectionItems extends Array<{
+          sectionKey: infer SomeResultSectionKey;
+        }>
+      ? CurrentSectionKey extends SomeResultSectionKey
+        ? false
+        : true
+      : never
+    : never;
 
 type StrictAssistantConfig<ThisAssistantConfig> =
   ThisAssistantConfig extends SourceAssistantConfig<infer ThisAssistantViews>
