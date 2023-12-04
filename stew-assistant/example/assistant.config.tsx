@@ -15,6 +15,7 @@ const exampleConfig = assistantConfig([
     getInitialViewState: () => ({
       fooThing: "asdf",
     }),
+    // thang: 3
   },
   {
     viewKey: "bazView",
@@ -24,7 +25,9 @@ const exampleConfig = assistantConfig([
         SectionDisplay: BbbDisplay,
         sectionConfig: {
           bbbThong: 3,
+          // thang: 3
         },
+        // thang: 3
       },
     ],
   },
@@ -102,24 +105,27 @@ type StricterAssistantViews<
   infer CurrentViewItem,
   ...infer NextRemainingViewItems
 ]
-  ? StricterAssistantViews<
-      NextRemainingViewItems,
-      [
-        ...ResultViewItems,
-        ExactKeys<
-          ResultViewItems extends []
-            ? keyof InitialViewItem<unknown, unknown, unknown>
-            : keyof SecondaryViewItem<unknown, unknown>,
+  ? UniqueViewKey<CurrentViewItem, ResultViewItems> extends true
+    ? EmptyTuple<ResultViewItems> extends true
+      ? ExactKeys<
+          keyof InitialViewItem<unknown, unknown, unknown>,
           keyof CurrentViewItem
         > extends true
-          ? UniqueViewKey<CurrentViewItem, ResultViewItems> extends true
-            ? ResultViewItems extends []
-              ? StricterInitialViewItem<CurrentViewItem>
-              : StricterSecondaryViewItem<CurrentViewItem>
-            : never
-          : never
-      ]
-    >
+        ? StricterAssistantViews<
+            NextRemainingViewItems,
+            [StricterInitialViewItem<CurrentViewItem>]
+          >
+        : [never]
+      : ExactKeys<
+          keyof SecondaryViewItem<unknown, unknown>,
+          keyof CurrentViewItem
+        > extends true
+      ? StricterAssistantViews<
+          NextRemainingViewItems,
+          [...ResultViewItems, StricterSecondaryViewItem<CurrentViewItem>]
+        >
+      : never
+    : never
   : ResultViewItems;
 
 type ExactKeys<ThisDefinedKeys, ThisProvidedKeys> = Exclude<
@@ -132,7 +138,7 @@ type ExactKeys<ThisDefinedKeys, ThisProvidedKeys> = Exclude<
 type UniqueViewKey<CurrentViewItem, ResultViewItems> = CurrentViewItem extends {
   viewKey: infer CurrentViewKey;
 }
-  ? ResultViewItems extends []
+  ? EmptyTuple<ResultViewItems> extends true
     ? true
     : ResultViewItems extends Array<{ viewKey: infer SomeResultViewKey }>
     ? CurrentViewKey extends SomeResultViewKey
@@ -197,20 +203,20 @@ type StricterViewSections<
                   infer ThisDefinedSectionConfig,
                   infer ThisDefinedViewState
                 >
-                ? SectionItem<
-                    ThisDefinedSectionKey,
-                    ExactKeys<
-                      keyof ThisDefinedSectionConfig,
-                      keyof ThisProvidedSectionConfig
-                    > extends true
-                      ? ThisDefinedSectionConfig
-                      : never,
-                    SectionDisplayProps<
+                ? ExactKeys<
+                    keyof ThisDefinedSectionConfig,
+                    keyof ThisProvidedSectionConfig
+                  > extends true
+                  ? SectionItem<
                       ThisDefinedSectionKey,
                       ThisDefinedSectionConfig,
-                      ThisFirstDefinedViewState
+                      SectionDisplayProps<
+                        ThisDefinedSectionKey,
+                        ThisDefinedSectionConfig,
+                        ThisFirstDefinedViewState
+                      >
                     >
-                  >
+                  : never
                 : never
               : never
           ]
@@ -223,7 +229,7 @@ type UniqueSectionKey<CurrentSectionItem, ResultSectionItems> =
   CurrentSectionItem extends {
     sectionKey: infer CurrentSectionKey;
   }
-    ? ResultSectionItems extends []
+    ? EmptyTuple<ResultSectionItems> extends true
       ? true
       : ResultSectionItems extends Array<{
           sectionKey: infer SomeResultSectionKey;
@@ -233,6 +239,8 @@ type UniqueSectionKey<CurrentSectionItem, ResultSectionItems> =
         : true
       : never
     : never;
+
+type EmptyTuple<ResultItems> = ResultItems extends [] ? true : false;
 
 type StrictAssistantConfig<ThisAssistantConfig> =
   ThisAssistantConfig extends SourceAssistantConfig<infer ThisAssistantViews>
