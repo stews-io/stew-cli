@@ -176,38 +176,38 @@ type StrictViewSections<
         SectionItem<unknown, unknown, unknown>,
         CurrentSectionItem
       > extends true
-      ? StrictViewSections<
-          ThisFirstDefinedViewState,
-          NextRemainingSectionItems,
-          [
-            ...ResultSectionItems,
-            CurrentSectionItem extends {
-              SectionDisplay: FunctionComponent<infer ThisDefinedSectionProps>;
-              sectionConfig: infer ThisProvidedSectionConfig;
-            }
-              ? ThisDefinedSectionProps extends SectionDisplayProps<
-                  infer ThisDefinedSectionKey,
-                  infer ThisDefinedSectionConfig,
-                  infer ThisDefinedViewState
-                >
-                ? ExactKeys<
+      ? CurrentSectionItem extends {
+          SectionDisplay: FunctionComponent<infer ThisDefinedSectionProps>;
+          sectionConfig: infer ThisProvidedSectionConfig;
+        }
+        ? ThisDefinedSectionProps extends SectionDisplayProps<
+            infer ThisDefinedSectionKey,
+            infer ThisDefinedSectionConfig,
+            infer ThisDefinedViewState
+          >
+          ? ExactKeys<
+              ThisDefinedSectionConfig,
+              ThisProvidedSectionConfig
+            > extends true
+            ? StrictViewSections<
+                ThisFirstDefinedViewState,
+                NextRemainingSectionItems,
+                [
+                  ...ResultSectionItems,
+                  SectionItem<
+                    ThisDefinedSectionKey,
                     ThisDefinedSectionConfig,
-                    ThisProvidedSectionConfig
-                  > extends true
-                  ? SectionItem<
+                    SectionDisplayProps<
                       ThisDefinedSectionKey,
                       ThisDefinedSectionConfig,
-                      SectionDisplayProps<
-                        ThisDefinedSectionKey,
-                        ThisDefinedSectionConfig,
-                        ThisFirstDefinedViewState
-                      >
+                      ThisFirstDefinedViewState
                     >
-                  : never
-                : never
-              : never
-          ]
-        >
+                  >
+                ]
+              >
+            : never
+          : never
+        : never
       : never
     : never
   : ResultSectionItems;
