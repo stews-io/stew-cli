@@ -8,7 +8,7 @@ import { createElement } from "../../stew-library/deps/preact/mod.ts";
 import {
   BuildAssistantConfig,
   ViewApi,
-} from "../library/types/AssistantConfig.ts";
+} from "../library/config/AssistantConfig.ts";
 
 export interface AssitantAppProps extends Pick<ClientAppProps, "appCss"> {
   assistantConfig: BuildAssistantConfig;
@@ -23,10 +23,11 @@ export function AssistantApp(props: AssitantAppProps) {
   return (
     <ClientApp appCss={appCss}>
       <Page pageAriaHeader={"stew assistant"}>
-        {activeStackView.viewConfig.viewSections.map((someSectionConfig) =>
-          createElement(someSectionConfig.SectionDisplay, {
-            key: someSectionConfig.sectionKey,
-            sectionConfig: someSectionConfig,
+        {activeStackView.viewConfig.viewSections.map((someSectionItem) =>
+          createElement(someSectionItem.SectionDisplay, {
+            key: someSectionItem.sectionKey,
+            sectionKey: someSectionItem.sectionKey,
+            sectionConfig: someSectionItem.sectionConfig,
             viewState: activeStackView.viewState,
             viewApi,
           })
@@ -43,8 +44,8 @@ function useAssistantView(api: UseAssistantViewApi) {
   const { assistantConfig } = api;
   const [viewStack, setViewStack] = useState<ViewStack>([
     {
-      viewConfig: assistantConfig.initialViewConfig,
-      viewState: assistantConfig.initialViewConfig.getInitialViewState(),
+      viewConfig: assistantConfig.initialAssistantView,
+      viewState: assistantConfig.initialAssistantView.getInitialViewState(),
     },
   ]);
   const viewApi = useMemo<ViewApi<unknown>>(
