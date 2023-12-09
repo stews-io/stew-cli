@@ -4,6 +4,7 @@ import {
   JSX,
   createElement,
 } from "../../../stew-library/deps/preact/mod.ts";
+import { irrelevant } from "../utilities/types.ts";
 import {
   InitialViewItem,
   SectionDisplayProps,
@@ -119,7 +120,7 @@ export interface InitialFormViewConfigItem<
   ThisFormFields
 > extends FormViewConfigItem<ThisViewKey, ThisViewState, ThisFormFields>,
     Pick<
-      InitialViewItem<unknown, unknown, ThisViewState>,
+      InitialViewItem<irrelevant, unknown, ThisViewState>,
       "getInitialViewState"
     > {}
 

@@ -3,35 +3,36 @@ import { FunctionComponent } from "../../../stew-library/deps/preact/mod.ts";
 export function assistantConfig<
   SomeViewKey extends string,
   SomeSectionKey extends string,
-  SomeViewSections extends [
-    SectionItem<SomeSectionKey, any, any>,
-    ...Array<SectionItem<SomeSectionKey, any, any>>
+  SomeSectionConfig extends { sectionKey: SomeSectionKey },
+  SomeViewSectionsConfig extends [
+    SomeSectionConfig,
+    ...Array<SomeSectionConfig>
   ],
-  ThisAssistantViews extends [
-    InitialViewItem<SomeViewKey, SomeViewSections, any>,
-    ...Array<SecondaryViewItem<SomeViewKey, SomeViewSections>>
+  ThisAssistantViewsConfig extends [
+    InitialViewConfig<SomeViewKey, SomeViewSectionsConfig, any>,
+    ...Array<ViewConfig<SomeViewKey, SomeViewSectionsConfig>>
   ]
 >(
-  thisAssistantViews: ThisAssistantViews
-): SourceAssistantConfig<ThisAssistantViews> {
+  thisAssistantViews: ThisAssistantViewsConfig
+): SourceAssistantConfig<ThisAssistantViewsConfig> {
   return {
     assistantViews: thisAssistantViews,
   };
 }
 
 export interface SourceAssistantConfig<
-  ThisAssistantViews extends [any, ...Array<any>]
-> extends AssistantConfigBase<ThisAssistantViews> {}
+  ThisAssistantViewsConfig extends [any, ...Array<any>]
+> extends AssistantConfigBase<ThisAssistantViewsConfig> {}
 
 export interface BuildAssistantConfig
   extends AssistantConfigBase<
     Record<
       string,
-      | InitialViewItem<string, BuildViewSectionConfigList, unknown>
-      | SecondaryViewItem<string, BuildViewSectionConfigList>
+      | InitialViewConfig<string, BuildViewSectionConfigList, unknown>
+      | ViewConfig<string, BuildViewSectionConfigList>
     >
   > {
-  initialAssistantView: InitialViewItem<
+  initialAssistantView: InitialViewConfig<
     string,
     BuildViewSectionConfigList,
     unknown
@@ -39,46 +40,40 @@ export interface BuildAssistantConfig
 }
 
 type BuildViewSectionConfigList = Array<
-  SectionItem<string, unknown, SectionDisplayProps<string, unknown, unknown>>
+  SectionConfig<SectionDisplayProps<string, unknown, unknown>>
 >;
 
 interface AssistantConfigBase<ThisAssistantViews> {
   assistantViews: ThisAssistantViews;
 }
 
-export interface InitialViewItem<ThisViewKey, ThisViewSections, ThisViewState>
-  extends ViewItemBase<ThisViewKey, ThisViewSections> {
+export interface InitialViewConfig<
+  ThisViewKey,
+  ThisViewSectionsConfig,
+  ThisViewState
+> extends ViewConfig<ThisViewKey, ThisViewSectionsConfig> {
   getInitialViewState: () => ThisViewState;
 }
-
-export interface SecondaryViewItem<ThisViewKey, ThisViewSections>
-  extends ViewItemBase<ThisViewKey, ThisViewSections> {}
-
-export interface ViewItemBase<ThisViewKey, ThisViewSections> {
+export interface ViewConfig<ThisViewKey, ThisViewSectionsConfig> {
   viewKey: ThisViewKey;
-  viewSections: ThisViewSections;
+  viewSections: ThisViewSectionsConfig;
 }
 
-export interface SectionItem<
-  ThisSectionKey,
-  ThisSectionConfig,
-  ThisSectionDisplayProps
-> extends Pick<
-    SectionDisplayProps<ThisSectionKey, ThisSectionConfig, unknown>,
-    "sectionKey" | "sectionConfig"
-  > {
+export interface SectionConfig<
+  ThisSectionDisplayProps extends SectionDisplayProps<any, any, any>
+> extends Pick<ThisSectionDisplayProps, "sectionKey" | "sectionData"> {
   SectionDisplay: FunctionComponent<ThisSectionDisplayProps>;
 }
 
 export interface SectionDisplayProps<
   ThisSectionKey,
-  ThisSectionConfig,
+  ThisSectionData,
   ThisViewState
 > {
   sectionKey: ThisSectionKey;
-  sectionConfig: ThisSectionConfig;
+  sectionData: ThisSectionData;
   viewState: ThisViewState;
-  viewApi: ViewApi<ThisViewState>;
+  viewApi: ViewApi<this["viewState"]>;
 }
 
 export interface ViewApi<ThisViewState> {
