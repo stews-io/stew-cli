@@ -23,11 +23,11 @@ export function AssistantApp(props: AssitantAppProps) {
   return (
     <ClientApp appCss={appCss}>
       <Page pageAriaHeader={"stew assistant"}>
-        {activeStackView.viewConfig.viewSections.map((someSectionItem) =>
-          createElement(someSectionItem.SectionDisplay, {
-            key: someSectionItem.sectionKey,
-            sectionKey: someSectionItem.sectionKey,
-            sectionConfig: someSectionItem.sectionConfig,
+        {activeStackView.viewConfig.viewSections.map((someSectionConfig) =>
+          createElement(someSectionConfig.SectionDisplay, {
+            key: someSectionConfig.sectionKey,
+            sectionKey: someSectionConfig.sectionKey,
+            sectionData: someSectionConfig.sectionData,
             viewState: activeStackView.viewState,
             viewApi,
           })

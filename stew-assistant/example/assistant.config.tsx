@@ -3,11 +3,12 @@ import {
   FunctionComponent,
   createElement,
   Fragment,
-  Attributes,
 } from "stew/deps/preact/mod.ts";
 import {
+  InitialViewConfig,
   SectionConfig,
   SectionDisplayProps,
+  ViewApi,
   ViewConfig,
   assistantConfig,
 } from "../library/config/AssistantConfig.ts";
@@ -15,22 +16,7 @@ import { VerifiedAssistantConfig } from "../library/config/VerifiedAssistantConf
 import { irrelevantNever } from "../library/utilities/types.ts";
 
 const exampleConfig = assistantConfig([
-  {
-    viewKey: "fooView",
-    viewSections: [
-      {
-        SectionDisplay: AaaSectionDisplay,
-        sectionKey: "aaaSection",
-        sectionData: {
-          aaaThing: 2,
-        },
-      },
-    ],
-    getInitialViewState: () => ({
-      fooThang: "",
-    }),
-  },
-  formViewConfig({
+  initialFormViewConfig({
     viewKey: "bazView",
     formHeader: {
       HeaderDisplay: BazHeaderDisplay,
@@ -53,6 +39,9 @@ const exampleConfig = assistantConfig([
         fieldData: {},
       },
     ],
+    getInitialViewState: () => ({
+      bazTing: "bazzy",
+    }),
   }),
 ]);
 
@@ -60,22 +49,6 @@ const verifiedExampleConfig: VerifiedAssistantConfig<typeof exampleConfig> =
   exampleConfig;
 
 export default verifiedExampleConfig;
-
-interface FooViewState {
-  fooThang: string;
-}
-
-interface AaaSectionData {
-  aaaThing: number;
-}
-
-interface AaaSectionDisplayProps
-  extends SectionDisplayProps<"aaaSection", AaaSectionData, FooViewState> {}
-
-function AaaSectionDisplay(props: AaaSectionDisplayProps) {
-  const {} = props;
-  return null;
-}
 
 interface BazFormViewState {
   bazTing: string;
@@ -92,7 +65,7 @@ function BazHeaderDisplay(props: BazHeaderDisplayProps) {
   props.headerKey;
   props.headerData.headerTing;
   props.viewState.bazTing;
-  return null;
+  return <div>baz header {props.headerData.headerTing}</div>;
 }
 
 interface BazFooterData {
@@ -103,7 +76,7 @@ interface BazFooterDisplayProps
   extends FooterDisplayProps<"bazFooter", BazFooterData, BazFormViewState> {}
 
 function BazFooterDisplay(props: BazFooterDisplayProps) {
-  return null;
+  return <div>baz footer {props.viewState.bazTing}</div>;
 }
 
 interface AaaBazFieldData {}
@@ -112,11 +85,66 @@ interface AaaBazFieldDisplayProps
   extends FieldDisplayProps<"aaaBazField", AaaBazFieldData, BazFormViewState> {}
 
 function AaaBazFieldDisplay(props: AaaBazFieldDisplayProps) {
-  return null;
+  return <div>aaa field {props.viewState.bazTing}</div>;
 }
 
 ///
 ///
+
+interface InitialFormViewConfigApi<
+  ThisViewState,
+  ThisViewKey,
+  ThisHeaderDisplayProps,
+  ThisFooterDisplayProps,
+  ThisFormFieldsConfig
+> extends FormViewConfigApi<
+      ThisViewKey,
+      ThisHeaderDisplayProps,
+      ThisFooterDisplayProps,
+      ThisFormFieldsConfig
+    >,
+    Pick<
+      InitialFormViewConfig<
+        ThisViewState,
+        irrelevantNever,
+        irrelevantNever,
+        irrelevantNever,
+        irrelevantNever
+      >,
+      "getInitialViewState"
+    > {}
+
+function initialFormViewConfig<
+  ThisViewState,
+  ThisViewKey extends string,
+  ThisHeaderDisplayProps,
+  ThisFooterDisplayProps,
+  SomeFieldKey extends string,
+  ThisFormFieldsConfig extends [
+    { fieldKey: SomeFieldKey },
+    ...Array<{ fieldKey: SomeFieldKey }>
+  ]
+>(
+  api: InitialFormViewConfigApi<
+    ThisViewState,
+    ThisViewKey,
+    ThisHeaderDisplayProps,
+    ThisFooterDisplayProps,
+    ThisFormFieldsConfig
+  >
+): InitialFormViewConfig<
+  ThisViewState,
+  ThisViewKey,
+  ThisHeaderDisplayProps,
+  ThisFooterDisplayProps,
+  ThisFormFieldsConfig
+> {
+  const { getInitialViewState, ...formViewConfigApi } = api;
+  return {
+    getInitialViewState,
+    ...formViewConfig(formViewConfigApi),
+  };
+}
 
 interface FormViewConfigApi<
   ThisViewKey,
@@ -133,16 +161,17 @@ interface FormViewConfigApi<
       "viewKey"
     >,
     Pick<__FormHeaderData<ThisHeaderDisplayProps>, "formHeader">,
-    Pick<__FormFooterData<ThisFooterDisplayProps>, "formFooter">,
-    Pick<__FormBodyData<ThisFormFieldsConfig>, "formFields"> {}
+    Pick<__FormBodyData<ThisFormFieldsConfig>, "formFields">,
+    Pick<__FormFooterData<ThisFooterDisplayProps>, "formFooter"> {}
 
 function formViewConfig<
-  ThisViewKey,
+  ThisViewKey extends string,
   ThisHeaderDisplayProps,
   ThisFooterDisplayProps,
+  SomeFieldKey extends string,
   ThisFormFieldsConfig extends [
-    FormFieldConfig<FieldDisplayProps<any, any, any>>,
-    ...Array<FormFieldConfig<FieldDisplayProps<any, any, any>>>
+    { fieldKey: SomeFieldKey },
+    ...Array<{ fieldKey: SomeFieldKey }>
   ]
 >(
   api: FormViewConfigApi<
@@ -186,6 +215,23 @@ function formViewConfig<
   };
 }
 
+interface InitialFormViewConfig<
+  ThisViewState,
+  ThisViewKey,
+  ThisHeaderDisplayProps,
+  ThisFooterDisplayProps,
+  ThisFormFieldsConfig
+> extends FormViewConfig<
+      ThisViewKey,
+      ThisHeaderDisplayProps,
+      ThisFooterDisplayProps,
+      ThisFormFieldsConfig
+    >,
+    Pick<
+      InitialViewConfig<irrelevantNever, irrelevantNever, ThisViewState>,
+      "getInitialViewState"
+    > {}
+
 interface FormViewConfig<
   ThisViewKey,
   ThisHeaderDisplayProps,
@@ -200,10 +246,13 @@ interface FormViewConfig<
     ]
   > {}
 
-interface HeaderDisplayProps<ThisHeaderKey, ThisHeaderData, ThisViewState> {
+interface HeaderDisplayProps<ThisHeaderKey, ThisHeaderData, ThisViewState>
+  extends Pick<
+    SectionDisplayProps<irrelevantNever, irrelevantNever, ThisViewState>,
+    "viewState" | "viewApi"
+  > {
   headerKey: ThisHeaderKey;
   headerData: ThisHeaderData;
-  viewState: ThisViewState;
 }
 
 interface FormHeaderConfig<ThisHeaderDisplayProps>
@@ -222,19 +271,25 @@ interface __FormHeaderDisplayProps<ThisHeaderDisplayProps>
   extends SectionDisplayProps<
     "__formHeader",
     __FormHeaderData<ThisHeaderDisplayProps>,
-    GetFormSectionViewState<ThisHeaderDisplayProps>
+    GetFormViewState<ThisHeaderDisplayProps>
   > {}
 
 function __FormHeaderDisplay<ThisHeaderDisplayProps>(
   props: __FormHeaderDisplayProps<ThisHeaderDisplayProps>
 ) {
-  const { sectionData, viewState } = props;
-  return createElement(sectionData.formHeader.HeaderDisplay, {
+  const { sectionData, viewApi, viewState } = props;
+  const unknownFormHeader =
+    sectionData.formHeader as unknown as FormHeaderConfig<
+      HeaderDisplayProps<unknown, unknown, unknown>
+    >;
+  const unknownViewApi = viewApi as ViewApi<unknown>;
+  return createElement(unknownFormHeader.HeaderDisplay, {
     viewState,
-    key: sectionData.formHeader.headerKey,
-    headerKey: sectionData.formHeader.headerKey,
-    headerData: sectionData.formHeader.headerData,
-  } as Attributes & NarrowHeaderDisplayProps<ThisHeaderDisplayProps>);
+    viewApi: unknownViewApi,
+    key: unknownFormHeader.headerKey,
+    headerKey: unknownFormHeader.headerKey,
+    headerData: unknownFormHeader.headerData,
+  });
 }
 
 type NarrowHeaderDisplayProps<ThisHeaderDisplayProps> = Narrow<
@@ -242,33 +297,32 @@ type NarrowHeaderDisplayProps<ThisHeaderDisplayProps> = Narrow<
   ThisHeaderDisplayProps
 >;
 
-interface FieldDisplayProps<ThisFieldKey, ThisFieldData, ThisViewState> {
+interface FieldDisplayProps<ThisFieldKey, ThisFieldData, ThisViewState>
+  extends Pick<
+    SectionDisplayProps<irrelevantNever, irrelevantNever, ThisViewState>,
+    "viewState" | "viewApi"
+  > {
   fieldKey: ThisFieldKey;
   fieldData: ThisFieldData;
-  viewState: ThisViewState;
 }
 
-interface FormFieldConfig<
-  ThisFieldDisplayProps extends FieldDisplayProps<any, any, any>
-> extends Pick<ThisFieldDisplayProps, "fieldKey" | "fieldData"> {
-  FieldDisplay: FunctionComponent<
-    FieldDisplayProps<
-      ThisFieldDisplayProps["fieldKey"],
-      ThisFieldDisplayProps["fieldData"],
-      ThisFieldDisplayProps["viewState"]
-    >
-  >;
+interface FormFieldConfig<ThisFieldDisplayProps>
+  extends Pick<
+    NarrowFieldDisplayProps<ThisFieldDisplayProps>,
+    "fieldKey" | "fieldData"
+  > {
+  FieldDisplay: FunctionComponent<ThisFieldDisplayProps>;
 }
 
 interface __FormBodyData<ThisFormFieldsConfig> {
-  formFields: NarrowFormFieldsConfig<ThisFormFieldsConfig>;
+  formFields: ThisFormFieldsConfig;
 }
 
 interface __FormBodyDisplayProps<ThisFormFieldsConfig>
   extends SectionDisplayProps<
     "__formBody",
     __FormBodyData<ThisFormFieldsConfig>,
-    GetFormSectionViewState<
+    GetFormViewState<
       ComponentProps<
         NarrowFormFieldsConfig<ThisFormFieldsConfig>[0]["FieldDisplay"]
       >
@@ -278,12 +332,17 @@ interface __FormBodyDisplayProps<ThisFormFieldsConfig>
 function __FormBodyDisplay<ThisFormFieldsConfig>(
   props: __FormBodyDisplayProps<ThisFormFieldsConfig>
 ) {
-  const { sectionData, viewState } = props;
+  const { sectionData, viewApi, viewState } = props;
+  const unknownFormFields = sectionData.formFields as Array<
+    FormFieldConfig<FieldDisplayProps<unknown, unknown, unknown>>
+  >;
+  const unknownViewApi = viewApi as ViewApi<unknown>;
   return (
     <Fragment>
-      {sectionData.formFields.map((someFieldConfig) =>
+      {unknownFormFields.map((someFieldConfig) =>
         createElement(someFieldConfig.FieldDisplay, {
           viewState,
+          viewApi: unknownViewApi,
           key: someFieldConfig.fieldKey,
           fieldKey: someFieldConfig.fieldKey,
           fieldData: someFieldConfig.fieldData,
@@ -301,10 +360,18 @@ type NarrowFormFieldsConfig<ThisFormFieldsConfig> = Narrow<
   ThisFormFieldsConfig
 >;
 
-interface FooterDisplayProps<ThisFooterKey, ThisFooterData, ThisViewState> {
+type NarrowFieldDisplayProps<ThisFieldDisplayProps> = Narrow<
+  FieldDisplayProps<any, any, any>,
+  ThisFieldDisplayProps
+>;
+
+interface FooterDisplayProps<ThisFooterKey, ThisFooterData, ThisViewState>
+  extends Pick<
+    SectionDisplayProps<irrelevantNever, irrelevantNever, ThisViewState>,
+    "viewState" | "viewApi"
+  > {
   footerKey: ThisFooterKey;
   footerData: ThisFooterData;
-  viewState: ThisViewState;
 }
 
 interface FormFooterConfig<ThisFooterDisplayProps>
@@ -323,19 +390,25 @@ interface __FormFooterDisplayProps<ThisFooterDisplayProps>
   extends SectionDisplayProps<
     "__formFooter",
     __FormFooterData<ThisFooterDisplayProps>,
-    GetFormSectionViewState<ThisFooterDisplayProps>
+    GetFormViewState<ThisFooterDisplayProps>
   > {}
 
 function __FormFooterDisplay<ThisFooterDisplayProps>(
   props: __FormFooterDisplayProps<ThisFooterDisplayProps>
 ) {
-  const { sectionData, viewState } = props;
-  return createElement(sectionData.formFooter.FooterDisplay, {
+  const { sectionData, viewApi, viewState } = props;
+  const unknownFormHeader =
+    sectionData.formFooter as unknown as FormFooterConfig<
+      FooterDisplayProps<unknown, unknown, unknown>
+    >;
+  const unknownViewApi = viewApi as ViewApi<unknown>;
+  return createElement(unknownFormHeader.FooterDisplay, {
     viewState,
-    key: sectionData.formFooter.footerKey,
-    footerKey: sectionData.formFooter.footerKey,
-    footerData: sectionData.formFooter.footerData,
-  } as Attributes & NarrowFooterDisplayProps<ThisFooterDisplayProps>);
+    viewApi: unknownViewApi,
+    key: unknownFormHeader.footerKey,
+    footerKey: unknownFormHeader.footerKey,
+    footerData: unknownFormHeader.footerData,
+  });
 }
 
 type NarrowFooterDisplayProps<ThisFooterDisplayProps> = Narrow<
@@ -343,8 +416,8 @@ type NarrowFooterDisplayProps<ThisFooterDisplayProps> = Narrow<
   ThisFooterDisplayProps
 >;
 
-type GetFormSectionViewState<ThisDefinedFormSectionDisplayProps> =
-  ThisDefinedFormSectionDisplayProps extends {
+type GetFormViewState<ThisDefinedFormItemDisplayProps> =
+  ThisDefinedFormItemDisplayProps extends {
     viewState: infer ThisDefinedViewState;
   }
     ? ThisDefinedViewState

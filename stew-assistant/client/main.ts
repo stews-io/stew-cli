@@ -5,6 +5,8 @@ import { AssistantApp } from "./AssistantApp.tsx";
 //
 import exampleAssistantConfig from "../example/assistant.config.tsx";
 
+console.log(exampleAssistantConfig);
+
 loadClientApp({
   appGlobals: {},
   clientApp: AssistantApp,
