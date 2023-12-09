@@ -28,3 +28,6 @@ export type AssertUniqueKey<
 export type IsEmptyTuple<ResultRecords> = ResultRecords extends []
   ? true
   : false;
+
+export type Narrow<RequirementType, SourceType> =
+  SourceType extends RequirementType ? SourceType : never;
